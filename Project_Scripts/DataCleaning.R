@@ -164,6 +164,6 @@ CleanClass07to14_0 = rbind(Class2014,Class2013,Class2012,Class2011,Class2010,Cla
 # second year that they are eligable). Thanks to the descending order of the years the irrelevant older
 # years are removed.
 CleanClass2007to2014 = CleanClass07to14_0[!(duplicated(CleanClass07to14_0$Player.Code)),]
-  
+
 
 save(CleanClass2007to2014, file="../Data/CleanData/CleanClass2007to2014.Rdata")

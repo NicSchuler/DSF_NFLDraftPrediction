@@ -153,7 +153,7 @@ getCleanClass <- function(draftyear, Drafts, Combine2013, GameSummary2012_0, Pla
     select(Player.Code, Name.x, Team.Code.x, Class.x, Position.x, Year, Drafted, everything())
   
   # Remove the Players that couln't be matched with any season data
-  Class2013clean1 = Class2013clean[apply(Class2013clean[,9:ncol(Class2013clean)], 1, function(x) {!all(is.na(x))}),]
+  Class2013clean1 = Class2013clean[apply(Class2013clean[,15:ncol(Class2013clean)], 1, function(x) {!all(is.na(x))}),]
   
   # Remove dublicated players (or players with the same name that could not be matched)
   CleanClassYear = Class2013clean1[!(duplicated(Class2013clean1$Name.x)),]
