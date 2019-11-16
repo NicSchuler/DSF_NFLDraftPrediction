@@ -11,11 +11,11 @@ library(tidyverse)
 
 # 
 
-load("../Data/CleanData/CleanClass2007to2014.Rdata")
+load("../Data/CleanData/CleanClass2007to2014_2.Rdata")
 
-CleanClass2007to2014_QB = CleanClass2007to2014 %>%
+CleanClass2007to2014_QB = CleanClass2007to2014_2 %>%
   filter(Position.x == "QB") %>%
-  select(-c(Player.Code, Name.x, Team.Code.x, Class.x, Year, Position.x))
+  select(-c(Player.Code, Name, Team.Code, Class, Year, Position))
 
 # Reshuffle the data and split in a testing and a training set
 PercTrain = 0.7
