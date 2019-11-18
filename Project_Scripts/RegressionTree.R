@@ -180,3 +180,6 @@ fancyRpartPlot(ClassTreetog)
 savePlotToFile(file.name = "Togtree.jpg")
 
 PerfMeasTibble[1,4] = ((sum(CheckListtog$FP)+sum(CheckListtog$FN))/nrow(CheckListtog))
+
+
+PerfMeas = ((sum(CheckListtog$TP))/((1+sum(CheckListtog$FN)+sum(CheckListtog$FP))*sum(CheckListtog$Y)))
