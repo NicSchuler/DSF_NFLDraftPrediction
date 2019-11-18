@@ -14,8 +14,14 @@ library(RColorBrewer)				# Color selection for fancy tree plot
 
 load("../Data/CleanData/CleanClass2007to2014_2.Rdata")
 
-PerfMeasTibble = matrix(NA, ncol=4, nrow = 1)
-colnames(PerfMeasTibble) = c("QB","WR","RB","together")
+ClassificationTreePerfMeas = data.frame(Method = character(), QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
+                                        WR_TP = integer(), WR_TN = integer(), WR_FP = integer(), WR_FN = integer(),
+                                        RB_TP = integer(), RB_TN = integer(), RB_FP = integer(), RB_FN = integer(),
+                                        Together_TP = integer(), Together_TN = integer(), Together_FP = integer(), Together_FN = integer(), stringsAsFactors = FALSE)
+
+ClassificationTreePerfMeas[1,1] = "ClassificationTree"
+
+
 
 # QB ---------------------------
 # Predicting the likelyhood of a QB being picked in the draft
@@ -38,9 +44,6 @@ ClassTreeQB = rpart(
   method  = "class",
   control = list(cp = 0, minsplit = 1, maxdepth = 30, xval = 10))
 
-printcp(ClassTreeQB)  
-plotcp(ClassTreeQB) 
-
 CheckList = as.data.frame(cbind(DtestQB$Drafted, predict(ClassTreeQB, DtestQB)))
 
 CheckListQB = CheckList %>%
@@ -52,10 +55,11 @@ CheckListQB = CheckList %>%
   mutate(FP=ifelse(Y!=Pred,ifelse(Pred==1,1,0),0)) %>%
   mutate(FN=ifelse(Y!=Pred,ifelse(Pred==0,1,0),0))
 
-plot(ClassTreeQB, uniform=TRUE, main="Classification tree for QB's")
-text(ClassTreeQB, use.n=TRUE, all=TRUE, cex=.5, pretty = 0)
-
-PerfMeasTibble[1,1] = ((sum(CheckListQB$FP)+sum(CheckListQB$FN))/nrow(CheckListQB))
+# Fill the Performance Measurement Matrix
+ClassificationTreePerfMeas[1,"QB_TP"] = sum(CheckListQB$TP)
+ClassificationTreePerfMeas[1,"QB_TN"] = sum(CheckListQB$TN)
+ClassificationTreePerfMeas[1,"QB_FP"] = sum(CheckListQB$FP)
+ClassificationTreePerfMeas[1,"QB_FN"] = sum(CheckListQB$FN)
 
 # WR ---------------------------
 # Predicting the likelyhood of a WR being picked in the draft
@@ -78,9 +82,6 @@ ClassTreeWR = rpart(
   method  = "class",
   control = list(cp = 0, minsplit = 1, maxdepth = 30, xval = 10))
 
-printcp(ClassTreeWR)  
-plotcp(ClassTreeWR) 
-
 CheckList = as.data.frame(cbind(DtestWR$Drafted, predict(ClassTreeWR, DtestWR)))
 
 CheckListWR = CheckList %>%
@@ -92,10 +93,11 @@ CheckListWR = CheckList %>%
   mutate(FP=ifelse(Y!=Pred,ifelse(Pred==1,1,0),0)) %>%
   mutate(FN=ifelse(Y!=Pred,ifelse(Pred==0,1,0),0))
 
-plot(ClassTreeWR, uniform=TRUE, main="Classification tree for WR's")
-text(ClassTreeWR, use.n=TRUE, all=TRUE, cex=.5, pretty = 0)
-
-PerfMeasTibble[1,2] = ((sum(CheckListWR$FP)+sum(CheckListWR$FN))/nrow(CheckListWR))
+# Fill the Performance Measurement Matrix
+ClassificationTreePerfMeas[1,"WR_TP"] = sum(CheckListWR$TP)
+ClassificationTreePerfMeas[1,"WR_TN"] = sum(CheckListWR$TN)
+ClassificationTreePerfMeas[1,"WR_FP"] = sum(CheckListWR$FP)
+ClassificationTreePerfMeas[1,"WR_FN"] = sum(CheckListWR$FN)
 
 # RB ---------------------------
 # Predicting the likelyhood of a RB being picked in the draft
@@ -118,9 +120,6 @@ ClassTreeRB = rpart(
   method  = "class",
   control = list(cp = 0, minsplit = 1, maxdepth = 30, xval = 10))
 
-printcp(ClassTreeRB)  
-plotcp(ClassTreeRB) 
-
 CheckList = as.data.frame(cbind(DtestRB$Drafted, predict(ClassTreeRB, DtestRB)))
 
 CheckListRB = CheckList %>%
@@ -132,10 +131,11 @@ CheckListRB = CheckList %>%
   mutate(FP=ifelse(Y!=Pred,ifelse(Pred==1,1,0),0)) %>%
   mutate(FN=ifelse(Y!=Pred,ifelse(Pred==0,1,0),0))
 
-plot(ClassTreeRB, uniform=TRUE, main="Classification tree for RB's")
-text(ClassTreeRB, use.n=TRUE, all=TRUE, cex=.5, pretty = 0)
-
-PerfMeasTibble[1,3] = ((sum(CheckListRB$FP)+sum(CheckListRB$FN))/nrow(CheckListRB))
+# Fill the Performance Measurement Matrix
+ClassificationTreePerfMeas[1,"RB_TP"] = sum(CheckListRB$TP)
+ClassificationTreePerfMeas[1,"RB_TN"] = sum(CheckListRB$TN)
+ClassificationTreePerfMeas[1,"RB_FP"] = sum(CheckListRB$FP)
+ClassificationTreePerfMeas[1,"RB_FN"] = sum(CheckListRB$FN)
 
 # Together ---------------------------
 # Predicting the likelyhood of a QB/WR/RB being picked in the draft (without filter)
@@ -157,12 +157,9 @@ ClassTreetog = rpart(
   method  = "class",
   control = list(cp = 0, minsplit = 1, maxdepth = 30, xval = 10))
 
-printcp(ClassTreetog)  
-plotcp(ClassTreetog) 
-
 CheckList = as.data.frame(cbind(Dtesttog$Drafted, predict(ClassTreetog, Dtesttog)))
 
-CheckListtog = CheckList %>%
+CheckListTogether = CheckList %>%
   mutate(Y=V1) %>%
   select(-V1) %>%
   mutate(Pred=ifelse(CheckList[,3]>0.5, 1,0)) %>%
@@ -171,15 +168,19 @@ CheckListtog = CheckList %>%
   mutate(FP=ifelse(Y!=Pred,ifelse(Pred==1,1,0),0)) %>%
   mutate(FN=ifelse(Y!=Pred,ifelse(Pred==0,1,0),0))
 
-plot(ClassTreetog, uniform=TRUE, main="Classification tree for QB's / WR's / RB's together")
-text(ClassTreetog, use.n=TRUE, all=TRUE, cex=.5, pretty = 0)
+# Fill the Performance Measurement Matrix
+ClassificationTreePerfMeas[1,"Together_TP"] = sum(CheckListTogether$TP)
+ClassificationTreePerfMeas[1,"Together_TN"] = sum(CheckListTogether$TN)
+ClassificationTreePerfMeas[1,"Together_FP"] = sum(CheckListTogether$FP)
+ClassificationTreePerfMeas[1,"Together_FN"] = sum(CheckListTogether$FN)
+
+save(ClassificationTreePerfMeas, file="../Data/PerformanceMeasurement/ClassificationTreePerfMeas.Rdata")
 
 
 fancyRpartPlot(ClassTreetog)
 
 savePlotToFile(file.name = "Togtree.jpg")
 
-PerfMeasTibble[1,4] = ((sum(CheckListtog$FP)+sum(CheckListtog$FN))/nrow(CheckListtog))
 
-
-PerfMeas = ((sum(CheckListtog$TP))/((1+sum(CheckListtog$FN)+sum(CheckListtog$FP))*sum(CheckListtog$Y)))
+# Pro Memoria
+# PerfMeas = ((sum(CheckListtog$TP))/((1+sum(CheckListtog$FN)+sum(CheckListtog$FP))*sum(CheckListtog$Y)))
