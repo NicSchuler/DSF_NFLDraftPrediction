@@ -10,8 +10,8 @@ sigmoid <- function(z){
 }
 
 # Create standardization function
-standFun = function(x){
-  out = (x - mean(x))/sd(x)
+standFun <- function(x){
+  out <- (x - mean(x))/sd(x)
   return(out)
 }
 
@@ -22,88 +22,87 @@ cleanData <- as_tibble(CleanClass2007to2014_2)
 # Define the ANN cost function
 ANN_cost <- function(ANN_par, L_i_size, L_h_size, L_o_size, x, y, lambda){
 
-  theta1 = matrix(ANN_par[1:(L_h_size * (L_i_size + 1))], nrow = L_h_size)
-  theta2 = matrix(ANN_par[(1 + (L_h_size * (L_i_size + 1))):length(ANN_par)], nrow = L_o_size)
+  theta1 <- matrix(ANN_par[1:(L_h_size * (L_i_size + 1))], nrow = L_h_size)
+  theta2 <- matrix(ANN_par[(1 + (L_h_size * (L_i_size + 1))):length(ANN_par)], nrow = L_o_size)
   
   # Prepare gradients to return to optimization
-  J = 0
-  theta1_grad = matrix(0, nrow(theta1), ncol(theta1))
-  theta2_grad = matrix(0, nrow(theta2), ncol(theta2))
+  J <- 0
+  theta1_grad <- matrix(0, nrow(theta1), ncol(theta1))
+  theta2_grad <- matrix(0, nrow(theta2), ncol(theta2))
   
-  y_new = matrix(0, n, L_o_size)
+  y_new <- matrix(0, n, L_o_size)
   
   # Mapping y vector to binary vector
   for (i in 1:n) { 
-    y_new[i, y[i]] = 1
+    y_new[i, y[i]] <- 1
   }
   
-  x = cbind(1, x)
+  x <- cbind(1, x)
   
-  H1 = sigmoid(x %*% t(theta1))
-  H2 = cbind(rep(1,n), H1)
-  H = sigmoid(H2 %*% t(theta2))
+  H1 <- sigmoid(x %*% t(theta1))
+  H2 <- cbind(rep(1,n), H1)
+  H <- sigmoid(H2 %*% t(theta2))
   
   # Computing the log-likelihood
-  J = vector()
+  J <- vector()
   
   for (i in 1:n){
-    J[i] = (sum(-y_new[i,] %*% log(H[i,]) - (1-y_new[i,]) %*% log(1-H[i,]))) 
-    + (lambda/(2*n)) * (sum(sum(theta1[,2:dim(theta1)[2] ]^2)) +  sum(sum(theta2[,2:dim(theta2)[2]]^2)) ) 
+    J[i] <- (sum(-y_new[i,] %*% log(H[i,]) - (1-y_new[i,]) %*% log(1-H[i,]))) +
+      (lambda/(2*n)) * (sum(sum(theta1[,2:dim(theta1)[2] ]^2)) +  sum(sum(theta2[,2:dim(theta2)[2]]^2)) ) 
   }
   
-  J_new = sum(J)/n
-  J = J_new
+  J_new <- sum(J)/n
+  J <- J_new
 }
 
 # Define the function to calculate the gradient of the cost function
 
 ANN_grad <- function(ANN_par, L_i_size, L_h_size, L_o_size, x, y, lambda){
   
-  theta1 = matrix(ANN_par[1:(L_h_size * (L_i_size + 1))], nrow = L_h_size)
-  theta2 = matrix(ANN_par[(1 + (L_h_size * (L_i_size + 1))):length(ANN_par)], nrow = L_o_size)
+  theta1 <- matrix(ANN_par[1:(L_h_size * (L_i_size + 1))], nrow = L_h_size)
+  theta2 <- matrix(ANN_par[(1 + (L_h_size * (L_i_size + 1))):length(ANN_par)], nrow = L_o_size)
   
-  theta1_grad = matrix(0, nrow(theta1), ncol(theta1))
-  theta2_grad = matrix(0, nrow(theta2), ncol(theta2))
+  theta1_grad <- matrix(0, nrow(theta1), ncol(theta1))
+  theta2_grad <- matrix(0, nrow(theta2), ncol(theta2))
   
-  y_new = matrix(0, n, L_o_size)
+  y_new <- matrix(0, n, L_o_size)
   
   # Mapping y vector to binary vector
   for (i in 1:n) { 
-    y_new[i, y[i]] = 1
+    y_new[i, y[i]] <- 1
   }
   
-  x = cbind(1, x)
+  x <- cbind(1, x)
   
   # Implement the backpropagation algorithm to compute the gradients
   
-  a_2 = matrix(0, L_h_size, 1)
-  a_2 = rbind( 1 , a_2)
-  a_3 = matrix(0, n, L_o_size)
+  a_2 <- matrix(0, L_h_size, 1)
+  a_2 <- rbind( 1 , a_2)
+  a_3 <- matrix(0, n, L_o_size)
   
-  z_2 = matrix(0, L_i_size, 1)
-  z_3 = matrix(0, L_h_size, 1)
+  z_2 <- matrix(0, L_i_size, 1)
+  z_3 <- matrix(0, L_h_size, 1)
   
-  D1 = matrix(0, L_h_size, L_i_size + 1)
-  D2 = matrix(0, L_o_size, L_h_size + 1)
+  D1 <- matrix(0, L_h_size, L_i_size + 1)
+  D2 <- matrix(0, L_o_size, L_h_size + 1)
   
   
   for (t in 1:n) {
+    a_1 <- x[t,]
+    z_2 <- theta1 %*% a_1
+    a_2 <- rbind(1, sigmoid(z_2))
     
-    a_1 = x[t,]
-    z_2 = theta1 %*% a_1
-    a_2 = rbind(1, sigmoid(z_2))
+    z_3 <- theta2 %*% a_2
+    a_3 <- sigmoid(z_3)
     
-    z_3 = theta2 %*% a_2
-    a_3 = sigmoid(z_3)
+    delta_3 <- a_3 - y_new[t,]
     
-    delta_3 = a_3 - y_new[t,]
+    tmp <- (t(theta2) %*% delta_3)
     
-    tmp = (t(theta2) %*% delta_3)
+    delta_2 <- tmp[2:length(tmp)] * sigmoid(z_2) * (1 - sigmoid(z_2))
     
-    delta_2 =  tmp[2:length(tmp)] * sigmoid(z_2) * (1 - sigmoid(z_2))
-    
-    D1 = D1 + delta_2 %*% a_1
-    D2 = D2 + delta_3 %*% t(a_2)   
+    D1 <- D1 + delta_2 %*% a_1
+    D2 <- D2 + delta_3 %*% t(a_2)   
   }
   
   theta1_grad <- D1/n
