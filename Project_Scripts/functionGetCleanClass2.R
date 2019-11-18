@@ -16,7 +16,8 @@ Drafts <- read.csv("../Data/DraftedQBRBWR05_19.txt")
 GameSummary2011_0 <- read.csv("../Data/cfbstats-com-2011-1-5-0/player-game-statistics.csv")
 PlayerList2011 <- read.csv("../Data/cfbstats-com-2011-1-5-0/player.csv")
 
-# Create a function, that returns directly the cleaned data for a draft class
+# Create a function, that returns directly the cleaned data for a draft class (There are examples of the years, so that you don't get
+# confused where to put the data of which year (minus one or minus two))
 
 getCleanClass2 <- function(draftyear, Drafts, Combine2013, GameSummary2012_0, PlayerList2012, GameSummary2011_0, PlayerList2011){
   
