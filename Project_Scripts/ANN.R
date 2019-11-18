@@ -107,9 +107,9 @@ ANN_grad <- function(ANN_par, L_i_size, L_h_size, L_o_size, x, y, lambda){
   }
   
   theta1_grad <- D1/n
-  theta1_grad[, 2:ncol(theta1_grad)] <- theta1_grad[, 2:ncol(theta1_grad)] + (lambda/n) * theta1[, 2:ncol(theta1_grad)]
+  theta1_grad[,2:ncol(theta1_grad)] <- theta1_grad[,2:ncol(theta1_grad)] + (lambda/n) * theta1[,2:ncol(theta1_grad)]
   theta2_grad <- D2/n
-  theta2_grad[, 2:ncol(theta2_grad)] <- theta2_grad[, 2:ncol(theta2_grad)] + (lambda/n) * theta2[,2:ncol(theta2_grad)]
+  theta2_grad[,2:ncol(theta2_grad)] <- theta2_grad[,2:ncol(theta2_grad)] + (lambda/n) * theta2[,2:ncol(theta2_grad)]
   
   grad <- c(as.vector(theta1_grad), as.vector(theta2_grad))
 }
