@@ -41,8 +41,7 @@ DtestQB = CleanClass2007to2014_QB %>%
 ClassTreeQB = rpart(
   formula = Drafted ~ .,
   data    = DtrainQB,
-  method  = "class",
-  control = list(cp = 0, minsplit = 1, maxdepth = 30, xval = 10))
+  method  = "class")
 
 CheckList = as.data.frame(cbind(DtestQB$Drafted, predict(ClassTreeQB, DtestQB)))
 
@@ -79,8 +78,7 @@ DtestWR = CleanClass2007to2014_WR %>%
 ClassTreeWR = rpart(
   formula = Drafted ~ .,
   data    = DtrainWR,
-  method  = "class",
-  control = list(cp = 0, minsplit = 1, maxdepth = 30, xval = 10))
+  method  = "class")
 
 CheckList = as.data.frame(cbind(DtestWR$Drafted, predict(ClassTreeWR, DtestWR)))
 
@@ -117,8 +115,7 @@ DtestRB = CleanClass2007to2014_RB %>%
 ClassTreeRB = rpart(
   formula = Drafted ~ .,
   data    = DtrainRB,
-  method  = "class",
-  control = list(cp = 0, minsplit = 1, maxdepth = 30, xval = 10))
+  method  = "class")
 
 CheckList = as.data.frame(cbind(DtestRB$Drafted, predict(ClassTreeRB, DtestRB)))
 
@@ -154,8 +151,7 @@ Dtesttog = CleanClass2007to2014_tog %>%
 ClassTreetog = rpart(
   formula = Drafted ~ .,
   data    = Dtraintog,
-  method  = "class",
-  control = list(cp = 0, minsplit = 1, maxdepth = 30, xval = 10))
+  method  = "class")
 
 CheckList = as.data.frame(cbind(Dtesttog$Drafted, predict(ClassTreetog, Dtesttog)))
 
@@ -184,3 +180,11 @@ savePlotToFile(file.name = "Togtree.jpg")
 
 # Pro Memoria
 # PerfMeas = ((sum(CheckListtog$TP))/((1+sum(CheckListtog$FN)+sum(CheckListtog$FP))*sum(CheckListtog$Y)))
+
+# Boosted Tree -----------------------------
+
+# https://www.datacamp.com/community/tutorials/decision-trees-R
+# GMB - Package
+
+
+
