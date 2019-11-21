@@ -165,5 +165,10 @@ CleanClass07to14_0_2 = rbind(Class2014_2,Class2013_2,Class2012_2,Class2011_2,Cla
 # years are removed.
 CleanClass2007to2014_2 = CleanClass07to14_0_2[!(duplicated(CleanClass07to14_0_2$Player.Code)),]
 
+# Update the levels for the categorical variables, since the old layers like "FR" and "SO" we filtered out
+# still are still stored
+CleanClass2007to2014_2$Class = factor(CleanClass2007to2014_2$Class)
+CleanClass2007to2014_2$Position = factor(CleanClass2007to2014_2$Position)
+
 
 save(CleanClass2007to2014_2, file="../Data/CleanData/CleanClass2007to2014_2.Rdata")
