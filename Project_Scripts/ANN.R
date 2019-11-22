@@ -22,28 +22,32 @@ cleanData <- as_tibble(CleanClass2007to2014_2)
 # Define the ANN cost function
 ANN_cost <- function(ANN_par, L_i_size, L_h_size, L_o_size, x, y, lambda){
 
+  # Separate the ANN_par matrix back into the two thetas
   theta1 <- matrix(ANN_par[1:(L_h_size * (L_i_size + 1))], nrow = L_h_size)
   theta2 <- matrix(ANN_par[(1 + (L_h_size * (L_i_size + 1))):length(ANN_par)], nrow = L_o_size)
   
-  # Prepare gradients to return to optimization
+  # Prepare gradients to return to optimization function
   J <- 0
   theta1_grad <- matrix(0, nrow(theta1), ncol(theta1))
   theta2_grad <- matrix(0, nrow(theta2), ncol(theta2))
   
+  # Create output matrix
   y_new <- matrix(0, n, L_o_size)
   
-  # Mapping y vector to binary vector
+  # Map output vector to binary vector
   for (i in 1:n) { 
     y_new[i, y[i]] <- 1
   }
   
+  # Add column of 1s for bias
   x <- cbind(1, x)
   
+  # Compute the output for the current thetas
   H1 <- sigmoid(x %*% t(theta1))
   H2 <- cbind(rep(1,n), H1)
   H <- sigmoid(H2 %*% t(theta2))
   
-  # Computing the log-likelihood
+  # Compute the log-likelihood for optimization
   J <- vector()
   
   for (i in 1:n){
@@ -59,23 +63,26 @@ ANN_cost <- function(ANN_par, L_i_size, L_h_size, L_o_size, x, y, lambda){
 
 ANN_grad <- function(ANN_par, L_i_size, L_h_size, L_o_size, x, y, lambda){
   
+  # Separate the ANN_par matrix back into the thetas
   theta1 <- matrix(ANN_par[1:(L_h_size * (L_i_size + 1))], nrow = L_h_size)
   theta2 <- matrix(ANN_par[(1 + (L_h_size * (L_i_size + 1))):length(ANN_par)], nrow = L_o_size)
   
+  # Create placeholder matrices for the gradients
   theta1_grad <- matrix(0, nrow(theta1), ncol(theta1))
   theta2_grad <- matrix(0, nrow(theta2), ncol(theta2))
   
+  # Create output matrix
   y_new <- matrix(0, n, L_o_size)
   
-  # Mapping y vector to binary vector
+  # Map y vector to binary vector
   for (i in 1:n) { 
     y_new[i, y[i]] <- 1
   }
   
+  # Add column of 1s to the input matrix for bias
   x <- cbind(1, x)
   
-  # Implement the backpropagation algorithm to compute the gradients
-  
+  # Create placeholders for gradient calculation
   a_2 <- matrix(0, L_h_size, 1)
   a_2 <- rbind( 1 , a_2)
   a_3 <- matrix(0, n, L_o_size)
@@ -86,7 +93,7 @@ ANN_grad <- function(ANN_par, L_i_size, L_h_size, L_o_size, x, y, lambda){
   D1 <- matrix(0, L_h_size, L_i_size + 1)
   D2 <- matrix(0, L_o_size, L_h_size + 1)
   
-  
+  # Calculate negative gradient for every input
   for (t in 1:n) {
     a_1 <- x[t,]
     z_2 <- theta1 %*% a_1
