@@ -10,7 +10,6 @@ library(dplyr)
 
 GameSummary2012_0 <- read.csv("../Data/cfbstats-com-2012-1-5-4/player-game-statistics.csv")
 PlayerList2012 <- read.csv("../Data/cfbstats-com-2012-1-5-4/player.csv")
-Combine2013 <- read.csv("../Data/NFLcombine/2013Offense.csv")
 Drafts <- read.csv("../Data/DraftedQBRBWR05_19.txt")
 
 GameSummary2011_0 <- read.csv("../Data/cfbstats-com-2011-1-5-0/player-game-statistics.csv")
@@ -19,13 +18,22 @@ PlayerList2011 <- read.csv("../Data/cfbstats-com-2011-1-5-0/player.csv")
 # Create a function, that returns directly the cleaned data for a draft class (There are examples of the years, so that you don't get
 # confused where to put the data of which year (minus one or minus two))
 
-getCleanClass2 <- function(draftyear, Drafts, Combine2013, GameSummary2012_0, PlayerList2012, GameSummary2011_0, PlayerList2011){
+getCleanClass2 <- function(draftyear, Drafts, GameSummary2012_0, PlayerList2012, GameSummary2011_0, PlayerList2011){
   
   
   # Remove the columns that are only relevant for defensive players, Kickers and Punters
-  # (since we only analize Quarterbacks, Runningbacks and Wide Receivers), such as Point
-  # (since they are just a linear combination of 6*Touchdowns + 2*2PtConversion)
+  # (since we only analize Quarterbacks, Runningbacks and Wide Receivers), such as Points
+  # (since they are just a linear combination of 6*Touchdowns + 2*2PtConversion) for
+  # both years.
   GameSummary2012_1 <- GameSummary2012_0 %>%
+    select(-c(Game.Code,Tackle.Solo, Tackle.Assist, Tackle.For.Loss, Tackle.For.Loss.Yard,
+              Kick.Punt.Blocked, Pass.Broken.Up, Fumble.Forced, QB.Hurry, Sack, Sack.Yard,
+              Kickoff, Kickoff.Onside, Kickoff.Out.Of.Bounds, Kickoff.Touchback, Kickoff.Yard,
+              Punt, Punt.Yard, Points, Def.2XP.Att, Def.2XP.Made, Off.XP.Kick.Made, Off.XP.Kick.Att,
+              Field.Goal.Att, Field.Goal.Made, Misc.Ret, Misc.Ret.Yard, Misc.Ret.TD, Int.Ret, Int.Ret.Yard,
+              Int.Ret.TD, Fum.Ret, Fum.Ret.Yard, Fum.Ret.TD))
+
+  GameSummary2011_1 <- GameSummary2011_0 %>%
     select(-c(Game.Code,Tackle.Solo, Tackle.Assist, Tackle.For.Loss, Tackle.For.Loss.Yard,
               Kick.Punt.Blocked, Pass.Broken.Up, Fumble.Forced, QB.Hurry, Sack, Sack.Yard,
               Kickoff, Kickoff.Onside, Kickoff.Out.Of.Bounds, Kickoff.Touchback, Kickoff.Yard,
@@ -35,35 +43,58 @@ getCleanClass2 <- function(draftyear, Drafts, Combine2013, GameSummary2012_0, Pl
   
   # Remove all the rows that just contain 0's and add a col for the number of games played
   GameSummary2012_1 = GameSummary2012_1[apply(GameSummary2012_1[,2:ncol(GameSummary2012_1)], 1, function(x) {!all(x==0)}),]
+  GameSummary2011_1 = GameSummary2011_1[apply(GameSummary2011_1[,2:ncol(GameSummary2011_1)], 1, function(x) {!all(x==0)}),]
   
   # Group by players and find out how many games they played in that season
-  GameNmb <- GameSummary2012_1 %>%
+  GameNmb1 <- GameSummary2012_1 %>%
     select(., Player.Code) %>%
     mutate(Games.Played = 1) %>%
     group_by(., Player.Code) %>%
     summarise_all(., sum)
   
-  # Group by players and summarize by the mean, which gives us the average performance of the players
-  # in the games in which they played in 2012
+  GameNmb2 <- GameSummary2011_1 %>%
+    select(., Player.Code) %>%
+    mutate(Games.Played = 1) %>%
+    group_by(., Player.Code) %>%
+    summarise_all(., sum)
+  
+  # Group by players and summarize by the sum, which gives us the performance of the players
+  # in the games in which they played in that specific year, matched by the player code
   GameSummary2012_2 <- GameSummary2012_1 %>%
     group_by(., Player.Code) %>%
     summarise_all(., sum)
   
-  GameSummary2012_Grp = merge(x = GameSummary2012_2, y = GameNmb, by = "Player.Code", all.x = TRUE)
+  GameSummary2012_Grp = merge(x = GameSummary2012_2, y = GameNmb1, by = "Player.Code", all.x = TRUE)
+
+  GameSummary2011_2 <- GameSummary2011_1 %>%
+    group_by(., Player.Code) %>%
+    summarise_all(., sum)
+  
+  GameSummary2011_Grp = merge(x = GameSummary2011_2, y = GameNmb2, by = "Player.Code", all.x = TRUE)
   
   # Dismiss uninteresting columns about the players (unfortunately Height and Weight have too many NA-Values)
   PlayerList2012_1 = PlayerList2012 %>%
     select(-c(Uniform.Number, Home.Town, Home.State, Home.Country, Last.School, Height, Weight))
   
+  PlayerList2011_1 = PlayerList2011 %>%
+    select(-c(Uniform.Number, Home.Town, Home.State, Home.Country, Last.School, Height, Weight))
+  
   # Match some Information about the players and dismiss the rows with name "Team Team" and filter
   # Class in order to only keep players in their junior (3rd) or senior (4th) year of college
-  # since other players are not yet eligable in the Draft
+  # since other players are not yet eligable in the Draft. We don't filter Class in the minus 2 year,
+  # because back then, a player was just a class earlier. This would only risk more mistakes.
   Data2012 <- as.data.frame(merge(y = GameSummary2012_Grp, x = PlayerList2012_1, by = "Player.Code", all.y = TRUE))
   Data2012_1 = Data2012 %>%
     filter(., First.Name != "Team") %>%
     filter(., Position %in% c("QB", "RB", "WR")) %>%
     mutate(Name= paste(First.Name, Last.Name, sep=" ")) %>%
     filter(., Class %in% c("SR", "JR"))
+  
+  Data2011 <- as.data.frame(merge(y = GameSummary2011_Grp, x = PlayerList2011_1, by = "Player.Code", all.y = TRUE))
+  Data2011_1 = Data2011 %>%
+    filter(., First.Name != "Team") %>%
+    filter(., Position %in% c("QB", "RB", "WR")) %>%
+    mutate(Name= paste(First.Name, Last.Name, sep=" "))
   
   
   # Prepare the Draft-Data for the match with the combine data, the "Drafted" column will be the Y!
@@ -81,45 +112,6 @@ getCleanClass2 <- function(draftyear, Drafts, Combine2013, GameSummary2012_0, Pl
     Draft1Season2013$Drafted[i] = ifelse(is.na(Draft1Season2013$Drafted[i]), 0, 1)
   }
   
-  # Prepare the data of the season 2 years before the actual draft (same code as before)
-  GameSummary2011_1 <- GameSummary2011_0 %>%
-    select(-c(Game.Code,Tackle.Solo, Tackle.Assist, Tackle.For.Loss, Tackle.For.Loss.Yard,
-              Kick.Punt.Blocked, Pass.Broken.Up, Fumble.Forced, QB.Hurry, Sack, Sack.Yard,
-              Kickoff, Kickoff.Onside, Kickoff.Out.Of.Bounds, Kickoff.Touchback, Kickoff.Yard,
-              Punt, Punt.Yard, Points, Def.2XP.Att, Def.2XP.Made, Off.XP.Kick.Made, Off.XP.Kick.Att,
-              Field.Goal.Att, Field.Goal.Made, Misc.Ret, Misc.Ret.Yard, Misc.Ret.TD, Int.Ret, Int.Ret.Yard,
-              Int.Ret.TD, Fum.Ret, Fum.Ret.Yard, Fum.Ret.TD))
-  
-  # Remove all the rows that just contain 0's and add a col for the number of games played
-  GameSummary2011_1 = GameSummary2011_1[apply(GameSummary2011_1[,2:ncol(GameSummary2011_1)], 1, function(x) {!all(x==0)}),]
-  
-  # Group by players and find out how many games they played in that season
-  GameNmb <- GameSummary2011_1 %>%
-    select(., Player.Code) %>%
-    mutate(Games.Played = 1) %>%
-    group_by(., Player.Code) %>%
-    summarise_all(., sum)
-  
-  # Group by players and summarize by the mean, which gives us the average performance of the players
-  # in the games in which they played in 2012
-  GameSummary2011_2 <- GameSummary2011_1 %>%
-    group_by(., Player.Code) %>%
-    summarise_all(., sum)
-  
-  GameSummary2011_Grp = merge(x = GameSummary2011_2, y = GameNmb, by = "Player.Code", all.x = TRUE)
-  
-  # Dismiss uninteresting columns about the players
-  PlayerList2011_1 = PlayerList2011 %>%
-    select(-c(Uniform.Number, Home.Town, Home.State, Home.Country, Last.School, Height, Weight))
-  
-  # Match some Information about the players and dismiss the rows with name "Team Team" and filter
-  # Class in order to only keep players in their junior (3rd) or senior (4th) year of college
-  # since other players are not yet eligable in the Draft
-  Data2011 <- as.data.frame(merge(y = GameSummary2011_Grp, x = PlayerList2011_1, by = "Player.Code", all.y = TRUE))
-  Data2011_1 = Data2011 %>%
-    filter(., First.Name != "Team") %>%
-    filter(., Position %in% c("QB", "RB", "WR")) %>%
-    mutate(Name= paste(First.Name, Last.Name, sep=" "))
   
   # Match the Draft, Combine, -1 Year and -2 Year data
   Class2013_0 <- merge(x = Draft1Season2013, y = Data2011_1, by = "Player.Code", all.x = TRUE)

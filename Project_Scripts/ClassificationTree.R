@@ -10,6 +10,7 @@ library(e1071)
 library(tidyverse)
 library(rattle)				    	# Fancy tree plot
 library(RColorBrewer)				# Color selection for fancy tree plot
+library(gbm)
 # 
 
 load("../Data/CleanData/CleanClass2007to2014_2.Rdata")
@@ -186,5 +187,37 @@ savePlotToFile(file.name = "Togtree.jpg")
 # https://www.datacamp.com/community/tutorials/decision-trees-R
 # GMB - Package
 
+# need to CV the Boosted Trees!!!!
 
+ClassificationTreePerfMeasBoost = data.frame(Method = character(), QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
+                                        WR_TP = integer(), WR_TN = integer(), WR_FP = integer(), WR_FN = integer(),
+                                        RB_TP = integer(), RB_TN = integer(), RB_FP = integer(), RB_FN = integer(),
+                                        Together_TP = integer(), Together_TN = integer(), Together_FP = integer(), Together_FN = integer(), stringsAsFactors = FALSE)
 
+ClassificationTreePerfMeasBoost[1,1] = "ClassificationTreeBoost"
+n.trees = 2000
+set.seed(1)
+ClassTreetogBoost = gbm(
+  formula = Drafted ~ .,
+  distribution = "gaussian",
+  n.trees = n.trees,
+  data = Dtraintog)
+
+CheckListBoost = as.data.frame(cbind(Dtesttog$Drafted, predict(ClassTreetogBoost, newdata = Dtesttog, n.trees = n.trees)))
+
+CheckListtogBoost = CheckListBoost %>%
+  mutate(Y=V1) %>%
+  select(-V1) %>%
+  mutate(Pred=ifelse(CheckListBoost[,2]>0.5, 1,0)) %>%
+  mutate(TP=ifelse(Y==Pred,ifelse(Pred==1,1,0),0)) %>%
+  mutate(TN=ifelse(Y==Pred,ifelse(Pred==0,1,0),0)) %>%
+  mutate(FP=ifelse(Y!=Pred,ifelse(Pred==1,1,0),0)) %>%
+  mutate(FN=ifelse(Y!=Pred,ifelse(Pred==0,1,0),0))
+
+# Fill the Performance Measurement Matrix
+ClassificationTreePerfMeasBoost[1,"Together_TP"] = sum(CheckListtogBoost$TP)
+ClassificationTreePerfMeasBoost[1,"Together_TN"] = sum(CheckListtogBoost$TN)
+ClassificationTreePerfMeasBoost[1,"Together_FP"] = sum(CheckListtogBoost$FP)
+ClassificationTreePerfMeasBoost[1,"Together_FN"] = sum(CheckListtogBoost$FN)
+
+asdf = rbind(ClassificationTreePerfMeas,ClassificationTreePerfMeasBoost)

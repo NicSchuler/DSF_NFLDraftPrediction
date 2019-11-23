@@ -1,0 +1,24 @@
+---
+title: "README for the classification tree"
+author: "Group 2"
+date: "`December, 2nd, 2019`"
+output:
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+  html_document:
+    df_print: paged
+abstract: This Chapter is describes the classification tree algorithm applied to the CleanClass2007to2014_2 data coded in the script 'ClassificationTree.R'.
+urlcolor: blue
+---
+
+## Fundamentals of Classification Trees
+Classification trees split the different variables in order to obtain the most homogeneos possible clusters, by minimizing a loss function, that can be restricted.
+
+## Our Approach
+
+
+
+
+
+
