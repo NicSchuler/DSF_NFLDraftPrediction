@@ -7,18 +7,37 @@ cleanData <- as_tibble(CleanClass2007to2014_2)
 
 
 # Random Forest for QBs ----
-# Select years 2007 through 2013 as training data
+# Select years 2007 through 2013 as "training" data
 cleanData_QB <- cleanData %>% filter(., Year < 2014, Position == "QB") %>% drop_na(.)
 
 x <- cleanData_QB %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
 
-# Run Random Forest classifier with standard parameters (500 bags, cutoff probability of 0.5)
-RF_QB <- randomForest(y ~ ., data = x)
+# Randomly shuffle the data for cross validation
+set.seed(6969)
+x <- x[sample(nrow(x)),]
+
+# Create 10 folds
+folds <- cut(seq(1,nrow(x)),breaks=10,labels=FALSE)
+
+# Create placeholder for confusion matrices
+confusion <- matrix(NA, 6, 10)
+
+# Perform 10 fold cross validation
+for(i in 1:10){
+  # Segement data by fold
+  testIndexes <- which(folds==i,arr.ind=TRUE)
+  testData <- x[testIndexes, ]
+  trainData <- x[-testIndexes, ]
+  
+  # Use the test and train data partitions to run Random Forest classifier with standard parameters (500 bags, cutoff probability of 0.5)
+  RF_QB <- randomForest(y ~ ., data = x)
+  confusion[, i] <- as.vector(RF_QB$confusion)
+}
 
 # Plot variable importance
-var_QB <- tibble("variable" = names(RF_QB$forest$xlevels), "MeanDecreaseGini" = as.vector(RF_QB$importance)) %>% arrange(desc(MeanDecreaseGini))
-par(mar = c(6,5,4,2))
-barplot(var_QB$MeanDecreaseGini, main = "Variable Importance QB", ylab = "mean decrease in Gini", names.arg = var_QB$variable, cex.names = 0.6, las = 2)
+var_QB <- tibble("variable" = names(RF_QB$forest$xlevels), "MeanDecreaseGini" = as.vector(RF_QB$importance)) %>% arrange(desc(-MeanDecreaseGini))
+par(mar = c(5,6,4,2))
+barplot(var_QB$MeanDecreaseGini, main = "Variable Importance QB", xlab = "mean decrease in Gini", names.arg = var_QB$variable, cex.names = 0.6, las = 1, horiz = TRUE)
 
 # Use year 2014 for testing
 cleanData_QB_test <- cleanData %>% filter(., Year == 2014, Position == "QB")
@@ -39,9 +58,9 @@ x <- cleanData_RB %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.
 RF_RB <- randomForest(y ~ ., data = x)
 
 # Plot variable importance
-var_RB <- tibble("variable" = names(RF_RB$forest$xlevels), "MeanDecreaseGini" = as.vector(RF_RB$importance)) %>% arrange(desc(MeanDecreaseGini))
-par(mar = c(6,5,4,2))
-barplot(var_RB$MeanDecreaseGini, main = "Variable Importance RB", ylab = "mean decrease in Gini", names.arg = var_RB$variable, cex.names = 0.6, las = 2)
+var_RB <- tibble("variable" = names(RF_RB$forest$xlevels), "MeanDecreaseGini" = as.vector(RF_RB$importance)) %>% arrange(desc(-MeanDecreaseGini))
+par(mar = c(5,6,4,2))
+barplot(var_RB$MeanDecreaseGini, main = "Variable Importance RB", xlab = "mean decrease in Gini", names.arg = var_RB$variable, cex.names = 0.6, las = 1, horiz = TRUE)
 
 # Use year 2014 for testing
 cleanData_RB_test <- cleanData %>% filter(., Year == 2014, Position == "RB")
@@ -62,9 +81,9 @@ x <- cleanData_WR %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.
 RF_WR <- randomForest(y ~ ., data = x)
 
 # Plot variable importance
-var_WR <- tibble("variable" = names(RF_WR$forest$xlevels), "MeanDecreaseGini" = as.vector(RF_WR$importance)) %>% arrange(desc(MeanDecreaseGini))
-par(mar = c(6,5,4,2))
-barplot(var_WR$MeanDecreaseGini, main = "Variable Importance WR", ylab = "mean decrease in Gini", names.arg = var_WR$variable, cex.names = 0.6, las = 2)
+var_WR <- tibble("variable" = names(RF_WR$forest$xlevels), "MeanDecreaseGini" = as.vector(RF_WR$importance)) %>% arrange(desc(-MeanDecreaseGini))
+par(mar = c(5,6,4,2))
+barplot(var_WR$MeanDecreaseGini, main = "Variable Importance WR", xlab = "mean decrease in Gini", names.arg = var_WR$variable, cex.names = 0.6, las = 1, horiz = TRUE)
 
 # Use year 2014 for testing
 cleanData_WR_test <- cleanData %>% filter(., Year == 2014, Position == "WR")
@@ -85,9 +104,9 @@ x <- cleanData_all %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player
 RF_all <- randomForest(y ~ ., data = x)
 
 # Plot variable importance
-var_all <- tibble("variable" = names(RF_all$forest$xlevels), "MeanDecreaseGini" = as.vector(RF_all$importance)) %>% arrange(desc(MeanDecreaseGini))
-par(mar = c(6,5,4,2))
-barplot(var_all$MeanDecreaseGini, main = "Variable Importance all positions", ylab = "mean decrease in Gini", names.arg = var_all$variable, cex.names = 0.6, las = 2)
+var_all <- tibble("variable" = names(RF_all$forest$xlevels), "MeanDecreaseGini" = as.vector(RF_all$importance)) %>% arrange(desc(-MeanDecreaseGini))
+par(mar = c(5,6,4,2))
+barplot(var_all$MeanDecreaseGini, main = "Variable Importance all positions", xlab = "mean decrease in Gini", names.arg = var_all$variable, cex.names = 0.6, las = 1, horiz = TRUE)
 
 # Use year 2014 for testing
 cleanData_all_test <- cleanData %>% filter(., Year == 2014)
