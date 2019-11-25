@@ -192,18 +192,20 @@ savePlotToFile(file.name = "Togtree.jpg")
 ClassificationTreePerfMeasBoost = data.frame(Method = character(), QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
                                         WR_TP = integer(), WR_TN = integer(), WR_FP = integer(), WR_FN = integer(),
                                         RB_TP = integer(), RB_TN = integer(), RB_FP = integer(), RB_FN = integer(),
-                                        Together_TP = integer(), Together_TN = integer(), Together_FP = integer(), Together_FN = integer(), stringsAsFactors = FALSE)
+                                        Together_TP = integer(), Together_TN = integer(), Together_FP = integer(), Together_FN = integer(), Together_PM = integer(),
+                                        stringsAsFactors = FALSE)
 
 ClassificationTreePerfMeasBoost[1,1] = "ClassificationTreeBoost"
-n.trees = 2000
+n.trees = 1000
 set.seed(1)
 ClassTreetogBoost = gbm(
   formula = Drafted ~ .,
-  distribution = "gaussian",
-  n.trees = n.trees,
-  data = Dtraintog)
+  distribution = "adaboost",
+  n.trees = 2000,
+  data = Dtraintog,
+  shrinkage = 0.01)
 
-CheckListBoost = as.data.frame(cbind(Dtesttog$Drafted, predict(ClassTreetogBoost, newdata = Dtesttog, n.trees = n.trees)))
+CheckListBoost = as.data.frame(cbind(Dtesttog$Drafted, predict(ClassTreetogBoost, newdata = Dtesttog, n.trees = 2000)))
 
 CheckListtogBoost = CheckListBoost %>%
   mutate(Y=V1) %>%
@@ -219,5 +221,6 @@ ClassificationTreePerfMeasBoost[1,"Together_TP"] = sum(CheckListtogBoost$TP)
 ClassificationTreePerfMeasBoost[1,"Together_TN"] = sum(CheckListtogBoost$TN)
 ClassificationTreePerfMeasBoost[1,"Together_FP"] = sum(CheckListtogBoost$FP)
 ClassificationTreePerfMeasBoost[1,"Together_FN"] = sum(CheckListtogBoost$FN)
+ClassificationTreePerfMeasBoost[1,"Together_PM"] = ((sum(CheckListtogBoost$TP))/((1+sum(CheckListtogBoost$FN)+sum(CheckListtogBoost$FP))*sum(CheckListtogBoost$Y)))
 
 asdf = rbind(ClassificationTreePerfMeas,ClassificationTreePerfMeasBoost)
