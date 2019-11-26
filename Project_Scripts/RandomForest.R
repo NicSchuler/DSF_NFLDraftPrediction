@@ -19,8 +19,83 @@ x <- x[sample(nrow(x)),]
 # Create 10 folds
 folds <- cut(seq(1,nrow(x)),breaks=10,labels=FALSE)
 
+# Create placeholders for confusion matrices and variable importance
+confusion_QB <- as.data.frame(matrix(NA, 6, 10))
+importance_QB <- as.data.frame(matrix(NA, 24, 10))
+
+confusion_QB_cv <- as.data.frame(matrix(NA, 6, 10))
+importance_QB_cv <- as.data.frame(matrix(NA, 24, 10))
+
+# Perform 10 fold cross validation using different numbers of trees in the model
+for (j in 1:10){
+  for(i in 1:10){
+    # Segement data by fold
+    testIndexes <- which(folds==i,arr.ind=TRUE)
+    testData <- x[testIndexes, ]
+    trainData <- x[-testIndexes, ]
+    
+    # Use the test and train data partitions to run Random Forest classifier
+    RF_QB <- randomForest(y ~ ., data = x, ntree = j*100)
+    
+    # Save confusion matrix for j*100 trees
+    confusion_QB[, i] <- as.vector(RF_QB$confusion)
+    
+    # Save variable importance for j*100 trees
+    importance_QB[, i] <- as.vector(RF_QB$importance)
+  }
+  
+  # Summarize cross validated confusion and variable importance for j*100 trees
+  
+  confusion_QB_cv[, j] <- rowMeans(confusion_QB)
+  colnames(confusion_QB_cv)[j] <- as.character(j*100)
+  
+  importance_QB_cv[, j] <- rowMeans(importance_QB)
+  colnames(importance_QB_cv)[j] <- as.character(j*100)
+}
+
+row.names(importance_QB_cv) <- names(RF_QB$forest$xlevels)
+
+# Measure the performance of the models with the "proprietary" measurement
+
+
+
+# Run the model with the best performing number of trees
+
+
+
+# Use year 2014 for testing
+cleanData_QB_test <- cleanData %>% filter(., Year == 2014, Position == "QB")
+x_test <- cleanData_QB_test %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
+pred <- as.integer(as.vector(predict(RF_QB, x_test)))
+
+# Combine predictions and player data
+pred_QB <- tibble("Code" = cleanData_QB_test$Player.Code, "Name" = cleanData_QB_test$Name, "Drafted" = cleanData_QB_test$Drafted, "pred" = pred)
+
+# Plot variable importance for the best cross validated model
+varImpPlot(RF_QB)
+
+# Plot the ROC curve for the best cross validated model
+pred <- predict(RF_QB, x_test, type = "prob")
+pred <- prediction(pred[,2], cleanData_QB_test$Drafted)
+perf <- performance(pred, measure = "tpr", x.measure = "fpr")
+plot(perf, colorize = TRUE, main = "ROC Curve QB")
+
+
+# Random Forest for RBs ----
+# Select years 2007 through 2013 as training data
+cleanData_RB <- cleanData %>% filter(., Year < 2014, Position == "RB") %>% drop_na(.)
+
+x <- cleanData_RB %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
+
+# Randomly shuffle the data for cross validation
+set.seed(6969)
+x <- x[sample(nrow(x)),]
+
+# Create 10 folds
+folds <- cut(seq(1,nrow(x)),breaks=10,labels=FALSE)
+
 # Create placeholder for confusion matrices
-confusion <- matrix(NA, 6, 10)
+confusion_RB <- matrix(NA, 6, 10)
 
 # Perform 10 fold cross validation
 for(i in 1:10){
@@ -30,32 +105,9 @@ for(i in 1:10){
   trainData <- x[-testIndexes, ]
   
   # Use the test and train data partitions to run Random Forest classifier with standard parameters (500 bags, cutoff probability of 0.5)
-  RF_QB <- randomForest(y ~ ., data = x)
-  confusion[, i] <- as.vector(RF_QB$confusion)
+  RF_RB <- randomForest(y ~ ., data = x)
+  confusion_RB[, i] <- as.vector(RF_RB$confusion)
 }
-
-# Plot variable importance
-var_QB <- tibble("variable" = names(RF_QB$forest$xlevels), "MeanDecreaseGini" = as.vector(RF_QB$importance)) %>% arrange(desc(-MeanDecreaseGini))
-par(mar = c(5,6,4,2))
-barplot(var_QB$MeanDecreaseGini, main = "Variable Importance QB", xlab = "mean decrease in Gini", names.arg = var_QB$variable, cex.names = 0.6, las = 1, horiz = TRUE)
-
-# Use year 2014 for testing
-cleanData_QB_test <- cleanData %>% filter(., Year == 2014, Position == "QB")
-x_test <- cleanData_QB_test %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
-pred <- as.integer(as.vector(predict(RF_QB, cleanData_QB_test)))
-
-# Combine predictions and player data
-pred_QB <- tibble("Code" = cleanData_QB_test$Player.Code, "Name" = cleanData_QB_test$Name, "Drafted" = cleanData_QB_test$Drafted, "pred" = pred)
-
-
-# Random Forest for RBs ----
-# Select years 2007 through 2013 as training data
-cleanData_RB <- cleanData %>% filter(., Year < 2014, Position == "RB") %>% drop_na(.)
-
-x <- cleanData_RB %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
-
-# Run Random Forest classifier
-RF_RB <- randomForest(y ~ ., data = x)
 
 # Plot variable importance
 var_RB <- tibble("variable" = names(RF_RB$forest$xlevels), "MeanDecreaseGini" = as.vector(RF_RB$importance)) %>% arrange(desc(-MeanDecreaseGini))
