@@ -7,8 +7,6 @@ library(tidyverse)
 library(rattle)				    	# Fancy tree plot
 library(RColorBrewer)				# Color selection for fancy tree plot
 
-# RB and Together still needs to be updated
-
 load("../Data/CleanData/CleanClass2007to2014_2.Rdata")
 
 ClassificationTreePerfMeas = data.frame(Method = character(), QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
@@ -39,7 +37,8 @@ DtestQB = Dtest %>%
   filter(Position == "QB") %>%
   select(-c(Player.Code, Name, Class, Position, Year))
 
-# Run a classification tree
+# Run a classification tree. We use the whole data for training, since the rpart-function has a built in cross-validation. For the evaluation of the 
+# best model we also use the whole training set for this cross-validation.
 ClassTreeQB = rpart(
   formula = Drafted ~ .,
   data    = DtrainQB,
@@ -68,7 +67,7 @@ fancyRpartPlot(ClassTreeQB)
 savePlotToFile(file.name = "QBtree.jpg")
 
 # WR ---------------------------
-# Predicting the likelyhood of a QB being picked in the draft
+# Predicting the likelyhood of a WR being picked in the draft
 DtrainWR = Dtrain %>%
   filter(Position == "WR") %>%
   select(-c(Player.Code, Name, Class, Position, Year))
@@ -77,7 +76,8 @@ DtestWR = Dtest %>%
   filter(Position == "WR") %>%
   select(-c(Player.Code, Name, Class, Position, Year))
 
-# Run a classification tree
+# Run a classification tree. We use the whole data for training, since the rpart-function has a built in cross-validation. For the evaluation of the 
+# best model we also use the whole training set for this cross-validation.
 ClassTreeWR = rpart(
   formula = Drafted ~ .,
   data    = DtrainWR,
@@ -107,127 +107,95 @@ savePlotToFile(file.name = "WRtree.jpg")
 
 # RB ---------------------------
 # Predicting the likelyhood of a RB being picked in the draft
-CleanClass2007to2014_RB = CleanClass2007to2014_2 %>%
+DtrainRB = Dtrain %>%
   filter(Position == "RB") %>%
-  select(-c(Player.Code, Name, Class, Position))
+  select(-c(Player.Code, Name, Class, Position, Year))
 
-DtrainRB = CleanClass2007to2014_RB %>%
-  filter(Year != 2014) %>%
-  select(-Year)
+DtestRB = Dtest %>%
+  filter(Position == "RB") %>%
+  select(-c(Player.Code, Name, Class, Position, Year))
 
-DtestRB = CleanClass2007to2014_RB %>%
-  filter(Year == 2014) %>%
-  select(-Year)
-
-# Run a classification tree
+# Run a classification tree. We use the whole data for training, since the rpart-function has a built in cross-validation. For the evaluation of the 
+# best model we also use the whole training set for this cross-validation.
 ClassTreeRB = rpart(
   formula = Drafted ~ .,
   data    = DtrainRB,
   method  = "class")
 
-CheckList = as.data.frame(cbind(DtestRB$Drafted, predict(ClassTreeRB, DtestRB)))
+CheckList = as.data.frame(cbind(DtrainRB$Drafted, predict(ClassTreeRB, DtrainRB)))
 
 CheckListRB = CheckList %>%
   mutate(Y=V1) %>%
   select(-V1) %>%
-  mutate(Pred=ifelse(CheckList[,3]>0.5, 1,0)) %>%
-  mutate(TP=ifelse(Y==Pred,ifelse(Pred==1,1,0),0)) %>%
-  mutate(TN=ifelse(Y==Pred,ifelse(Pred==0,1,0),0)) %>%
-  mutate(FP=ifelse(Y!=Pred,ifelse(Pred==1,1,0),0)) %>%
-  mutate(FN=ifelse(Y!=Pred,ifelse(Pred==0,1,0),0))
+  mutate(RB_Pred=ifelse(CheckList[,3]>0.5, 1,0)) %>%
+  mutate(RB_TP=ifelse(Y==RB_Pred,ifelse(RB_Pred==1,1,0),0)) %>%
+  mutate(RB_TN=ifelse(Y==RB_Pred,ifelse(RB_Pred==0,1,0),0)) %>%
+  mutate(RB_FP=ifelse(Y!=RB_Pred,ifelse(RB_Pred==1,1,0),0)) %>%
+  mutate(RB_FN=ifelse(Y!=RB_Pred,ifelse(RB_Pred==0,1,0),0))
 
 # Fill the Performance Measurement Matrix
-ClassificationTreePerfMeas[1,"RB_TP"] = sum(CheckListRB$TP)
-ClassificationTreePerfMeas[1,"RB_TN"] = sum(CheckListRB$TN)
-ClassificationTreePerfMeas[1,"RB_FP"] = sum(CheckListRB$FP)
-ClassificationTreePerfMeas[1,"RB_FN"] = sum(CheckListRB$FN)
+ClassificationTreePerfMeas[1,"RB_TP"] = sum(CheckListRB$RB_TP)
+ClassificationTreePerfMeas[1,"RB_TN"] = sum(CheckListRB$RB_TN)
+ClassificationTreePerfMeas[1,"RB_FP"] = sum(CheckListRB$RB_FP)
+ClassificationTreePerfMeas[1,"RB_FN"] = sum(CheckListRB$RB_FN)
+
+# Plotting the Tree
+fancyRpartPlot(ClassTreeRB)
+
+savePlotToFile(file.name = "RBtree.jpg")
 
 # Together ---------------------------
-# Predicting the likelyhood of a QB/WR/RB being picked in the draft (without filter)
-CleanClass2007to2014_tog = CleanClass2007to2014_2 %>%
-  select(-c(Player.Code, Name, Class, Position))
+# Predicting the likelyhood of QB/RB/WR together for being picked in the draft
+DtrainTogether = Dtrain %>%
+  select(-c(Player.Code, Name, Class, Position, Year))
 
-Dtraintog = CleanClass2007to2014_tog %>%
-  filter(Year != 2014) %>%
-  select(-Year)
+DtestTogether = Dtest %>%
+  select(-c(Player.Code, Name, Class, Position, Year))
 
-Dtesttog = CleanClass2007to2014_tog %>%
-  filter(Year == 2014) %>%
-  select(-Year)
-
-# Run a classification tree
-ClassTreetog = rpart(
+# Run a classification tree. We use the whole data for training, since the rpart-function has a built in cross-validation. For the evaluation of the 
+# best model we also use the whole training set for this cross-validation.
+ClassTreeTogether = rpart(
   formula = Drafted ~ .,
-  data    = Dtraintog,
+  data    = DtrainTogether,
   method  = "class")
 
-CheckList = as.data.frame(cbind(Dtesttog$Drafted, predict(ClassTreetog, Dtesttog)))
+CheckList = as.data.frame(cbind(DtrainTogether$Drafted, predict(ClassTreeTogether, DtrainTogether)))
 
 CheckListTogether = CheckList %>%
-  mutate(Y=V1) %>%
+  mutate(Drafted=V1) %>%
   select(-V1) %>%
-  mutate(Pred=ifelse(CheckList[,3]>0.5, 1,0)) %>%
-  mutate(TP=ifelse(Y==Pred,ifelse(Pred==1,1,0),0)) %>%
-  mutate(TN=ifelse(Y==Pred,ifelse(Pred==0,1,0),0)) %>%
-  mutate(FP=ifelse(Y!=Pred,ifelse(Pred==1,1,0),0)) %>%
-  mutate(FN=ifelse(Y!=Pred,ifelse(Pred==0,1,0),0))
+  mutate(Together_Pred=ifelse(CheckList[,3]>0.5, 1,0)) %>%
+  mutate(Together_TP=ifelse(Drafted==Together_Pred,ifelse(Together_Pred==1,1,0),0)) %>%
+  mutate(Together_TN=ifelse(Drafted==Together_Pred,ifelse(Together_Pred==0,1,0),0)) %>%
+  mutate(Together_FP=ifelse(Drafted!=Together_Pred,ifelse(Together_Pred==1,1,0),0)) %>%
+  mutate(Together_FN=ifelse(Drafted!=Together_Pred,ifelse(Together_Pred==0,1,0),0))
 
 # Fill the Performance Measurement Matrix
-ClassificationTreePerfMeas[1,"Together_TP"] = sum(CheckListTogether$TP)
-ClassificationTreePerfMeas[1,"Together_TN"] = sum(CheckListTogether$TN)
-ClassificationTreePerfMeas[1,"Together_FP"] = sum(CheckListTogether$FP)
-ClassificationTreePerfMeas[1,"Together_FN"] = sum(CheckListTogether$FN)
+ClassificationTreePerfMeas[1,"Together_TP"] = sum(CheckListTogether$Together_TP)
+ClassificationTreePerfMeas[1,"Together_TN"] = sum(CheckListTogether$Together_TN)
+ClassificationTreePerfMeas[1,"Together_FP"] = sum(CheckListTogether$Together_FP)
+ClassificationTreePerfMeas[1,"Together_FN"] = sum(CheckListTogether$Together_FN)
 
-save(ClassificationTreePerfMeas, file="../Data/PerformanceMeasurement/ClassificationTreePerfMeas.Rdata")
+# Plotting the Tree
+fancyRpartPlot(ClassTreeTogether)
 
+savePlotToFile(file.name = "Togethertree.jpg")
 
-fancyRpartPlot(ClassTreetog)
+# Save the tibble for the Performance Measurement separately
+save(ClassificationTreePerfMeas, file = "../Data/PerformanceMeasurement/ClassificationTreePerfMeas.Rdata")
 
-savePlotToFile(file.name = "Togtree.jpg")
+# Tibble for Combined method--------------------------
+# Construct the tibble for the Combined Method
+ClassificationTreeCombinedMethod_tog = cbind.data.frame(Player.Code=Dtrain$Player.Code, Position=Dtrain$Position, CheckListTogether[,3:8])
+ClassificationTreeCombinedMethod_QB = cbind.data.frame(Player.Code=Dtrain$Player.Code[Dtrain$Position=="QB"], CheckListQB[,4:8])
+ClassificationTreeCombinedMethod_RB = cbind.data.frame(Player.Code=Dtrain$Player.Code[Dtrain$Position=="RB"], CheckListRB[,4:8])
+ClassificationTreeCombinedMethod_WR = cbind.data.frame(Player.Code=Dtrain$Player.Code[Dtrain$Position=="WR"], CheckListWR[,4:8])
 
+ClassificationTreeCombinedMethod = merge(x = ClassificationTreeCombinedMethod_tog, y = ClassificationTreeCombinedMethod_QB, by = "Player.Code", all.x = TRUE)
+ClassificationTreeCombinedMethod = merge(x = ClassificationTreeCombinedMethod, y = ClassificationTreeCombinedMethod_RB, by = "Player.Code", all.x = TRUE)
+ClassificationTreeCombinedMethod = merge(x = ClassificationTreeCombinedMethod, y = ClassificationTreeCombinedMethod_WR, by = "Player.Code", all.x = TRUE)
 
-# Pro Memoria
+save(ClassificationTreeCombinedMethod, file = "../Data/CombinedMethod/ClassificationTreeCombinedMethod.Rdata")
+
+# Pro Memoria-----------------------
 # PerfMeas = ((sum(CheckListtog$TP))/((1+sum(CheckListtog$FN)+sum(CheckListtog$FP))*sum(CheckListtog$Y)))
-
-# Boosted Tree -----------------------------
-
-# https://www.datacamp.com/community/tutorials/decision-trees-R
-# GMB - Package
-
-# need to CV the Boosted Trees!!!!
-# library(gbm)
-# ClassificationTreePerfMeasBoost = data.frame(Method = character(), QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
-#                                         WR_TP = integer(), WR_TN = integer(), WR_FP = integer(), WR_FN = integer(),
-#                                         RB_TP = integer(), RB_TN = integer(), RB_FP = integer(), RB_FN = integer(),
-#                                         Together_TP = integer(), Together_TN = integer(), Together_FP = integer(), Together_FN = integer(), Together_PM = integer(),
-#                                         stringsAsFactors = FALSE)
-# 
-# ClassificationTreePerfMeasBoost[1,1] = "ClassificationTreeBoost"
-# n.trees = 1000
-# set.seed(1)
-# ClassTreetogBoost = gbm(
-#   formula = Drafted ~ .,
-#   distribution = "adaboost",
-#   n.trees = 2000,
-#   data = Dtraintog,
-#   shrinkage = 0.01)
-# 
-# CheckListBoost = as.data.frame(cbind(Dtesttog$Drafted, predict(ClassTreetogBoost, newdata = Dtesttog, n.trees = 2000)))
-# 
-# CheckListtogBoost = CheckListBoost %>%
-#   mutate(Y=V1) %>%
-#   select(-V1) %>%
-#   mutate(Pred=ifelse(CheckListBoost[,2]>0.5, 1,0)) %>%
-#   mutate(TP=ifelse(Y==Pred,ifelse(Pred==1,1,0),0)) %>%
-#   mutate(TN=ifelse(Y==Pred,ifelse(Pred==0,1,0),0)) %>%
-#   mutate(FP=ifelse(Y!=Pred,ifelse(Pred==1,1,0),0)) %>%
-#   mutate(FN=ifelse(Y!=Pred,ifelse(Pred==0,1,0),0))
-# 
-# # Fill the Performance Measurement Matrix
-# ClassificationTreePerfMeasBoost[1,"Together_TP"] = sum(CheckListtogBoost$TP)
-# ClassificationTreePerfMeasBoost[1,"Together_TN"] = sum(CheckListtogBoost$TN)
-# ClassificationTreePerfMeasBoost[1,"Together_FP"] = sum(CheckListtogBoost$FP)
-# ClassificationTreePerfMeasBoost[1,"Together_FN"] = sum(CheckListtogBoost$FN)
-# ClassificationTreePerfMeasBoost[1,"Together_PM"] = ((sum(CheckListtogBoost$TP))/((1+sum(CheckListtogBoost$FN)+sum(CheckListtogBoost$FP))*sum(CheckListtogBoost$Y)))
-# 
-# asdf = rbind(ClassificationTreePerfMeas,ClassificationTreePerfMeasBoost)
