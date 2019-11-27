@@ -172,41 +172,20 @@ comparison <- data.frame(model = names(models),
                          Accuracy = rep(NA, length(models)),
                          Performance = rep(NA, length(models)))
 
-for (name in names(models)) {
-  model <- get(paste0("cm_", name))
-  comparison[comparison$model == name, 2:5] <- c(model$byClass["Sensitivity"],
-                                                 model$byClass["Specificity"],
-                                                 model$byClass["Precision"],
-                                                 model$byClass["Recall"])
+PerfMeas = function(TP,TN,FP,FN){
+  Result <- ((TP)/(sum(1,FN,FP)*sum(TP,FN)))
+  return(Result)
 }
 
+for (name in names(models)) {
+  model <- get(paste0("cm_", name))
+  cm <- model$table
+  comparison[comparison$model == name, 2:5] <- c(model$byClass["Sensitivity"],
+                                                 model$byClass["Specificity"],
+                                                 model$overall["Accuracy"],
+                                                 PerfMeas(cm[2,2], cm[1,1], cm[2,1], cm[1,2]))
+}
 
-# Fill comparison data frame
-# original
-comparison[1,2] = 0.9897
-comparison[1,3] = 0.3150
-comparison[1,4] = 0.9429
-comparison[1,5] = (109) / (sum(1,237,48)*sum(109,237))
-# under
-comparison[2,2] = 0.8728
-comparison[2,3] = 0.8324
-comparison[2,4] = 0.87 
-comparison[2,5] = (288) / (sum(1,58,591)*sum(288,58))
-# over
-comparison[3,2] = 0.8851
-comparison[3,3] = 1.0000 
-comparison[3,4] = 0.893
-comparison[3,5] = (346) / (sum(1,0,534)*sum(346,0))
-# smote
-comparison[4,2] = 0.8592
-comparison[4,3] = 0.9075 
-comparison[4,4] = 0.8626
-comparison[4,5] = (314) / (sum(1,32,654)*sum(314,32))
-# rose
-comparison[5,2] = 0.9950
-comparison[5,3] = 0.1821
-comparison[5,4] = 0.9387
-comparison[5,5] = (63) / (sum(1,283,23)*sum(63,283))
 
 library(tidyr)
 comparison %>%
