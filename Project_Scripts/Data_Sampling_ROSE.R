@@ -13,10 +13,10 @@ library(ROSE)  # Random Over-Sampling Examples:
 load("../Data/CleanData/CleanClass2007to2014_3.Rdata")
 
 # Drop testing data (Year 2014)
-CleanClass2007to2014_3 <- CleanClass2007to2014_3[CleanClass2007to2014_3$Year != 2014,]
+CleanClass2007to2013_3 <- CleanClass2007to2014_3[CleanClass2007to2014_3$Year != 2014,]
 
 # Class distribution
-table(CleanClass2007to2014_3$Drafted)
+table(CleanClass2007to2013_3$Drafted)
 
 # 1. Oversampling ------
 
@@ -31,12 +31,12 @@ table(CleanClass2007to2014_3$Drafted)
 # by setting argument p, which represents the probability of the positive class in the new augmented sample. In this case, 
 # the proportion of positive examples will be only approximatively equal to the specified p.)
 
-CleanClass2007to2014_3_oversampling <- ovun.sample(Drafted~., data=CleanClass2007to2014_3, method="over",N=4022)
-CleanClass2007to2014_3_oversampling <- as.data.frame(CleanClass2007to2014_3_oversampling$data) 
+CleanClass2007to2013_3_oversampling <- ovun.sample(Drafted~., data=CleanClass2007to2013_3, method="over",N=4022)
+CleanClass2007to2013_3_oversampling <- as.data.frame(CleanClass2007to2013_3_oversampling$data) 
 
-table(CleanClass2007to2014_3_oversampling$Drafted)
+table(CleanClass2007to2013_3_oversampling$Drafted)
 
-save(CleanClass2007to2014_3_oversampling, file="../Data/CleanData/CleanClass2007to2014_3_oversampling.Rdata")
+save(CleanClass2007to2013_3_oversampling, file="../Data/CleanData/CleanClass2007to2013_3_oversampling.Rdata")
 
 # 2. Undersampling ------
 
@@ -48,12 +48,12 @@ save(CleanClass2007to2014_3_oversampling, file="../Data/CleanData/CleanClass2007
 # sample size N is reached. Since the minority class, here class 1, amounts to 327 observations, to obtain a balanced sample by undersampling, 
 # we need to set the new sample size to 654 (=2*327). (Alternatively, we may design the undersampling by setting argument p, see explenation above).
 
-CleanClass2007to2014_3_undersampling <- ovun.sample(Drafted~., data=CleanClass2007to2014_3, method="under" ,N=654)
-CleanClass2007to2014_3_undersampling <- as.data.frame(CleanClass2007to2014_3_undersampling$data) 
+CleanClass2007to2013_3_undersampling <- ovun.sample(Drafted~., data=CleanClass2007to2013_3, method="under" ,N=654)
+CleanClass2007to2013_3_undersampling <- as.data.frame(CleanClass2007to2013_3_undersampling$data) 
 
-table(CleanClass2007to2014_3_undersampling$Drafted)
+table(CleanClass2007to2013_3_undersampling$Drafted)
 
-save(CleanClass2007to2014_3_undersampling, file="../Data/CleanData/CleanClass2007to2014_3_undersampling.Rdata")
+save(CleanClass2007to2013_3_undersampling, file="../Data/CleanData/CleanClass2007to2013_3_undersampling.Rdata")
 
 # 3. Both; ROSE  ------
 
@@ -62,15 +62,15 @@ save(CleanClass2007to2014_3_undersampling, file="../Data/CleanData/CleanClass200
 # Essentially, the minority class is oversampled to reach a size determined as a realization of a binomial random variable with size N and probability p. 
 # Undersampling is then performed accordingly, to abide by the specified N.
 
-CleanClass2007to2014_3_Rose.both <- ovun.sample(Drafted~., data=CleanClass2007to2014_3, method="both", 
+CleanClass2007to2013_3_Rose.both <- ovun.sample(Drafted~., data=CleanClass2007to2013_3, method="both", 
                                                 p=0.5,      # probability of the minority class, by default 0.5.
                                                 seed=6969,  # specify random seed
                                                 N=2338)     # total specified sampled according to initial sample size of our train data
 
-CleanClass2007to2014_3_Rose.both <- as.data.frame(CleanClass2007to2014_3_Rose.both$data) 
+CleanClass2007to2013_3_Rose.both <- as.data.frame(CleanClass2007to2013_3_Rose.both$data) 
 
-table(CleanClass2007to2014_3_Rose.both$Drafted)
+table(CleanClass2007to2013_3_Rose.both$Drafted)
 
-save(CleanClass2007to2014_3_Rose.both, file="../Data/CleanData/CleanClass2007to2014_3_Rose.both.Rdata")
+save(CleanClass2007to2013_3_Rose.both, file="../Data/CleanData/CleanClass2007to2013_3_Rose.both.Rdata")
 
 
