@@ -164,3 +164,48 @@ CleanClass2007to2014_2$Position = factor(CleanClass2007to2014_2$Position)
 
 
 save(CleanClass2007to2014_2, file="../Data/CleanData/CleanClass2007to2014_2.Rdata")
+
+
+# Looking at the data-------------
+# Lets have a look at the data by plotting histograms of Games.Played over all Players and only the Drafted ones
+hist(CleanClass2007to2014_2$Games.Played)
+hist(CleanClass2007to2014_2$Games.Played[CleanClass2007to2014_2$Drafted==1])
+
+# We can already see, that there is a huge amount of Players with less than 10 games played
+# that, a priori don't have a big chance of being drafted
+# Now we look at the same problem but in a quantitative way
+
+# Percentage of Drafted Players in the whole dataset
+sum(CleanClass2007to2014_2$Drafted)/length(CleanClass2007to2014_2$Drafted)
+# Amount of Drafted Players with less than 10 games
+sum(CleanClass2007to2014_2$Drafted[CleanClass2007to2014_2$Games.Played<10])
+
+# And the Undrafted players
+# Amount of Undrafted Players with less than 10 games
+(length(CleanClass2007to2014_2$Drafted[CleanClass2007to2014_2$Games.Played<10])-sum(CleanClass2007to2014_2$Drafted[CleanClass2007to2014_2$Games.Played<10]))
+
+# Percentage of Drafted Players if we cut away all players with less than 10 games
+sum(CleanClass2007to2014_2$Drafted[CleanClass2007to2014_2$Games.Played>=10])/length(CleanClass2007to2014_2$Drafted[CleanClass2007to2014_2$Games.Played>=10])
+
+# By filtering out all players with less than 10 games, we can increase the percentage of drafted
+# Players from 6.2% up to 12.4%, which is better for machine learning (according to various sources)
+
+# Prepare a Plot to see the Percentage depending on the cutoff point
+Cutoff = seq(1:28)
+PlotTibble = as.tibble(Cutoff) %>%
+  mutate(Cutoff=value) %>%
+  select(-value) %>%
+  mutate(DataLength=NA) %>%
+  mutate(DraftLength=NA) %>%
+  mutate(DraftPerc=NA)
+
+for(i in PlotTibble$Cutoff){
+  PlotTibble$DataLength[i]=length(CleanClass2007to2014_2$Drafted[CleanClass2007to2014_2$Games.Played >= i])
+  PlotTibble$DraftLength[i]=sum(CleanClass2007to2014_2$Drafted[CleanClass2007to2014_2$Games.Played >= i])
+  PlotTibble$DraftPerc[i]=(PlotTibble$DraftLength[i])/(PlotTibble$DataLength[i])
+}
+
+# Optimizing the data
+CleanClass2007to2014_3 = CleanClass2007to2014_2 %>%
+  filter(Games.Played >= 10)
+save(CleanClass2007to2014_3, file="../Data/CleanData/CleanClass2007to2014_3.Rdata")
