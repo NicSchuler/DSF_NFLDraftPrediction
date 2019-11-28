@@ -975,7 +975,7 @@ KNNPerfMeas[5,"RB_FN"] = sum(CheckList_RBSM$FN)
 
 # 5. Save KNNPerfMeas as a new dataset ###################################################
 
-save(KNNPerfMeas, file="../Data/CleanData/KNNPerfMeas.Rdata")
+save(KNNPerfMeas, file="../Data/PerformanceMeasurement/KNNPerfMeas.Rdata")
 
 
 
