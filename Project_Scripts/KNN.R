@@ -28,7 +28,7 @@ KNNPerfMeas$Method = "KNN"
 
 # 1. No Sampling ###################################################
 
-load("../Data/CleanClass2007to2014_3.Rdata")
+load("../Data/CleanData/CleanClass2007to2014_3.Rdata")
 
 # I. KNN Classifier - 07 to 13, together ----------
 
@@ -236,7 +236,7 @@ KNNPerfMeas[1,"RB_FN"] = sum(CheckList_RB$FN)
 
 # 2. Oversampling ###################################################
 
-load("../Data/CleanClass2007to2013_3_oversampling.Rdata")
+load("../Data/CleanData/CleanClass2007to2013_3_oversampling.Rdata")
 
 # I. KNN Classifier - 07 to 13, together ----------
 
@@ -431,7 +431,7 @@ KNNPerfMeas[2,"RB_FN"] = sum(CheckList_RBOS$FN)
 
 # 3. Undersampling ###################################################
 
-load("../Data/CleanClass2007to2013_3_undersampling.Rdata")
+load("../Data/CleanData/CleanClass2007to2013_3_undersampling.Rdata")
 
 # I. KNN Classifier - 07 to 13, together ----------
 
@@ -627,7 +627,7 @@ KNNPerfMeas[3,"RB_FN"] = sum(CheckList_RBUS$FN)
 
 # 4. Rose_both ###################################################
 
-load("../Data/CleanClass2007to2013_3_Rose.both.Rdata")
+load("../Data/CleanData/CleanClass2007to2013_3_Rose.both.Rdata")
 
 # I. KNN Classifier - 07 to 13, together ----------
 
@@ -823,7 +823,7 @@ KNNPerfMeas[4,"RB_FN"] = sum(CheckList_RBBO$FN)
 
 # 5. Smote ###################################################
 
-load("../Data/CleanClass2007to2013_3_smote.Rdata")
+load("../Data/CleanData/CleanClass2007to2013_3_smote.Rdata")
 
 # I. KNN Classifier - 07 to 13, together ----------
 
@@ -1017,11 +1017,11 @@ KNNPerfMeas[5,"RB_TN"] = sum(CheckList_RBSM$TN)
 KNNPerfMeas[5,"RB_FP"] = sum(CheckList_RBSM$FP)
 KNNPerfMeas[5,"RB_FN"] = sum(CheckList_RBSM$FN)
 
-# 5. Save KNNPerfMeas as a new dataset ###################################################
+# 6. Save KNNPerfMeas as a new dataset ###################################################
 
 save(KNNPerfMeas, file="../Data/KNNPerfMeas.Rdata")
 
-# 6. Plots and Table for ReadMe ###################################################
+# 7. Plots and Table for ReadMe ###################################################
 
 # Note the value of "k" for every model; This is illustrated in the ReadMe.
 KNN_K = data.frame(Sampling = character(),Together=integer(), QB=integer(), WR=integer(), RB=integer(),stringsAsFactors = FALSE)
