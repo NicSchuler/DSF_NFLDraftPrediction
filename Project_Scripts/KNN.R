@@ -37,12 +37,12 @@ load("../Data/CleanData/CleanClass2007to2014_3.Rdata")
 CleanClass2007to2013_3<- CleanClass2007to2014_3[CleanClass2007to2014_3$Year != 2014,]
 CleanClass2007to2013_3$Drafted <- as.factor(CleanClass2007to2013_3$Drafted)
 Data2007to2013_tog <- CleanClass2007to2013_3 %>% select(-Position, -Class, -Name, -Player.Code, -Year, 
-                                                      -Safety) #this variable has zero variance hence it can not be normalized.
+                                                      -Safety) #this variable has zero variance hence it can not be standardized
 # Testing data
 CleanClass2014_3<- CleanClass2007to2014_3[CleanClass2007to2014_3$Year == 2014,]
 CleanClass2014_3$Drafted <- as.factor(CleanClass2014_3$Drafted)
 CleanClass2014_3_tog <- CleanClass2014_3 %>% select(-Position, -Class, -Name, -Player.Code, -Year, 
-                                                        -Safety) #this variable has zero variance hence it can not be normalized.
+                                                        -Safety) #this variable has zero variance hence it can not be standardized
 
 #2 - KNN ----------
 
@@ -54,6 +54,9 @@ KNN_tog <- train(Drafted~.,
              method="knn",
              trControl=tr_control,
              preProcess=c("center", "scale")) 
+
+# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
+# The standardized result ist the z-value. (See ReadMe for further explenation).
 
 # Predictions: 0.5 is used for probability cutoff value by default
 predict_tog <- predict(KNN_tog,Data2007to2013_tog) 
@@ -83,12 +86,12 @@ KNNPerfMeas[1,"Together_FN"] = sum(CheckList_tog$FN)
 # Training data
 Data2007to2013_QB <- CleanClass2007to2013_3[CleanClass2007to2013_3$Position=="QB", ]
 Data2007to2013_QB <- Data2007to2013_QB %>% select(-Class, -Position, -Name, -Player.Code, -Year, 
--Safety, -Kickoff.Ret.TD, -Punt.Ret.TD) #these variables have zero variance hence they can not be normalized.
+-Safety, -Kickoff.Ret.TD, -Punt.Ret.TD) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_QB<- CleanClass2014_3[CleanClass2014_3$Position=="QB", ]
 CleanClass2014_3_QB <- CleanClass2014_3_QB %>% select(-Class, -Position, -Name, -Player.Code, -Year,
--Safety, -Kickoff.Ret.TD, -Punt.Ret.TD) #these variables have zero variance hence they can not be normalized.
+-Safety, -Kickoff.Ret.TD, -Punt.Ret.TD) #these variables have zero variance hence they can not be standardized
 
 #2 - KNN ----------
 
@@ -100,9 +103,6 @@ KNN_QB <- train(Drafted~.,
                  method="knn",
                  trControl=tr_control,
                  preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_QB <- predict(KNN_QB, newdata=Data2007to2013_QB)
@@ -132,12 +132,12 @@ KNNPerfMeas[1,"QB_FN"] = sum(CheckList_QB$FN)
 # Training data
 Data2007to2013_WR <- CleanClass2007to2013_3[CleanClass2007to2013_3$Position=="WR", ]
 Data2007to2013_WR <- Data2007to2013_WR %>% select(-Class, -Position, -Name, -Player.Code, -Year, 
-                                                  -Safety) #these variables have zero variance hence they can not be normalized.
+                                                  -Safety) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_WR<- CleanClass2014_3[CleanClass2014_3$Position=="WR", ]
 CleanClass2014_3_WR <- CleanClass2014_3_WR %>% select(-Class, -Position, -Name, -Player.Code, -Year, 
-                                                      -Safety) #these variables have zero variance hence they can not be normalized.
+                                                      -Safety) #these variables have zero variance hence they can not be standardized
 
 #2 - KNN ----------
 
@@ -149,9 +149,6 @@ KNN_WR <- train(Drafted~.,
                 method="knn",
                 trControl=tr_control,
                 preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_WR <- predict(KNN_WR, newdata=Data2007to2013_WR)
@@ -180,12 +177,12 @@ KNNPerfMeas[1,"WR_FN"] = sum(CheckList_WR$FN)
 # Training data
 Data2007to2013_RB <- CleanClass2007to2013_3[CleanClass2007to2013_3$Position=="RB", ]
 Data2007to2013_RB <- Data2007to2013_RB %>% select(-Class, -Position, -Name, -Player.Code, -Year,
-                                                  -Safety) #these variables have zero variance hence they can not be normalized.
+                                                  -Safety) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_RB <-  CleanClass2014_3[CleanClass2014_3$Position=="RB", ]
 CleanClass2014_3_RB <- CleanClass2014_3_RB %>% select(-Class, -Position, -Name, -Player.Code, -Year,
-                                                      -Safety) #these variables have zero variance hence they can not be normalized.
+                                                      -Safety) #these variables have zero variance hence they can not be standardized
 
 #2 - KNN ----------
 
@@ -197,9 +194,6 @@ KNN_RB <- train(Drafted~.,
                 method="knn",
                 trControl=tr_control,
                 preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_RB <- predict(KNN_RB, newdata=Data2007to2013_RB)
@@ -233,7 +227,7 @@ load("../Data/CleanData/CleanClass2007to2013_3_oversampling.Rdata")
 # Training data
 CleanClass2007to2014_3_oversampling$Drafted <- as.factor(CleanClass2007to2014_3_oversampling$Drafted)
 Data2007to2013_togOS <- CleanClass2007to2014_3_oversampling %>% select(-Position, -Class, -Name, -Player.Code, -Year, 
-                                                        -Safety) #this variable has zero variance hence it can not be normalized.
+                                                        -Safety) #this variable has zero variance hence it can not be standardized
 # Testing data
 CleanClass2014_3_tog
 
@@ -276,7 +270,7 @@ KNNPerfMeas[2,"Together_FN"] = sum(CheckList_togOS$FN)
 # Training data
 Data2007to2013_QBOS <- CleanClass2007to2014_3_oversampling[CleanClass2007to2014_3_oversampling$Position=="QB", ]
 Data2007to2013_QBOS <- Data2007to2013_QBOS %>% select(-Class, -Position, -Name, -Player.Code, -Year,
-                                                  -Safety, -Kickoff.Ret.TD, -Punt.Ret.TD) #these variables have zero variance hence they can not be normalized.
+                                                  -Safety, -Kickoff.Ret.TD, -Punt.Ret.TD) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_QB      
@@ -291,9 +285,6 @@ KNN_QBOS <- train(Drafted~.,
                 method="knn",
                 trControl=tr_control,
                 preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_QBOS <- predict(KNN_QBOS, newdata=Data2007to2013_QB)
@@ -323,7 +314,7 @@ KNNPerfMeas[2,"QB_FN"] = sum(CheckList_QBOS$FN)
 # Training data
 Data2007to2013_WROS <- CleanClass2007to2014_3_oversampling[CleanClass2007to2014_3_oversampling$Position=="WR", ]
 Data2007to2013_WROS <- Data2007to2013_WROS %>% select(-Class, -Position, -Name, -Player.Code, -Year,
-                                                  -Safety) #these variables have zero variance hence they can not be normalized.
+                                                  -Safety) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_WR
@@ -338,9 +329,6 @@ KNN_WROS <- train(Drafted~.,
                 method="knn",
                 trControl=tr_control,
                 preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_WROS <- predict(KNN_WROS, newdata=Data2007to2013_WR)
@@ -369,7 +357,7 @@ KNNPerfMeas[2,"WR_FN"] = sum(CheckList_WROS$FN)
 # Training data
 Data2007to2013_RBOS <- CleanClass2007to2014_3_oversampling[CleanClass2007to2014_3_oversampling$Position=="RB", ]
 Data2007to2013_RBOS <- Data2007to2013_RBOS %>% select(-Class, -Position, -Name, -Player.Code, -Year, 
-                                                  -Safety) #these variables have zero variance hence they can not be normalized.
+                                                  -Safety) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_RB
@@ -384,9 +372,6 @@ KNN_RBOS <- train(Drafted~.,
                 method="knn",
                 trControl=tr_control,
                 preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_RBOS <- predict(KNN_RBOS, newdata=Data2007to2013_RB)
@@ -420,7 +405,7 @@ load("../Data/CleanData/CleanClass2007to2013_3_undersampling.Rdata")
 # Training data
 CleanClass2007to2014_3_undersampling$Drafted <- as.factor(CleanClass2007to2014_3_undersampling$Drafted)
 Data2007to2013_togUS <- CleanClass2007to2014_3_undersampling %>% select(-Position, -Class, -Name, -Player.Code, -Year, 
-                                                                       -Safety) #this variable has zero variance hence it can not be normalized.
+                                                                       -Safety) #this variable has zero variance hence it can not be standardized
 # Testing data
 CleanClass2014_3_tog
 
@@ -463,7 +448,7 @@ KNNPerfMeas[3,"Together_FN"] = sum(CheckList_togUS$FN)
 # Training data
 Data2007to2013_QBUS <- CleanClass2007to2014_3_undersampling[CleanClass2007to2014_3_undersampling$Position=="QB", ]
 Data2007to2013_QBUS <- Data2007to2013_QBUS %>% select(-Class, -Position, -Name, -Player.Code, -Year,
-                                                      -Safety, -Kickoff.Ret.TD, -Punt.Ret.TD, -Kickoff.Ret, -Kickoff.Ret.Yard, -Punt.Ret, -Punt.Ret.Yard) #these variables have zero variance hence they can not be normalized.
+                                                      -Safety, -Kickoff.Ret.TD, -Punt.Ret.TD, -Kickoff.Ret, -Kickoff.Ret.Yard, -Punt.Ret, -Punt.Ret.Yard) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_QB      
@@ -478,9 +463,6 @@ KNN_QBUS <- train(Drafted~.,
                   method="knn",
                   trControl=tr_control,
                   preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_QBUS <- predict(KNN_QBUS, newdata=Data2007to2013_QB)
@@ -510,7 +492,7 @@ KNNPerfMeas[3,"QB_FN"] = sum(CheckList_QBUS$FN)
 # Training data
 Data2007to2013_WRUS <- CleanClass2007to2014_3_undersampling[CleanClass2007to2014_3_undersampling$Position=="WR", ]
 Data2007to2013_WRUS <- Data2007to2013_WRUS %>% select(-Class, -Position, -Name, -Player.Code, -Year,
-                                                      -Safety) #these variables have zero variance hence they can not be normalized.
+                                                      -Safety) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_WR
@@ -525,9 +507,6 @@ KNN_WRUS <- train(Drafted~.,
                   method="knn",
                   trControl=tr_control,
                   preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_WRUS <- predict(KNN_WRUS, newdata=Data2007to2013_WR)
@@ -557,7 +536,7 @@ KNNPerfMeas[3,"WR_FN"] = sum(CheckList_WRUS$FN)
 # Training data
 Data2007to2013_RBUS <- CleanClass2007to2014_3_undersampling[CleanClass2007to2014_3_undersampling$Position=="RB", ]
 Data2007to2013_RBUS <- Data2007to2013_RBUS %>% select(-Class, -Position, -Name, -Player.Code, -Year,
-                                                      -Safety, -Pass.Conv) #these variables have zero variance hence they can not be normalized.
+                                                      -Safety, -Pass.Conv) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_RB
@@ -572,9 +551,6 @@ KNN_RBUS <- train(Drafted~.,
                   method="knn",
                   trControl=tr_control,
                   preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_RBUS <- predict(KNN_RBUS, newdata=Data2007to2013_RB)
@@ -608,7 +584,7 @@ load("../Data/CleanData/CleanClass2007to2013_3_Rose.both.Rdata")
 # Training data
 CleanClass2007to2014_3_Rose.both$Drafted <- as.factor(CleanClass2007to2014_3_Rose.both$Drafted)
 Data2007to2013_togBO <- CleanClass2007to2014_3_Rose.both %>% select(-Position, -Class, -Name, -Player.Code, -Year, 
-                                                                        -Safety) #this variable has zero variance hence it can not be normalized.
+                                                                        -Safety) #this variable has zero variance hence it can not be standardized
 # Testing data
 CleanClass2014_3_tog
 
@@ -651,7 +627,7 @@ KNNPerfMeas[4,"Together_FN"] = sum(CheckList_togBO$FN)
 # Training data
 Data2007to2013_QBBO <- CleanClass2007to2014_3_Rose.both[CleanClass2007to2014_3_Rose.both$Position=="QB", ]
 Data2007to2013_QBBO <- Data2007to2013_QBBO %>% select(-Class, -Position, -Name, -Player.Code, -Year,
-                                                      -Safety, -Kickoff.Ret.TD, -Punt.Ret.TD) #these variables have zero variance hence they can not be normalized.
+                                                      -Safety, -Kickoff.Ret.TD, -Punt.Ret.TD) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_QB      
@@ -666,9 +642,6 @@ KNN_QBBO <- train(Drafted~.,
                   method="knn",
                   trControl=tr_control,
                   preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_QBBO <- predict(KNN_QBBO, newdata=Data2007to2013_QB)
@@ -698,7 +671,7 @@ KNNPerfMeas[4,"QB_FN"] = sum(CheckList_QBBO$FN)
 # Training data
 Data2007to2013_WRBO <- CleanClass2007to2014_3_Rose.both[CleanClass2007to2014_3_Rose.both$Position=="WR", ]
 Data2007to2013_WRBO <- Data2007to2013_WRBO %>% select(-Class, -Position, -Name, -Player.Code, -Year, 
-                                                      -Safety) #these variables have zero variance hence they can not be normalized.
+                                                      -Safety) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_WR
@@ -713,9 +686,6 @@ KNN_WRBO <- train(Drafted~.,
                   method="knn",
                   trControl=tr_control,
                   preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_WRBO <- predict(KNN_WRBO, newdata=Data2007to2013_WR)
@@ -745,7 +715,7 @@ KNNPerfMeas[4,"WR_FN"] = sum(CheckList_WRBO$FN)
 # Training data
 Data2007to2013_RBBO <- CleanClass2007to2014_3_Rose.both[CleanClass2007to2014_3_Rose.both$Position=="RB", ]
 Data2007to2013_RBBO <- Data2007to2013_RBBO %>% select(-Class, -Position, -Name, -Player.Code, -Year,
-                                                      -Safety) #these variables have zero variance hence they can not be normalized.
+                                                      -Safety) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_RB
@@ -760,9 +730,6 @@ KNN_RBBO <- train(Drafted~.,
                   method="knn",
                   trControl=tr_control,
                   preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_RBBO <- predict(KNN_RBBO, newdata=Data2007to2013_RB)
@@ -796,7 +763,7 @@ load("../Data/CleanData/CleanClass2007to2013_3_smote.Rdata")
 # Training data
 cleanData_smote$Drafted <- as.factor(cleanData_smote$Drafted)
 Data2007to2013_togSM <- cleanData_smote %>% select(-Position, -Name, -Player.Code, -Year, 
-                                                                    -Safety) #this variable has zero variance hence it can not be normalized.
+                                                                    -Safety) #this variable has zero variance hence it can not be standardized
 # Testing data
 CleanClass2014_3_tog
 
@@ -839,7 +806,7 @@ KNNPerfMeas[5,"Together_FN"] = sum(CheckList_togSM$FN)
 # Training data
 Data2007to2013_QBSM <- cleanData_smote[cleanData_smote$Position=="QB", ]
 Data2007to2013_QBSM <- Data2007to2013_QBSM %>% select(-Position, -Name, -Player.Code, -Year,
-                                                      -Safety, -Kickoff.Ret.TD, -Punt.Ret.TD) #these variables have zero variance hence they can not be normalized.
+                                                      -Safety, -Kickoff.Ret.TD, -Punt.Ret.TD) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_QB      
@@ -854,9 +821,6 @@ KNN_QBSM <- train(Drafted~.,
                   method="knn",
                   trControl=tr_control,
                   preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_QBSM <- predict(KNN_QBSM, newdata=Data2007to2013_QB)
@@ -886,7 +850,7 @@ KNNPerfMeas[5,"QB_FN"] = sum(CheckList_QBSM$FN)
 # Training data
 Data2007to2013_WRSM <- cleanData_smote[cleanData_smote$Position=="WR", ]
 Data2007to2013_WRSM <- Data2007to2013_WRSM %>% select(-Position, -Name, -Player.Code, -Year,
-                                                      -Safety) #these variables have zero variance hence they can not be normalized.
+                                                      -Safety) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_WR
@@ -901,9 +865,6 @@ KNN_WRSM <- train(Drafted~.,
                   method="knn",
                   trControl=tr_control,
                   preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_WRSM <- predict(KNN_WRSM, newdata=Data2007to2013_WR)
@@ -933,7 +894,7 @@ KNNPerfMeas[5,"WR_FN"] = sum(CheckList_WRSM$FN)
 # Training data
 Data2007to2013_RBSM <- cleanData_smote[cleanData_smote$Position=="RB", ]
 Data2007to2013_RBSM <- Data2007to2013_RBSM %>% select(-Position, -Name, -Player.Code,-Year, 
-                                                      -Safety) #these variables have zero variance hence they can not be normalized.
+                                                      -Safety) #these variables have zero variance hence they can not be standardized
 
 # Testing data
 CleanClass2014_3_RB
@@ -948,9 +909,6 @@ KNN_RBSM <- train(Drafted~.,
                   method="knn",
                   trControl=tr_control,
                   preProcess=c("center", "scale")) 
-
-# Substract mean (="center") from each value and then divide this result by standard deviation (="scale").
-# The normalized result ist the z-value.
 
 # Predictions
 predict_RBSM <- predict(KNN_RBSM, newdata=Data2007to2013_RB)
