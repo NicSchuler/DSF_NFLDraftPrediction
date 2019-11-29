@@ -100,6 +100,11 @@ ntrees <- 100*which.max(perf$Recall)
 
 RF_QB <- randomForest(y ~ ., data = x, ntree = ntrees)
 
+# Exploring the training fit
+pred <- as.integer(as.vector(predict(RF_QB, x)))
+
+train_QB <- tibble("Code" = cleanData_QB$Player.Code, "Name" = cleanData_QB$Name, "Drafted" = cleanData_QB$Drafted, "pred" = pred)
+
 # Use year 2014 for testing
 cleanData_QB_test <- cleanData %>% filter(., Year == 2014, Position == "QB")
 x_test <- cleanData_QB_test %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
@@ -188,6 +193,11 @@ ntrees <- 100*which.max(perf$Recall)
 # Run the model with the best performing number of trees
 
 RF_RB <- randomForest(y ~ ., data = x, ntree = ntrees)
+
+# Exploring the training fit
+pred <- as.integer(as.vector(predict(RF_RB, x)))
+
+train_RB <- tibble("Code" = cleanData_RB$Player.Code, "Name" = cleanData_RB$Name, "Drafted" = cleanData_RB$Drafted, "pred" = pred)
 
 # Use year 2014 for testing
 cleanData_RB_test <- cleanData %>% filter(., Year == 2014, Position == "RB")
@@ -278,6 +288,11 @@ ntrees <- 100*which.max(perf$Recall)
 
 RF_WR <- randomForest(y ~ ., data = x, ntree = ntrees)
 
+# Exploring the training fit
+pred <- as.integer(as.vector(predict(RF_WR, x)))
+
+train_WR <- tibble("Code" = cleanData_WR$Player.Code, "Name" = cleanData_WR$Name, "Drafted" = cleanData_WR$Drafted, "pred" = pred)
+
 # Use year 2014 for testing
 cleanData_WR_test <- cleanData %>% filter(., Year == 2014, Position == "WR")
 x_test <- cleanData_WR_test %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
@@ -367,6 +382,11 @@ ntrees <- 100*which.max(perf$Recall)
 
 RF_all <- randomForest(y ~ ., data = x, ntree = ntrees)
 
+# Exploring the training fit
+pred <- as.integer(as.vector(predict(RF_all, x)))
+
+train_all <- tibble("Code" = cleanData_all$Player.Code, "Name" = cleanData_all$Name, "Drafted" = cleanData_all$Drafted, "pred" = pred)
+
 # Use year 2014 for testing
 cleanData_all_test <- cleanData %>% filter(., Year == 2014)
 x_test <- cleanData_all_test %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
@@ -406,7 +426,7 @@ resultsComb_all <- resultsComb_all %>% mutate(., "error" = ifelse(Pred != Drafte
                                               "TN" = ifelse(Pred == Drafted & Drafted == 0, 1, 0),
                                               "FN" = ifelse(Pred != Drafted & Drafted == 1, 1, 0))
 
-# Prepare for between-model comparison
+# Prepare for between-model comparison of the training fit
 randomForestPerfMeas = data.frame(Method = character(), Sampling = character(),
                                   QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
                                   WR_TP = integer(), WR_TN = integer(), WR_FP = integer(), WR_FN = integer(),
@@ -422,26 +442,65 @@ randomForestPerfMeas[5, 2] = "Smote"
 randomForestPerfMeas$Method = "randomForest"
 
 # Note: row index has to be changed depending on the dataset used
-randomForestPerfMeas[1, "QB_TP"] = sum(ifelse(pred_QB$pred == pred_QB$Drafted & pred_QB$pred == 1, 1, 0))
-randomForestPerfMeas[1, "QB_TN"] = sum(ifelse(pred_QB$pred == pred_QB$Drafted & pred_QB$pred == 0, 1, 0))
-randomForestPerfMeas[1, "QB_FP"] = sum(ifelse(pred_QB$pred != pred_QB$Drafted & pred_QB$pred == 1, 1, 0))
-randomForestPerfMeas[1, "QB_FN"] = sum(ifelse(pred_QB$pred != pred_QB$Drafted & pred_QB$pred == 0, 1, 0))
+randomForestPerfMeas[1, "QB_TP"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) == train_QB$Drafted & train_QB$Drafted == 1, 1, 0))
+randomForestPerfMeas[1, "QB_TN"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) == train_QB$Drafted & train_QB$Drafted == 0, 1, 0))
+randomForestPerfMeas[1, "QB_FP"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) != train_QB$Drafted & train_QB$Drafted == 1, 1, 0))
+randomForestPerfMeas[1, "QB_FN"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) != train_QB$Drafted & train_QB$Drafted == 0, 1, 0))
 
-randomForestPerfMeas[1, "RB_TP"] = sum(ifelse(pred_RB$pred == pred_RB$Drafted & pred_RB$pred == 1, 1, 0))
-randomForestPerfMeas[1, "RB_TN"] = sum(ifelse(pred_RB$pred == pred_RB$Drafted & pred_RB$pred == 0, 1, 0))
-randomForestPerfMeas[1, "RB_FP"] = sum(ifelse(pred_RB$pred != pred_RB$Drafted & pred_RB$pred == 1, 1, 0))
-randomForestPerfMeas[1, "RB_FN"] = sum(ifelse(pred_RB$pred != pred_RB$Drafted & pred_RB$pred == 0, 1, 0))
+randomForestPerfMeas[1, "RB_TP"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) == train_RB$Drafted & train_RB$Drafted == 1, 1, 0))
+randomForestPerfMeas[1, "RB_TN"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) == train_RB$Drafted & train_RB$Drafted == 0, 1, 0))
+randomForestPerfMeas[1, "RB_FP"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) != train_RB$Drafted & train_RB$Drafted == 1, 1, 0))
+randomForestPerfMeas[1, "RB_FN"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) != train_RB$Drafted & train_RB$Drafted == 0, 1, 0))
 
-randomForestPerfMeas[1, "WR_TP"] = sum(ifelse(pred_WR$pred == pred_WR$Drafted & pred_WR$pred == 1, 1, 0))
-randomForestPerfMeas[1, "WR_TN"] = sum(ifelse(pred_WR$pred == pred_WR$Drafted & pred_WR$pred == 0, 1, 0))
-randomForestPerfMeas[1, "WR_FP"] = sum(ifelse(pred_WR$pred != pred_WR$Drafted & pred_WR$pred == 1, 1, 0))
-randomForestPerfMeas[1, "WR_FN"] = sum(ifelse(pred_WR$pred != pred_WR$Drafted & pred_WR$pred == 0, 1, 0))
+randomForestPerfMeas[1, "WR_TP"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) == train_WR$Drafted & train_WR$Drafted == 1, 1, 0))
+randomForestPerfMeas[1, "WR_TN"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) == train_WR$Drafted & train_WR$Drafted == 0, 1, 0))
+randomForestPerfMeas[1, "WR_FP"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) != train_WR$Drafted & train_WR$Drafted == 1, 1, 0))
+randomForestPerfMeas[1, "WR_FN"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) != train_WR$Drafted & train_WR$Drafted == 0, 1, 0))
 
-randomForestPerfMeas[1, "Together_TP"] = sum(ifelse(pred_all$pred == pred_all$Drafted & pred_all$pred == 1, 1, 0))
-randomForestPerfMeas[1, "Together_TN"] = sum(ifelse(pred_all$pred == pred_all$Drafted & pred_all$pred == 0, 1, 0))
-randomForestPerfMeas[1, "Together_FP"] = sum(ifelse(pred_all$pred != pred_all$Drafted & pred_all$pred == 1, 1, 0))
-randomForestPerfMeas[1, "Together_FN"] = sum(ifelse(pred_all$pred != pred_all$Drafted & pred_all$pred == 0, 1, 0))
+randomForestPerfMeas[1, "Together_TP"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) == train_all$Drafted & train_all$Drafted == 1, 1, 0))
+randomForestPerfMeas[1, "Together_TN"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) == train_all$Drafted & train_all$Drafted == 0, 1, 0))
+randomForestPerfMeas[1, "Together_FP"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) != train_all$Drafted & train_all$Drafted == 1, 1, 0))
+randomForestPerfMeas[1, "Together_FN"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) != train_all$Drafted & train_all$Drafted == 0, 1, 0))
 
 # Save the results for model comparison
 save(randomForestPerfMeas, file = "../Data/PerformanceMeasurement/randomForestPerfMeas.Rdata")
+
+# Prepare for between-model comparison with 2014 as testing data
+randomForestPerfMeas2014 = data.frame(Method = character(), Sampling = character(),
+                                      QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
+                                      WR_TP = integer(), WR_TN = integer(), WR_FP = integer(), WR_FN = integer(),
+                                      RB_TP = integer(), RB_TN = integer(), RB_FP = integer(), RB_FN = integer(),
+                                      Together_TP = integer(), Together_TN = integer(), Together_FP = integer(), Together_FN = integer(),
+                                      stringsAsFactors = FALSE)
+
+randomForestPerfMeas2014[1, 2] = "no_sampling"
+randomForestPerfMeas2014[2, 2] = "oversampling"
+randomForestPerfMeas2014[3, 2] = "undersampling"
+randomForestPerfMeas2014[4, 2] = "Rose_both"
+randomForestPerfMeas2014[5, 2] = "Smote"
+randomForestPerfMeas2014$Method = "randomForest"
+
+# Note: row index has to be changed depending on the dataset used
+randomForestPerfMeas2014[1, "QB_TP"] = sum(ifelse(pred_QB$pred == pred_QB$Drafted & pred_QB$pred == 1, 1, 0))
+randomForestPerfMeas2014[1, "QB_TN"] = sum(ifelse(pred_QB$pred == pred_QB$Drafted & pred_QB$pred == 0, 1, 0))
+randomForestPerfMeas2014[1, "QB_FP"] = sum(ifelse(pred_QB$pred != pred_QB$Drafted & pred_QB$pred == 1, 1, 0))
+randomForestPerfMeas2014[1, "QB_FN"] = sum(ifelse(pred_QB$pred != pred_QB$Drafted & pred_QB$pred == 0, 1, 0))
+
+randomForestPerfMeas2014[1, "RB_TP"] = sum(ifelse(pred_RB$pred == pred_RB$Drafted & pred_RB$pred == 1, 1, 0))
+randomForestPerfMeas2014[1, "RB_TN"] = sum(ifelse(pred_RB$pred == pred_RB$Drafted & pred_RB$pred == 0, 1, 0))
+randomForestPerfMeas2014[1, "RB_FP"] = sum(ifelse(pred_RB$pred != pred_RB$Drafted & pred_RB$pred == 1, 1, 0))
+randomForestPerfMeas2014[1, "RB_FN"] = sum(ifelse(pred_RB$pred != pred_RB$Drafted & pred_RB$pred == 0, 1, 0))
+
+randomForestPerfMeas2014[1, "WR_TP"] = sum(ifelse(pred_WR$pred == pred_WR$Drafted & pred_WR$pred == 1, 1, 0))
+randomForestPerfMeas2014[1, "WR_TN"] = sum(ifelse(pred_WR$pred == pred_WR$Drafted & pred_WR$pred == 0, 1, 0))
+randomForestPerfMeas2014[1, "WR_FP"] = sum(ifelse(pred_WR$pred != pred_WR$Drafted & pred_WR$pred == 1, 1, 0))
+randomForestPerfMeas2014[1, "WR_FN"] = sum(ifelse(pred_WR$pred != pred_WR$Drafted & pred_WR$pred == 0, 1, 0))
+
+randomForestPerfMeas2014[1, "Together_TP"] = sum(ifelse(pred_all$pred == pred_all$Drafted & pred_all$pred == 1, 1, 0))
+randomForestPerfMeas2014[1, "Together_TN"] = sum(ifelse(pred_all$pred == pred_all$Drafted & pred_all$pred == 0, 1, 0))
+randomForestPerfMeas2014[1, "Together_FP"] = sum(ifelse(pred_all$pred != pred_all$Drafted & pred_all$pred == 1, 1, 0))
+randomForestPerfMeas2014[1, "Together_FN"] = sum(ifelse(pred_all$pred != pred_all$Drafted & pred_all$pred == 0, 1, 0))
+
+# Save the results for model comparison
+save(randomForestPerfMeas2014, file = "../Data/PerformanceMeasurement/randomForestPerfMeas2014.Rdata")
 
