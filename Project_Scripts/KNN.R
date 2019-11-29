@@ -21,7 +21,7 @@ KNNPerfMeas$Method = "KNN"
 # NOTICE
 ###################################################
 
-# We will do the next steps 5 times (e.g. "1. No Splitting" does the same thing as "2. Oversampling"), but using different data for training the model
+# We will do the next steps 5 times (e.g. "1. No Sampling" does the same thing as "2. Oversampling"), but using different data for training the model
 # In other words, this is the cross-validation of the sampling methods. The reason for doing it a couple of times instead of looping or functioning it
 # is the easier availability of the steps in between in case of further processing them.
 
