@@ -2,10 +2,12 @@
 
 # Load all the results of the different models
 load("../Data/PerformanceMeasurement/ClassificationTreePerfMeas.Rdata")
-
+load("../Data/PerformanceMeasurement/KNNPerfMeas.Rdata")
+load("../Data/PerformanceMeasurement/NaiveBayesPerfMeas.Rdata")
+load("../Data/PerformanceMeasurement/randomForestPerfMeas.Rdata")
 
 # Bring all the pieces together
-PerfMeas07to13 = as.data.frame(rbind(ClassificationTreePerfMeas,))
+PerfMeas07to13 = as.data.frame(rbind(ClassificationTreePerfMeas,KNNPerfMeas,NaiveBayesPerfMeas,randomForestPerfMeas))
 
 # Check whether the columns have always the same value inside (which means, that all methods used the unsampled data set for checking)
 CheckTibble = data.frame(Method = PerfMeas07to13$Method, Sampling = PerfMeas07to13$Sampling, QB = NA, WR = NA, RB = NA, Together = NA, stringsAsFactors = FALSE)

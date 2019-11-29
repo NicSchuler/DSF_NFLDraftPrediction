@@ -33,6 +33,7 @@
             urlcolor=blue,
             breaklinks=true}
 \urlstyle{same}  % don't use monospace font for urls
+\usepackage{longtable,booktabs}
 \usepackage{graphicx,grffile}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -94,7 +95,7 @@
 \begin{abstract}
 This Chapter is describes the process from raw to clean data, as well as
 the data sources. In other words it explains the scripts
-`DataCleaning2.R' and `functionGetCleanClass2R' and therefore also the
+`DataCleaning2.R' and `functionGetCleanClass2.R' and therefore also the
 function `getCleanClass2'.
 \end{abstract}
 
@@ -116,7 +117,8 @@ Most of our data was uploaded some years ago to Kaggle
 (\url{https://www.kaggle.com/mhixon/college-football-statistics}), but
 has no relevant scprips that were made of it and try to predict the NFL
 Draft. These Datasets contain much more information about college
-football, than we would need. We only use following data sets:
+football, than we would need. We only use following data sets for all
+the years:
 
 \begin{itemize}
 \tightlist
@@ -150,14 +152,16 @@ analized with all the algorithms we want to use.
 
 The third data set we integrate, is from Pro Football reference
 (\url{https://www.pro-football-reference.com/play-index/draft-finder.cgi?}).
-In terms of return on investment, the most reasonable option to obtain
-the data, was to filter the Years 2005 to 2019, the positions QB, WR, RB
-and then only keeping the Rows ``Year'', ``Rnd'', ``Pick'', ``Player'',
-``Pos'', ``Tm'', ``College.Univ''. To reproduce it, this is the way: set
-the named filters -\textgreater{} Get Results -\textgreater{} Share \&
-More -\textgreater{} Modify \& Share table -\textgreater{} remove all
-other Variables we don't need -\textgreater{} comma-separated (in the
-yellow box) -\textgreater{} copy paste the data into a new .txt file.
+It contains the information about the NFL Drafts from the last couple of
+years. In terms of return on investment, the most reasonable option to
+obtain the data, was to filter the Years 2005 to 2019, the positions QB,
+WR, RB and then only keeping the Rows ``Year'', ``Rnd'', ``Pick'',
+``Player'', ``Pos'', ``Tm'', ``College.Univ''. To reproduce it, this is
+the way: set the named filters -\textgreater{} Get Results
+-\textgreater{} Share \& More -\textgreater{} Modify \& Share table
+-\textgreater{} remove all other Variables we don't need -\textgreater{}
+comma-separated (in the yellow box) -\textgreater{} copy paste the data
+into a new .txt file.
 
 \hypertarget{the-data-cleaning-process}{%
 \subsection{The data cleaning process}\label{the-data-cleaning-process}}
@@ -224,11 +228,95 @@ eligable players on the first hand and than only keep the latest
 information about players that played a senior year (those who have been
 drafted in their junior year will appear with their junior year).
 
+\hypertarget{validation-of-the-data-and-further-cleaning}{%
+\subsubsection{Validation of the Data and further
+cleaning}\label{validation-of-the-data-and-further-cleaning}}
+
+Just by having a look at the different rows (=players) can already help
+to see wheter the data seems to be right or not. Most of the data seems
+to be plausible, but for example the QB Jimmy Garoppolo has not his
+total performance in our data.
+
+\begin{longtable}[]{@{}lrrrrrr@{}}
+\caption{Comparison of Jimmy Garoppolo's performance}\tabularnewline
+\toprule
+& Drafted & Pass.Att & Pass.Comp & Pass.Yards & Pass.TD &
+Games.Played\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+& Drafted & Pass.Att & Pass.Comp & Pass.Yards & Pass.TD &
+Games.Played\tabularnewline
+\midrule
+\endhead
+Our Data & 1 & 127 & 80 & 1036 & 10 & 3\tabularnewline
+Wikipedia & 1 & 1108 & 706 & 8873 & 84 & 26\tabularnewline
+\bottomrule
+\end{longtable}
+
+Unfortunately, the missing 23 games could not be found anywhere in the
+input data, which means, that there must be some errors in the data. An
+other way to look at this issue is by looking at the histograms of
+``Games.Played'' of all players and compare it to the histogram of the
+drafted ones.
+\includegraphics{RM_DataHandling_files/figure-latex/unnamed-chunk-3-1.pdf}
+\includegraphics{RM_DataHandling_files/figure-latex/unnamed-chunk-3-2.pdf}
+
+As we see in the histograms, there is a majority of players that played
+less than 5 games (at least according to our data) and some of them have
+been drafted. It seems very unlikely, that a player is drafted if he
+played less than 5 games in the two seasons prior to the draft.
+Therefore it is very likely, that all the drafted players with less than
+5 played games are mistakes. As we see in the second histogram, there
+were no players drafted haveing played between 5 and 9 games. Looking at
+our business case, we decided to eliminate all players with less than 10
+played games in the data. This eliminates the errors and players, that a
+priori don't have a chance to be drafted. The new data frame is called
+`CleanClass2007to2014\_3.Rdata'.
+
+\hypertarget{sampling-the-data}{%
+\subsubsection{Sampling the data}\label{sampling-the-data}}
+
+Because our target value is distributed very inequally (see table
+below), we applied 4 different sampling methods, to approach this issue.
+The methods are called `oversampling', `undersampling', `rose both' and
+`smote'. We then cross-validate the different data in all the models, to
+find the best data to use for training the optimal model.
+
+\begin{longtable}[]{@{}lrl@{}}
+\caption{Number of observations and Ratio of Drafted Players in the
+Dataframes}\tabularnewline
+\toprule
+& Observations & Drafted\_Ratio\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+& Observations & Drafted\_Ratio\tabularnewline
+\midrule
+\endhead
+Before filter & 6372 & 06.24\%\tabularnewline
+No Sampling & 3008 & 12.43\%\tabularnewline
+Oversampling & 4022 & 50.00\%\tabularnewline
+Undersampling & 654 & 50.00\%\tabularnewline
+Rose Both & 2338 & 50.81\%\tabularnewline
+Smote & 4221 & 52.35\%\tabularnewline
+\bottomrule
+\end{longtable}
+
+As we see, applying the filter Games.played \textgreater= 10 already
+decreases the inequality of drafted vs.~undrafted players by dismissing
+players with a chance of being drafted close to zero or have errors in
+the data. By sampling the data we can make the distribution close to
+fifty/fifty, but if this will really improve our predictions needs to be
+cross-validated with the models. Since the filter shall dismiss the
+errors, we only continue with the filtered data (one set unsampled and
+four sampled).
+
 \hypertarget{the-clean-data}{%
 \subsection{The clean data}\label{the-clean-data}}
 
-After all the described processes the result is the dataframe called
-`CleanClass2007to2014\_4.Rdata' containing following variables:
+After all the described processes the five dataframes (one unsampled and
+four sampled) contain following variables:
 
 \begin{itemize}
 \tightlist
@@ -311,8 +399,86 @@ After all the described processes the result is the dataframe called
   Fumble.Lost: Dropped balls recovered by opponent summed over both
   seasons
 \item
-  Games.Played: Number of games played over both seasons
+  Games.Played: Number of games played over both seasons (filter
+  applied: \textgreater= 10)
 \end{itemize}
+
+\hypertarget{for-the-documentation}{%
+\section{For the Documentation:}\label{for-the-documentation}}
+
+For further details on this part, please see `RM\_DataHandling.pdf'.
+
+\hypertarget{data-source-1}{%
+\subsection{Data Source}\label{data-source-1}}
+
+Most of our data was uploaded some years ago to Kaggle
+(\url{https://www.kaggle.com/mhixon/college-football-statistics}), but
+has no relevant scprips that were made of it and try to predict the NFL
+Draft. These Datasets contain much more information about college
+football, than we would need.
+
+The best data sets (in order of lenght) about the NFL Combine and the
+Pro Day we found, is also one from Kaggle
+(\url{https://www.kaggle.com/kbanta11/nfl-combine}). Unfortunately it
+turned out that, compared to the College data, not even 10\% of the
+players have accessible Combine/Pro Day data, which is why we took them
+out again. Otherwise too many cells would contain NA and could not be
+analized with all the algorithms we want to use.
+
+The third data set we integrate, is from Pro Football reference
+(\url{https://www.pro-football-reference.com/play-index/draft-finder.cgi?}).
+It contains the information about the NFL Drafts from the last couple of
+years.
+
+\hypertarget{the-data-cleaning-process-1}{%
+\subsection{The data cleaning
+process}\label{the-data-cleaning-process-1}}
+
+In order to clean the data fast and easy and with only a few manual
+steps, we build a function, that will provide us the clean data sets in
+the formate we want them to be. This function is called getCleanClass2
+and is coded in the file `functionGetCleanClass2.R'. After putting them
+together and removing duplicates, we apply a filter on the games a
+player played, in order to remove observations containing errors
+(details explained in `RM\_DataHandling.pdf').
+
+\hypertarget{sampling-the-data-1}{%
+\subsection{Sampling the data}\label{sampling-the-data-1}}
+
+Because our target value is distributed very inequally (see table
+below), we applied 4 different sampling methods, to approach this issue.
+The methods are called `oversampling', `undersampling', `rose both' and
+`smote'. We then cross-validate the different data in all the models, to
+find the best data to use for training the optimal model.
+
+\begin{longtable}[]{@{}lrl@{}}
+\caption{Number of observations and Ratio of Drafted Players in the
+Dataframes}\tabularnewline
+\toprule
+& Observations & Drafted\_Ratio\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+& Observations & Drafted\_Ratio\tabularnewline
+\midrule
+\endhead
+Before filter & 6372 & 06.24\%\tabularnewline
+No Sampling & 3008 & 12.43\%\tabularnewline
+Oversampling & 4022 & 50.00\%\tabularnewline
+Undersampling & 654 & 50.00\%\tabularnewline
+Rose Both & 2338 & 50.81\%\tabularnewline
+Smote & 4221 & 52.35\%\tabularnewline
+\bottomrule
+\end{longtable}
+
+As we see, applying the filter Games.played \textgreater= 10 already
+decreases the inequality of drafted vs.~undrafted players by dismissing
+players with a chance of being drafted close to zero or have errors in
+the data. By sampling the data we can make the distribution close to
+fifty/fifty, but if this will really improve our predictions needs to be
+cross-validated with the models. Since the filter shall dismiss the
+errors, we only continue with the filtered data (one set unsampled and
+four sampled).
 
 
 \end{document}
