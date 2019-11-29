@@ -16,8 +16,20 @@ standFun <- function(x){
 }
 
 # Load cleaned data
-load("../Data/CleanData/CleanClass2007to2014_2.RData")
-cleanData <- as_tibble(CleanClass2007to2014_2)
+
+# Uncomment one of the lines to use the respective sampling
+load("../Data/CleanData/CleanClass2007to2014_3.RData") # no sampling, don't comment this line out!
+# load("../Data/CleanData/CleanClass2007to2013_3_oversampling.RData") # oversampling
+# load("../Data/CleanData/CleanClass2007to2013_3_undersampling.RData") # undersampling
+# load("../Data/CleanData/CleanClass2007to2013_3_Rose.both.RData") # ROSE both
+# load("../Data/CleanData/CleanClass2007to2013_3_smote.RData") # SMOTE
+
+# Uncomment one of the lines to use the respective sampling
+cleanData <- as_tibble(CleanClass2007to2014_3) # no sampling, don't comment this line out!
+# cleanData_s <- as_tibble(CleanClass2007to2014_3_oversampling) # oversampling
+# cleanData_s <- as_tibble(CleanClass2007to2014_3_undersampling) # undersampling
+# cleanData_s <- as_tibble(CleanClass2007to2014_3_Rose.both) # ROSE both
+# cleanData_s <- as_tibble(cleanData_smote) # SMOTE
 
 # Define the ANN cost function
 ANN_cost <- function(ANN_par, L_i_size, L_h_size, L_o_size, x, y, lambda){
@@ -122,12 +134,13 @@ ANN_grad <- function(ANN_par, L_i_size, L_h_size, L_o_size, x, y, lambda){
 
 # ANN for QB ----
 
-# Select QBs and remove any players with missing values
-cleanData_QB <- cleanData %>% filter(., Position == "QB") %>% drop_na(.)
-
 # Select years 2007 through 2013 as training data
-x <- as.matrix(cleanData_QB %>% filter(., Year < 2014) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
-y <- pull(cleanData_QB %>% filter(., Year < 2014) %>% select(., Drafted))
+cleanData_QB <- cleanData %>% filter(., Year < 2014, Position == "QB") %>% drop_na(.)
+# cleanData_QB <- cleanData_s %>% filter(., Year < 2014, Position == "QB") %>% drop_na(.) # use this line when working with sampled data
+
+# Drop unimportant variables
+x <- as.matrix(cleanData_QB %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
+y <- as.integer(as.vector(cleanData_QB$Drafted))
 
 # Standardize the training data
 for (i in 1:ncol(x)) {
@@ -168,6 +181,13 @@ BP_par <- BP_pred$par
 theta1_train <- matrix(data = BP_par[1:(L_h_size * (L_i_size + 1))], nrow = L_h_size)
 theta2_train <- matrix(data = BP_par[(1 + (L_h_size * (L_i_size + 1))):length(BP_par)], nrow = L_o_size)
 
+# Exploring the training fit
+a_1 <- rbind(1, t(x))
+a_2 <- rbind(1, sigmoid(theta1_train %*% a_1))
+a_3 <- sigmoid(theta2_train %*% a_2)
+
+train_QB <- tibble("Code" = cleanData_QB$Player.Code, "Name" = cleanData_QB$Name, "pred" = as.vector(a_3), "Drafted" = cleanData_QB$Drafted)
+
 # Take the year 2014 as testing data
 cleanData_QB_test <- cleanData %>% filter(., Position == "QB", Year == 2014) %>% drop_na(.)
 x_test <- as.matrix(cleanData_QB_test %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
@@ -189,12 +209,13 @@ pred_QB <- tibble("Code" = cleanData_QB_test$Player.Code, "Name" = cleanData_QB_
 
 # ANN for RB ----
 
-# Select RBs and remove any players with missing values
-cleanData_RB <- cleanData %>% filter(., Position == "RB") %>% drop_na(.)
-
 # Select years 2007 through 2013 as training data
-x <- as.matrix(cleanData_RB %>% filter(., Year < 2014) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
-y <- pull(cleanData_RB %>% filter(., Year < 2014) %>% select(., Drafted))
+cleanData_RB <- cleanData %>% filter(., Year < 2014, Position == "RB") %>% drop_na(.)
+# cleanData_RB <- cleanData_s %>% filter(., Year < 2014, Position == "RB") %>% drop_na(.) # use this line when working with sampled data
+
+# Drop unimportant variables
+x <- as.matrix(cleanData_RB %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
+y <- as.integer(as.vector(cleanData_RB$Drafted))
 
 # Standardize the training data
 for (i in 1:ncol(x)) {
@@ -235,6 +256,13 @@ BP_par <- BP_pred$par
 theta1_train <- matrix(data = BP_par[1:(L_h_size * (L_i_size + 1))], nrow = L_h_size)
 theta2_train <- matrix(data = BP_par[(1 + (L_h_size * (L_i_size + 1))):length(BP_par)], nrow = L_o_size)
 
+# Exploring the training fit
+a_1 <- rbind(1, t(x))
+a_2 <- rbind(1, sigmoid(theta1_train %*% a_1))
+a_3 <- sigmoid(theta2_train %*% a_2)
+
+train_RB <- tibble("Code" = cleanData_RB$Player.Code, "Name" = cleanData_RB$Name, "pred" = as.vector(a_3), "Drafted" = cleanData_RB$Drafted)
+
 # Take the year 2014 as testing data
 cleanData_RB_test <- cleanData %>% filter(., Position == "RB", Year == 2014) %>%  drop_na(.)
 x_test <- as.matrix(cleanData_RB_test %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
@@ -256,12 +284,13 @@ pred_RB <- tibble("Code" = cleanData_RB_test$Player.Code, "Name" = cleanData_RB_
 
 # ANN for WR ----
 
-# Select WRs and remove any players with missing values
-cleanData_WR <- cleanData %>% filter(., Position == "WR") %>% drop_na(.)
-
 # Select years 2007 through 2013 as training data
-x <- as.matrix(cleanData_WR %>% filter(., Year < 2014) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
-y <- pull(cleanData_WR %>% filter(., Year < 2014) %>% select(., Drafted))
+cleanData_WR <- cleanData %>% filter(., Year < 2014, Position == "WR") %>% drop_na(.)
+# cleanData_WR <- cleanData_s %>% filter(., Year < 2014, Position == "WR") %>% drop_na(.) # use this line when working with sampled data
+
+# Drop unimportant variables
+x <- as.matrix(cleanData_WR %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
+y <- as.integer(as.vector(cleanData_WR$Drafted))
 
 # Standardize the training data
 for (i in 1:ncol(x)) {
@@ -302,6 +331,13 @@ BP_par <- BP_pred$par
 theta1_train <- matrix(data = BP_par[1:(L_h_size * (L_i_size + 1))], nrow = L_h_size)
 theta2_train <- matrix(data = BP_par[(1 + (L_h_size * (L_i_size + 1))):length(BP_par)], nrow = L_o_size)
 
+# Exploring the training fit
+a_1 <- rbind(1, t(x))
+a_2 <- rbind(1, sigmoid(theta1_train %*% a_1))
+a_3 <- sigmoid(theta2_train %*% a_2)
+
+train_WR <- tibble("Code" = cleanData_WR$Player.Code, "Name" = cleanData_WR$Name, "pred" = as.vector(a_3), "Drafted" = cleanData_WR$Drafted)
+
 # Take the year 2014 as testing data
 cleanData_WR_test <- cleanData %>% filter(., Position == "WR", Year == 2014) %>% drop_na(.)
 x_test <- as.matrix(cleanData_WR_test %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
@@ -323,12 +359,13 @@ pred_WR <- tibble("Code" = cleanData_WR_test$Player.Code, "Name" = cleanData_WR_
 
 # ANN for all positions ----
 
-# Remove any players with missing values
-cleanData_all <- cleanData %>% drop_na(.)
-
 # Select years 2007 through 2013 as training data
-x <- as.matrix(cleanData_all %>% filter(., Year < 2014) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
-y <- pull(cleanData_all %>% filter(., Year < 2014) %>% select(., Drafted))
+cleanData_all <- cleanData %>% filter(., Year < 2014) %>% drop_na(.)
+# cleanData_all <- cleanData_s %>% filter(., Year < 2014) %>% drop_na(.) # use this line when working with sampled data
+
+# Drop unimportant variables
+x <- as.matrix(cleanData_all %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
+y <- as.integer(as.vector(cleanData_all$Drafted))
 
 # Standardize the training data
 for (i in 1:ncol(x)) {
@@ -368,6 +405,13 @@ BP_par <- BP_pred$par
 # Separate theta vector from backpropagation into thetas
 theta1_train <- matrix(data = BP_par[1:(L_h_size * (L_i_size + 1))], nrow = L_h_size)
 theta2_train <- matrix(data = BP_par[(1 + (L_h_size * (L_i_size + 1))):length(BP_par)], nrow = L_o_size)
+
+# Exploring the training fit
+a_1 <- rbind(1, t(x))
+a_2 <- rbind(1, sigmoid(theta1_train %*% a_1))
+a_3 <- sigmoid(theta2_train %*% a_2)
+
+train_all <- tibble("Code" = cleanData_all$Player.Code, "Name" = cleanData_all$Name, "pred" = as.vector(a_3), "Drafted" = cleanData_all$Drafted)
 
 # Take the year 2014 as testing data
 cleanData_all_test <- cleanData %>% filter(., Year == 2014) %>% drop_na(.)
@@ -410,4 +454,82 @@ resultsComb_all <- resultsComb_all %>% mutate(., "error" = ifelse(Pred != Drafte
                                               "FP" = ifelse(Pred != Drafted & Drafted == 0, 1, 0),
                                               "TN" = ifelse(Pred == Drafted & Drafted == 0, 1, 0),
                                               "FN" = ifelse(Pred != Drafted & Drafted == 1, 1, 0))
+
+# Prepare for between-model comparison of the training fit
+ANNPerfMeas = data.frame(Method = character(), Sampling = character(),
+                         QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
+                         WR_TP = integer(), WR_TN = integer(), WR_FP = integer(), WR_FN = integer(),
+                         RB_TP = integer(), RB_TN = integer(), RB_FP = integer(), RB_FN = integer(),
+                         Together_TP = integer(), Together_TN = integer(), Together_FP = integer(), Together_FN = integer(),
+                         stringsAsFactors = FALSE)
+
+ANNPerfMeas[1, 2] = "no_sampling"
+ANNPerfMeas[2, 2] = "oversampling"
+ANNPerfMeas[3, 2] = "undersampling"
+ANNPerfMeas[4, 2] = "Rose_both"
+ANNPerfMeas[5, 2] = "Smote"
+ANNPerfMeas$Method = "ANN"
+
+# Note: row index has to be changed depending on the dataset used
+ANNPerfMeas[1, "QB_TP"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) == train_QB$Drafted & train_QB$Drafted == 1, 1, 0))
+ANNPerfMeas[1, "QB_TN"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) == train_QB$Drafted & train_QB$Drafted == 0, 1, 0))
+ANNPerfMeas[1, "QB_FP"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) != train_QB$Drafted & train_QB$Drafted == 1, 1, 0))
+ANNPerfMeas[1, "QB_FN"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) != train_QB$Drafted & train_QB$Drafted == 0, 1, 0))
+
+ANNPerfMeas[1, "RB_TP"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) == train_RB$Drafted & train_RB$Drafted == 1, 1, 0))
+ANNPerfMeas[1, "RB_TN"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) == train_RB$Drafted & train_RB$Drafted == 0, 1, 0))
+ANNPerfMeas[1, "RB_FP"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) != train_RB$Drafted & train_RB$Drafted == 1, 1, 0))
+ANNPerfMeas[1, "RB_FN"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) != train_RB$Drafted & train_RB$Drafted == 0, 1, 0))
+
+ANNPerfMeas[1, "WR_TP"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) == train_WR$Drafted & train_WR$Drafted == 1, 1, 0))
+ANNPerfMeas[1, "WR_TN"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) == train_WR$Drafted & train_WR$Drafted == 0, 1, 0))
+ANNPerfMeas[1, "WR_FP"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) != train_WR$Drafted & train_WR$Drafted == 1, 1, 0))
+ANNPerfMeas[1, "WR_FN"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) != train_WR$Drafted & train_WR$Drafted == 0, 1, 0))
+
+ANNPerfMeas[1, "Together_TP"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) == train_all$Drafted & train_all$Drafted == 1, 1, 0))
+ANNPerfMeas[1, "Together_TN"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) == train_all$Drafted & train_all$Drafted == 0, 1, 0))
+ANNPerfMeas[1, "Together_FP"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) != train_all$Drafted & train_all$Drafted == 1, 1, 0))
+ANNPerfMeas[1, "Together_FN"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) != train_all$Drafted & train_all$Drafted == 0, 1, 0))
+
+# Save the results for model comparison
+save(ANNPerfMeas, file = "../Data/PerformanceMeasurement/ANNPerfMeas.Rdata")
+
+# Prepare for between-model comparison with 2014 as testing data
+ANNPerfMeas2014 = data.frame(Method = character(), Sampling = character(),
+                             QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
+                             WR_TP = integer(), WR_TN = integer(), WR_FP = integer(), WR_FN = integer(),
+                             RB_TP = integer(), RB_TN = integer(), RB_FP = integer(), RB_FN = integer(),
+                             Together_TP = integer(), Together_TN = integer(), Together_FP = integer(), Together_FN = integer(),
+                             stringsAsFactors = FALSE)
+
+ANNPerfMeas2014[1, 2] = "no_sampling"
+ANNPerfMeas2014[2, 2] = "oversampling"
+ANNPerfMeas2014[3, 2] = "undersampling"
+ANNPerfMeas2014[4, 2] = "Rose_both"
+ANNPerfMeas2014[5, 2] = "Smote"
+ANNPerfMeas2014$Method = "ANN"
+
+# Note: row index has to be changed depending on the dataset used
+ANNPerfMeas2014[1, "QB_TP"] = sum(ifelse(ifelse(pred_QB$pred >= 0.5, 1, 0) == pred_QB$Drafted & pred_QB$Drafted == 1, 1, 0))
+ANNPerfMeas2014[1, "QB_TN"] = sum(ifelse(ifelse(pred_QB$pred >= 0.5, 1, 0) == pred_QB$Drafted & pred_QB$Drafted == 0, 1, 0))
+ANNPerfMeas2014[1, "QB_FP"] = sum(ifelse(ifelse(pred_QB$pred >= 0.5, 1, 0) != pred_QB$Drafted & pred_QB$Drafted == 1, 1, 0))
+ANNPerfMeas2014[1, "QB_FN"] = sum(ifelse(ifelse(pred_QB$pred >= 0.5, 1, 0) != pred_QB$Drafted & pred_QB$Drafted == 0, 1, 0))
+
+ANNPerfMeas2014[1, "RB_TP"] = sum(ifelse(ifelse(pred_RB$pred >= 0.5, 1, 0) == pred_RB$Drafted & pred_RB$Drafted == 1, 1, 0))
+ANNPerfMeas2014[1, "RB_TN"] = sum(ifelse(ifelse(pred_RB$pred >= 0.5, 1, 0) == pred_RB$Drafted & pred_RB$Drafted == 0, 1, 0))
+ANNPerfMeas2014[1, "RB_FP"] = sum(ifelse(ifelse(pred_RB$pred >= 0.5, 1, 0) != pred_RB$Drafted & pred_RB$Drafted == 1, 1, 0))
+ANNPerfMeas2014[1, "RB_FN"] = sum(ifelse(ifelse(pred_RB$pred >= 0.5, 1, 0) != pred_RB$Drafted & pred_RB$Drafted == 0, 1, 0))
+
+ANNPerfMeas2014[1, "WR_TP"] = sum(ifelse(ifelse(pred_WR$pred >= 0.5, 1, 0) == pred_WR$Drafted & pred_WR$Drafted == 1, 1, 0))
+ANNPerfMeas2014[1, "WR_TN"] = sum(ifelse(ifelse(pred_WR$pred >= 0.5, 1, 0) == pred_WR$Drafted & pred_WR$Drafted == 0, 1, 0))
+ANNPerfMeas2014[1, "WR_FP"] = sum(ifelse(ifelse(pred_WR$pred >= 0.5, 1, 0) != pred_WR$Drafted & pred_WR$Drafted == 1, 1, 0))
+ANNPerfMeas2014[1, "WR_FN"] = sum(ifelse(ifelse(pred_WR$pred >= 0.5, 1, 0) != pred_WR$Drafted & pred_WR$Drafted == 0, 1, 0))
+
+ANNPerfMeas2014[1, "Together_TP"] = sum(ifelse(ifelse(pred_all$pred >= 0.5, 1, 0) == pred_all$Drafted & pred_all$Drafted == 1, 1, 0))
+ANNPerfMeas2014[1, "Together_TN"] = sum(ifelse(ifelse(pred_all$pred >= 0.5, 1, 0) == pred_all$Drafted & pred_all$Drafted == 0, 1, 0))
+ANNPerfMeas2014[1, "Together_FP"] = sum(ifelse(ifelse(pred_all$pred >= 0.5, 1, 0) != pred_all$Drafted & pred_all$Drafted == 1, 1, 0))
+ANNPerfMeas2014[1, "Together_FN"] = sum(ifelse(ifelse(pred_all$pred >= 0.5, 1, 0) != pred_all$Drafted & pred_all$Drafted == 0, 1, 0))
+
+# Save the results for model comparison
+save(ANNPerfMeas2014, file = "../Data/PerformanceMeasurement/ANNPerfMeas2014.Rdata")
 
