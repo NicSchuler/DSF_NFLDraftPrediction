@@ -1079,16 +1079,3 @@ LogisticRegressionPerfMeas[5,"RB_FN"] = sum(CheckList_test_RB_5$RB_FN)
 # Save Performance Measurement data frame
 
 save(LogisticRegressionPerfMeas, file = "../Data/PerformanceMeasurement/LogisticRegressionPerfMeas.Rdata")
-
-### Combined method ----------
-
-
-
-
-
-
-save(LogisticRegressionCombinedMethod, file = "../Data/CombinedMethod/LogisticRegressionCombinedMethod.Rdata")
-
-
-
-
