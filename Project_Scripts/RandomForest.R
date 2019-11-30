@@ -100,10 +100,13 @@ ntrees <- 100*which.max(perf$Recall)
 
 RF_QB <- randomForest(y ~ ., data = x, ntree = ntrees)
 
-# Exploring the training fit
-pred <- as.integer(as.vector(predict(RF_QB, x)))
+# Exploring the training fit on unsampled data
+D_uns <- cleanData %>% filter(., Year < 2014, Position == "QB") %>% drop_na(.)
+x_uns <- D_uns %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
 
-train_QB <- tibble("Code" = cleanData_QB$Player.Code, "Name" = cleanData_QB$Name, "Drafted" = cleanData_QB$Drafted, "pred" = pred)
+pred <- as.integer(as.vector(predict(RF_QB, x_uns)))
+
+train_QB <- tibble("Code" = D_uns$Player.Code, "Name" = D_uns$Name, "Drafted" = D_uns$Drafted, "pred" = pred)
 
 # Use year 2014 for testing
 cleanData_QB_test <- cleanData %>% filter(., Year == 2014, Position == "QB")
@@ -194,10 +197,13 @@ ntrees <- 100*which.max(perf$Recall)
 
 RF_RB <- randomForest(y ~ ., data = x, ntree = ntrees)
 
-# Exploring the training fit
-pred <- as.integer(as.vector(predict(RF_RB, x)))
+# Exploring the training fit on unsampled data
+D_uns <- cleanData %>% filter(., Year < 2014, Position == "RB") %>% drop_na(.)
+x_uns <- D_uns %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
 
-train_RB <- tibble("Code" = cleanData_RB$Player.Code, "Name" = cleanData_RB$Name, "Drafted" = cleanData_RB$Drafted, "pred" = pred)
+pred <- as.integer(as.vector(predict(RF_RB, x_uns)))
+
+train_RB <- tibble("Code" = D_uns$Player.Code, "Name" = D_uns$Name, "Drafted" = D_uns$Drafted, "pred" = pred)
 
 # Use year 2014 for testing
 cleanData_RB_test <- cleanData %>% filter(., Year == 2014, Position == "RB")
@@ -288,10 +294,13 @@ ntrees <- 100*which.max(perf$Recall)
 
 RF_WR <- randomForest(y ~ ., data = x, ntree = ntrees)
 
-# Exploring the training fit
-pred <- as.integer(as.vector(predict(RF_WR, x)))
+# Exploring the training fit on unsampled data
+D_uns <- cleanData %>% filter(., Year < 2014, Position == "WR") %>% drop_na(.)
+x_uns <- D_uns %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
 
-train_WR <- tibble("Code" = cleanData_WR$Player.Code, "Name" = cleanData_WR$Name, "Drafted" = cleanData_WR$Drafted, "pred" = pred)
+pred <- as.integer(as.vector(predict(RF_WR, x_uns)))
+
+train_WR <- tibble("Code" = D_uns$Player.Code, "Name" = D_uns$Name, "Drafted" = D_uns$Drafted, "pred" = pred)
 
 # Use year 2014 for testing
 cleanData_WR_test <- cleanData %>% filter(., Year == 2014, Position == "WR")
@@ -382,10 +391,13 @@ ntrees <- 100*which.max(perf$Recall)
 
 RF_all <- randomForest(y ~ ., data = x, ntree = ntrees)
 
-# Exploring the training fit
-pred <- as.integer(as.vector(predict(RF_all, x)))
+# Exploring the training fit on unsampled data
+D_uns <- cleanData %>% filter(., Year < 2014) %>% drop_na(.)
+x_uns <- D_uns %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
 
-train_all <- tibble("Code" = cleanData_all$Player.Code, "Name" = cleanData_all$Name, "Drafted" = cleanData_all$Drafted, "pred" = pred)
+pred <- as.integer(as.vector(predict(RF_all, x_uns)))
+
+train_all <- tibble("Code" = D_uns$Player.Code, "Name" = D_uns$Name, "Drafted" = D_uns$Drafted, "pred" = pred)
 
 # Use year 2014 for testing
 cleanData_all_test <- cleanData %>% filter(., Year == 2014)
