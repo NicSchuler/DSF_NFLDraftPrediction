@@ -1,0 +1,205 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\PassOptionsToPackage{usenames,dvipsnames}{color} % color is loaded by hyperref
+\hypersetup{unicode=true,
+            pdftitle={README for the performance measurement part},
+            pdfauthor={Group 2},
+            colorlinks=true,
+            linkcolor=Maroon,
+            citecolor=Blue,
+            urlcolor=blue,
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{longtable,booktabs}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{README for the performance measurement part}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Group 2}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{\texttt{December,\ 2nd,\ 2019}}
+
+
+\begin{document}
+\maketitle
+\begin{abstract}
+This Chapter is describes the evaluation of the best sampling and model
+combination, which is computed in the script `PerformanceMeasurement.R'.
+\end{abstract}
+
+\hypertarget{the-goal-of-our-performance-measurement}{%
+\subsection{The goal of our performance
+measurement}\label{the-goal-of-our-performance-measurement}}
+
+After training a model it is important to check how well it performes.
+Since we not only trained one model but 140 in total (7 algos * 5
+datasets * 4 positions), it is even more important to compare all the
+different models to see which one is the best. For our business case,
+this means that we want to see which combination of method and sampling
+we should take to predict which position, or if we even have a model,
+which does it better when we leave them together.
+
+\hypertarget{how-to-compare-the-methodsampling-combinations-for-all-positions}{%
+\subsection{How to compare the method/sampling combinations for all
+positions}\label{how-to-compare-the-methodsampling-combinations-for-all-positions}}
+
+After training the models with 10-fold cross-validation, we applied them
+on all the (unsampled) data from 2007 to 2013 to obtain the true
+positives, true negatives, false positives and false negatives. Since we
+used the cross-validation for training, this will not give us the
+training error, but the testing error we get with all the available data
+prior to the 2014 NFL Draft. At the end of every model-script, we save
+this information separately, to bring it all together in the script
+`PerformanceMeasurement.R'.
+
+The first step, is to bring them all into one dataframe, to use them
+easier. Then we make sure, that we used the same, unsampled data by
+computing the sums of TP, TN, FP, FN, for every method/sampling/position
+combination. In the CheckTibble we now see, that for every position the
+whole column contains always the same number, which means this is the
+case.
+
+Then we calculate the ratio of correct classification, which is equal
+to:
+
+\begin{center}
+$\frac{Correct Classifications}{All Classifications} = \frac{TP + TN}{TP+TP+FP+FN}$
+\end{center}
+
+The result is a table showing the percentage of correct classification
+for all the 140 model/sampling/position combination. This table is quite
+big, but it is still interesting to have a look at it, to see how well
+which combination performes.
+
+\begin{longtable}[]{@{}llrrrr@{}}
+\caption{Ratio of correct classification}\tabularnewline
+\toprule
+Method & Sampling & QB & WR & RB & Together\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Method & Sampling & QB & WR & RB & Together\tabularnewline
+\midrule
+\endhead
+ClassificationTree & no\_sampling & 0.9098 & 0.9208 & 0.9156 &
+0.8939\tabularnewline
+ClassificationTree & oversampling & 0.8780 & 0.8415 & 0.8631 &
+0.7930\tabularnewline
+ClassificationTree & undersampling & 0.7098 & 0.8254 & 0.8137 &
+0.7938\tabularnewline
+ClassificationTree & Rose\_both & 0.8317 & 0.7985 & 0.8057 &
+0.7746\tabularnewline
+ClassificationTree & Smote & 0.8439 & 0.8062 & 0.7850 &
+0.7998\tabularnewline
+KNN & no\_sampling & 0.8488 & 0.8892 & 0.8646 & 0.8755\tabularnewline
+KNN & oversampling & 0.8366 & 0.8915 & 0.8519 & 0.8725\tabularnewline
+KNN & undersampling & 0.6463 & 0.8331 & 0.7962 & 0.7994\tabularnewline
+KNN & Rose\_both & 0.7317 & 0.8192 & 0.7834 & 0.7981\tabularnewline
+KNN & Smote & 0.8610 & 0.9023 & 0.8726 & 0.8918\tabularnewline
+NaiveBayes & no\_sampling & 0.8268 & 0.8908 & 0.8758 &
+0.8901\tabularnewline
+NaiveBayes & oversampling & 0.7000 & 0.7746 & 0.8137 &
+0.7998\tabularnewline
+NaiveBayes & undersampling & 0.6878 & 0.7946 & 0.8328 &
+0.7968\tabularnewline
+NaiveBayes & Rose\_both & 0.7341 & 0.7231 & 0.8615 &
+0.7930\tabularnewline
+NaiveBayes & Smote & 0.7317 & 0.8077 & 0.7213 & 0.8798\tabularnewline
+randomForest & no\_sampling & 0.6829 & 0.7838 & 0.7452 &
+0.7626\tabularnewline
+randomForest & oversampling & 0.5192 & 0.5146 & 0.5009 &
+0.4980\tabularnewline
+randomForest & undersampling & 0.5254 & 0.4665 & 0.4607 &
+0.4786\tabularnewline
+randomForest & Rose\_both & 0.5077 & 0.5139 & 0.4750 &
+0.4970\tabularnewline
+randomForest & Smote & 0.5389 & 0.5161 & 0.5136 & 0.5058\tabularnewline
+ANN & no\_sampling & 0.8488 & 0.9054 & 0.8838 & 0.8828\tabularnewline
+ANN & oversampling & 0.8593 & 0.8664 & 0.8574 & 0.8531\tabularnewline
+ANN & undersampling & 0.8559 & 0.8771 & 0.8708 & 0.8440\tabularnewline
+ANN & Rose\_both & 0.8923 & 0.8570 & 0.8558 & 0.8512\tabularnewline
+ANN & Smote & 0.8639 & 0.8853 & 0.8692 & 0.8628\tabularnewline
+LogisticRegression & no\_sampling & 0.8510 & 0.9072 & 0.8938 &
+0.8980\tabularnewline
+LogisticRegression & oversampling & 0.7876 & 0.8608 & 0.8246 &
+0.8432\tabularnewline
+LogisticRegression & undersampling & 0.7678 & 0.8637 & 0.8167 &
+0.8432\tabularnewline
+LogisticRegression & Rose\_both & 0.7879 & 0.8606 & 0.8248 &
+0.8451\tabularnewline
+LogisticRegression & Smote & NA & NA & NA & NA\tabularnewline
+\bottomrule
+\end{longtable}
+
+
+\end{document}

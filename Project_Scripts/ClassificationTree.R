@@ -76,7 +76,8 @@ ClassificationTreePerfMeas[1,"QB_FP"] = sum(CheckListQBNS$QB_FP)
 ClassificationTreePerfMeas[1,"QB_FN"] = sum(CheckListQBNS$QB_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeQBNS)
+fancyRpartPlot(ClassTreeQBNS, main="Classification Tree for QB's with unsampled data", sub="", cex=0.5)
+savePlotToFile(file.name = "QBtreeNS.jpg")
 
 # WR ---------------------------
 # Predicting the likelyhood of a WR being picked in the draft
@@ -113,7 +114,8 @@ ClassificationTreePerfMeas[1,"WR_FP"] = sum(CheckListWRNS$WR_FP)
 ClassificationTreePerfMeas[1,"WR_FN"] = sum(CheckListWRNS$WR_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeWRNS)
+fancyRpartPlot(ClassTreeWRNS, main="Classification Tree for WR's with unsampled data", sub="", cex=0.5)
+savePlotToFile(file.name = "WRtreeNS.jpg")
 
 # RB ---------------------------
 # Predicting the likelyhood of a RB being picked in the draft
@@ -150,15 +152,16 @@ ClassificationTreePerfMeas[1,"RB_FP"] = sum(CheckListRBNS$RB_FP)
 ClassificationTreePerfMeas[1,"RB_FN"] = sum(CheckListRBNS$RB_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeRBNS)
+fancyRpartPlot(ClassTreeRBNS, main="Classification Tree for RB's with unsampled data", sub="", cex=0.5)
+savePlotToFile(file.name = "RBtreeNS.jpg")
 
 # Together ---------------------------
 # Predicting the likelyhood of QB/RB/WR together for being picked in the draft
 DtrainTogetherNS = DtrainNS %>%
-  select(-c(Player.Code, Name, Class, Position, Year))
+  select(-c(Player.Code, Name, Class, Year))
 
 DtestTogetherNS = DtestNS %>%
-  select(-c(Player.Code, Name, Class, Position, Year))
+  select(-c(Player.Code, Name, Class, Year))
 
 # Run a classification tree. We use the whole data for training, since the rpart-function has a built in cross-validation. For the evaluation of the 
 # best model we also use the whole training set for this cross-validation.
@@ -185,8 +188,8 @@ ClassificationTreePerfMeas[1,"Together_FP"] = sum(CheckListTogetherNS$Together_F
 ClassificationTreePerfMeas[1,"Together_FN"] = sum(CheckListTogetherNS$Together_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeTogetherNS)
-
+fancyRpartPlot(ClassTreeTogetherNS, main="Classification Tree for QB/WR/RB together with unsampled data", sub="", cex=0.5)
+savePlotToFile(file.name = "TogethertreeNS.jpg")
 
 ## 2. Oversampling ------------------------
 # Splitting the data
@@ -235,7 +238,7 @@ ClassificationTreePerfMeas[2,"QB_FP"] = sum(CheckListQBOS$QB_FP)
 ClassificationTreePerfMeas[2,"QB_FN"] = sum(CheckListQBOS$QB_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeQBOS)
+fancyRpartPlot(ClassTreeQBOS, main="Classification Tree for QB's with oversampled data", sub="", cex=0.5)
 
 # WR ---------------------------
 # Predicting the likelyhood of a WR being picked in the draft
@@ -272,7 +275,7 @@ ClassificationTreePerfMeas[2,"WR_FP"] = sum(CheckListWROS$WR_FP)
 ClassificationTreePerfMeas[2,"WR_FN"] = sum(CheckListWROS$WR_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeWROS)
+fancyRpartPlot(ClassTreeWROS, main="Classification Tree for WR's with oversampled data", sub="", cex=0.5)
 
 # RB ---------------------------
 # Predicting the likelyhood of a RB being picked in the draft
@@ -309,15 +312,15 @@ ClassificationTreePerfMeas[2,"RB_FP"] = sum(CheckListRBOS$RB_FP)
 ClassificationTreePerfMeas[2,"RB_FN"] = sum(CheckListRBOS$RB_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeRBOS)
+fancyRpartPlot(ClassTreeRBOS, main="Classification Tree for RB's with oversampled data", sub="", cex=0.5)
 
 # Together ---------------------------
 # Predicting the likelyhood of QB/RB/WR together for being picked in the draft
 DtrainTogetherOS = DtrainOS %>%
-  select(-c(Player.Code, Name, Class, Position, Year))
+  select(-c(Player.Code, Name, Class, Year))
 
 DtestTogetherOS = DtestOS %>%
-  select(-c(Player.Code, Name, Class, Position, Year))
+  select(-c(Player.Code, Name, Class, Year))
 
 # Run a classification tree. We use the whole data for training, since the rpart-function has a built in cross-validation. For the evaluation of the 
 # best model we also use the whole training set for this cross-validation.
@@ -344,7 +347,7 @@ ClassificationTreePerfMeas[2,"Together_FP"] = sum(CheckListTogetherOS$Together_F
 ClassificationTreePerfMeas[2,"Together_FN"] = sum(CheckListTogetherOS$Together_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeTogetherOS)
+fancyRpartPlot(ClassTreeTogetherOS, main="Classification Tree for QB/WR/RB together with oversampled data", sub="", cex=0.5)
 
 
 
@@ -395,7 +398,7 @@ ClassificationTreePerfMeas[3,"QB_FP"] = sum(CheckListQBUS$QB_FP)
 ClassificationTreePerfMeas[3,"QB_FN"] = sum(CheckListQBUS$QB_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeQBUS)
+fancyRpartPlot(ClassTreeQBUS, main="Classification Tree for QB's with undersampled data", sub="", cex=0.5)
 
 # WR ---------------------------
 # Predicting the likelyhood of a WR being picked in the draft
@@ -432,7 +435,7 @@ ClassificationTreePerfMeas[3,"WR_FP"] = sum(CheckListWRUS$WR_FP)
 ClassificationTreePerfMeas[3,"WR_FN"] = sum(CheckListWRUS$WR_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeWRUS)
+fancyRpartPlot(ClassTreeWRUS, main="Classification Tree for WR's with undersampled data", sub="", cex=0.5)
 
 # RB ---------------------------
 # Predicting the likelyhood of a RB being picked in the draft
@@ -469,15 +472,15 @@ ClassificationTreePerfMeas[3,"RB_FP"] = sum(CheckListRBUS$RB_FP)
 ClassificationTreePerfMeas[3,"RB_FN"] = sum(CheckListRBUS$RB_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeRBUS)
+fancyRpartPlot(ClassTreeRBUS, main="Classification Tree for RB's with undersampled data", sub="", cex=0.5)
 
 # Together ---------------------------
 # Predicting the likelyhood of QB/RB/WR together for being picked in the draft
 DtrainTogetherUS = DtrainUS %>%
-  select(-c(Player.Code, Name, Class, Position, Year))
+  select(-c(Player.Code, Name, Class, Year))
 
 DtestTogetherUS = DtestUS %>%
-  select(-c(Player.Code, Name, Class, Position, Year))
+  select(-c(Player.Code, Name, Class, Year))
 
 # Run a classification tree. We use the whole data for training, since the rpart-function has a built in cross-validation. For the evaluation of the 
 # best model we also use the whole training set for this cross-validation.
@@ -504,7 +507,7 @@ ClassificationTreePerfMeas[3,"Together_FP"] = sum(CheckListTogetherUS$Together_F
 ClassificationTreePerfMeas[3,"Together_FN"] = sum(CheckListTogetherUS$Together_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeTogetherUS)
+fancyRpartPlot(ClassTreeTogetherUS, main="Classification Tree for QB/WR/RB together with undersampled data", sub="", cex=0.5)
 
 
 ## 4. Rose_Both------------------------
@@ -554,7 +557,7 @@ ClassificationTreePerfMeas[4,"QB_FP"] = sum(CheckListQBRO$QB_FP)
 ClassificationTreePerfMeas[4,"QB_FN"] = sum(CheckListQBRO$QB_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeQBRO)
+fancyRpartPlot(ClassTreeQBRO, main="Classification Tree for QB's with Rose Both sampled data", sub="", cex=0.5)
 
 # WR ---------------------------
 # Predicting the likelyhood of a WR being picked in the draft
@@ -591,7 +594,7 @@ ClassificationTreePerfMeas[4,"WR_FP"] = sum(CheckListWRRO$WR_FP)
 ClassificationTreePerfMeas[4,"WR_FN"] = sum(CheckListWRRO$WR_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeWRRO)
+fancyRpartPlot(ClassTreeWRRO, main="Classification Tree for WR's with Rose Both sampled data", sub="", cex=0.5)
 
 # RB ---------------------------
 # Predicting the likelyhood of a RB being picked in the draft
@@ -628,15 +631,15 @@ ClassificationTreePerfMeas[4,"RB_FP"] = sum(CheckListRBRO$RB_FP)
 ClassificationTreePerfMeas[4,"RB_FN"] = sum(CheckListRBRO$RB_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeRBRO)
+fancyRpartPlot(ClassTreeRBRO, main="Classification Tree for RB's with Rose Both sampled data", sub="", cex=0.5)
 
 # Together ---------------------------
 # Predicting the likelyhood of QB/RB/WR together for being picked in the draft
 DtrainTogetherRO = DtrainRO %>%
-  select(-c(Player.Code, Name, Class, Position, Year))
+  select(-c(Player.Code, Name, Class, Year))
 
 DtestTogetherRO = DtestRO %>%
-  select(-c(Player.Code, Name, Class, Position, Year))
+  select(-c(Player.Code, Name, Class, Year))
 
 # Run a classification tree. We use the whole data for training, since the rpart-function has a built in cross-validation. For the evaluation of the 
 # best model we also use the whole training set for this cross-validation.
@@ -663,7 +666,7 @@ ClassificationTreePerfMeas[4,"Together_FP"] = sum(CheckListTogetherRO$Together_F
 ClassificationTreePerfMeas[4,"Together_FN"] = sum(CheckListTogetherRO$Together_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeTogetherRO)
+fancyRpartPlot(ClassTreeTogetherRO, main="Classification Tree for QB/WR/RB together with Rose Both sampled data", sub="", cex=0.5)
 
 
 
@@ -714,7 +717,7 @@ ClassificationTreePerfMeas[5,"QB_FP"] = sum(CheckListQBSM$QB_FP)
 ClassificationTreePerfMeas[5,"QB_FN"] = sum(CheckListQBSM$QB_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeQBSM)
+fancyRpartPlot(ClassTreeQBSM, main="Classification Tree for QB's with smote sampled data", sub="", cex=0.5)
 
 # WR ---------------------------
 # Predicting the likelyhood of a WR being picked in the draft
@@ -751,7 +754,7 @@ ClassificationTreePerfMeas[5,"WR_FP"] = sum(CheckListWRSM$WR_FP)
 ClassificationTreePerfMeas[5,"WR_FN"] = sum(CheckListWRSM$WR_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeWRSM)
+fancyRpartPlot(ClassTreeWRSM, main="Classification Tree for WR's with smote sampled data", sub="", cex=0.5)
 
 # RB ---------------------------
 # Predicting the likelyhood of a RB being picked in the draft
@@ -788,15 +791,15 @@ ClassificationTreePerfMeas[5,"RB_FP"] = sum(CheckListRBSM$RB_FP)
 ClassificationTreePerfMeas[5,"RB_FN"] = sum(CheckListRBSM$RB_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeRBSM)
+fancyRpartPlot(ClassTreeRBSM, main="Classification Tree for RB's with smote sampled data", sub="", cex=0.5)
 
 # Together ---------------------------
 # Predicting the likelyhood of QB/RB/WR together for being picked in the draft
 DtrainTogetherSM = DtrainSM %>%
-  select(-c(Player.Code, Name, Position, Year))
+  select(-c(Player.Code, Name, Year))
 
 DtestTogetherSM = DtestSM %>%
-  select(-c(Player.Code, Name, Position, Year))
+  select(-c(Player.Code, Name, Year))
 
 # Run a classification tree. We use the whole data for training, since the rpart-function has a built in cross-validation. For the evaluation of the 
 # best model we also use the whole training set for this cross-validation.
@@ -823,7 +826,7 @@ ClassificationTreePerfMeas[5,"Together_FP"] = sum(CheckListTogetherSM$Together_F
 ClassificationTreePerfMeas[5,"Together_FN"] = sum(CheckListTogetherSM$Together_FN)
 
 # Plotting the Tree
-fancyRpartPlot(ClassTreeTogetherSM)
+fancyRpartPlot(ClassTreeTogetherSM, main="Classification Tree for QB/WR/RB together with smote sampled data", sub="", cex=0.5)
 
 
 # Save the tibble for the Performance Measurement separately

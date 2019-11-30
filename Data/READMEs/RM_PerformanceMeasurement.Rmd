@@ -1,0 +1,54 @@
+---
+title: "README for the performance measurement part"
+author: "Group 2"
+date: "`December, 2nd, 2019`"
+output:
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+  html_document:
+    df_print: paged
+abstract: This Chapter is describes the evaluation of the best sampling and model combination, which is computed in the script 'PerformanceMeasurement.R'.
+urlcolor: blue
+---
+## The goal of our performance measurement
+After training a model it is important to check how well it performes. Since we not only trained one model but 140 in total (7 algos * 5 datasets * 4 positions), it is even more important to compare all the different models to see which one is the best. For our business case, this means that we want to see which combination of method and sampling we should take to predict which position, or if we even have a model, which does it better when we leave them together.
+
+## How to compare the method/sampling combinations for all positions
+After training the models with 10-fold cross-validation, we applied them on all the (unsampled) data from 2007 to 2013 to obtain the true positives, true negatives, false positives and false negatives. Since we used the cross-validation for training, this will not give us the training error, but the testing error we get with all the available data prior to the 2014 NFL Draft. At the end of every model-script, we save this information separately, to bring it all together in the script 'PerformanceMeasurement.R'.
+
+The first step, is to bring them all into one dataframe, to use them easier. Then we make sure, that we used the same, unsampled data by computing the sums of TP, TN, FP, FN, for every method/sampling/position combination. In the CheckTibble we now see, that for every position the whole column contains always the same number, which means this is the case.
+
+Then we calculate the ratio of correct classification, which is equal to:
+
+\begin{center}
+$\frac{Correct Classifications}{All Classifications} = \frac{TP + TN}{TP+TP+FP+FN}$
+\end{center}
+
+The result is a table showing the percentage of correct classification for all the 140 model/sampling/position combination. This table is quite big, but it is still interesting to have a look at it, to see how well which combination performes.
+
+```{r echo=FALSE}
+load("../PerformanceMeasurement/BestModels.Rdata")
+load("../PerformanceMeasurement/PerfMeasAllModels.Rdata")
+```
+```{r echo = FALSE}
+knitr::kable(PerfMeasTibble, caption = "Ratio of correct classification", digits=4)
+```
+
+We can see these two tendencies in the models:
+* Better performance with unsampled data, than with sampled data
+* Better performance when we split the positions manually
+
+## Our best models
+With regards to the business case, we now need to decide which model/models we will use to predict the 2014 NFL Draft. Here you can see the best model/sampling combination for all positions.
+
+```{r echo = FALSE}
+knitr::kable(ResultTibble, caption = "The best model/sampling combinations by position", digits=4)
+```
+
+## Discussion
+
+
+
+
+
