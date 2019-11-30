@@ -8,26 +8,22 @@ output:
   word_document: default
 ---
 
-**Corresponding R Scripts:** [Data_Sampling_ROSE](https://github.com/NicSchuler/DSF_NFLDraftPrediction/tree/master/Project_Scripts);
-[Data_Sampling_Smote](https://github.com/NicSchuler/DSF_NFLDraftPrediction/tree/master/Project_Scripts).
+**Corresponding R Scripts:** [Data_Sampling_ROSE](https://github.com/NicSchuler/DSF_NFLDraftPrediction/blob/master/Project_Scripts/Data_Sampling_ROSE.R);
+[Data_Sampling_Smote](https://github.com/NicSchuler/DSF_NFLDraftPrediction/blob/master/Project_Scripts/Data_Sampling_Smote.R).
 
 # 1. Introduction
 
-Allgemeiner Teil wird von Ruben verfasst.
+In classification problems, an issue to come across can be imbalanced class sizes in the training dataset. Such imbalances can lead to a classifier performing seemingly well when looking solely at model accuracy but on closer inspection being ineffective in classifying instances of the minority class. Because the underlying dataset in this project is heavily skewed towards non-drafted players (approximately 20:1) and therefore contains a majority of zero values for the labels, classification models tend to perform sub-optimally (i.e. predict the majority class much better than the minority class). This is due to the classifier being able to be "lazy" and only classify a player as drafted when absolutely certain, as is visible by the error rates being very close to the proportion of not drafted players in the dataset.
 
-# 2. Allgemeiner Teil
+# 2. General Approach
 
-Allgemeiner Teil wird von Ruben verfasst.
+To deal with the problem of imbalanced class sizes, a number of methods to rework the underlying dataset are commonly applyied, some of which shall be outlined below. In some cases, it might not be viable or necessary to aim for equally sized classes (e.g. when instances of the minority class are inherently easy to classify because they exert highly specific feature values), especially in high dimensional classification problems it is however appropriate to deal with imbalance.
 
-Inputs:
-
-Problematik anhand der Klassenverteilung unserer Daten darlegen.
-Ansätze wie diesem Umstand zu begegnen ist, darlegen und die vorliegend verwendeten Techniken aufzählen.
-Darlegen, dass wir die _3 Daten von 2007 bis 2013 samplen und diese sogleich in den Analysen als training set für die Modelle dienen.
+In this project, the imbalance issue can be dealt with by sampling an approximately equal amount of drafted and non drafted players into the training set, either using one of the methods described in the following paragraphs or with a certain pre-made assumption about one of the variables. The latter was applied to the unsampled dataset by disregarding any players that played fewer than ten games (as is done in the basic unsampled [dataset](https://github.com/NicSchuler/DSF_NFLDraftPrediction/blob/master/Data/CleanData/CleanClass2007to2014_3.Rdata)), for the main reason that these players do not have sufficient game data to be useful to the prediction and are intuitively less likely to be drafted due to severe lack of experience. To gain an oversight over the different sampling methods available, the approaches outlined below have been taken on top of the qualitative method and the resulting sampled datasets have been used as training data.
 
 # 3. Random Oversampling for the Minority Class
 
-In order to deal with imbalanced data random oversampling increases the weight of the minority class, here drafted CFPs (class 1), by randomly replicating the minority class instances. This technique is known to increase the likelihood of occurring overfitting, although random oversampling does not increase information.
+In order to deal with imbalanced data, random oversampling increases the weight of the minority class, here drafted CFPs (class 1), by randomly replicating the minority class instances. This technique is known to increase the likelihood of occurring overfitting, although random oversampling does not increase information.
 Since the prevalent class, here class 0, amounts to 2011 observations, to obtain a balanced 
 sample by random oversampling, the new sample size needs to be set to 4022.
 
@@ -91,12 +87,20 @@ table(CleanClass2007to2013_3_both$Drafted)
 1150 1188 
 ```
 
-# 6. Synthetic Data Generation
+# 6. Synthetic Minority Oversampling Technique (SMOTE)
 
-Wird von Ruben verfasst.
+SMOTE is a variant of oversampling, following the same basic logic as described in paragraph 3. Differing from "regular" oversampling by effectively replicating minority class instances, SMOTE generates additional synthetic instances similar to the existing ones. This is achieved through placing artificial datapoints between the original ones, while considering a certain number of nearest neighbors as an indication for what such synthetic data could look like. Because class imbalance is not combatted by using more instances of the same minority data, this can have the advantage of reducing overfit on possibly unique feature manifestations of datapoints in the existing set, however, strong bias can be induced especially in models based on the euclidian distance and especially if a high number of nearest neighbors is used.
 
 ## 6.1 Implementation with SMOTE-Package
 
-Wird von Ruben verfasst.
+To perform synthetic minority oversampling and therefore provide a method to combat class imbalance, the `smotefamiliy` package was used. This package contains the `SMOTE()` function which takes the arguments `K` and `dupsize`. The value passed to the `K` argument determines the number of nearest neighbors considered in the synthesis. In the script, the default value of 5 nearest neighbors was used, which leaves room for future exploration of a more optimal value through comparison of bias and variance of especially KNN when using the sampled data. The value passed to the `dupsize` argument determines the factor with which the original minority class is to be scaled. In the script, the fraction of majority to minority instances was used for this argument to achieve roughly equally sized classes. The SMOTE sampling process was performed for every position and every year to account for possible differences within the original data.
+
+The function `SMOTE()` generates a list from which we extract the synthesized data; the result is a new balanced data set:
+
+```{r eval=FALSE}
+D_smote <- SMOTE(X = select(cleanData_var, -y), target = cleanData_var$y,
+                 K = 5,
+                 dup_size = length(which(cleanData_var$y == 0))/length(which(cleanData_var$y == 1)))
+```
 
 
