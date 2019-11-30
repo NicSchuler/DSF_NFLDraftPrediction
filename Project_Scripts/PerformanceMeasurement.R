@@ -55,3 +55,27 @@ ResultTibble$Accuracy[4] = PerfMeasTibble$Together[which.max(PerfMeasTibble$Toge
 
 save(ResultTibble, file="../Data/PerformanceMeasurement/BestModels.Rdata")
 save(PerfMeasTibble, file="../Data/PerformanceMeasurement/PerfMeasAllModels.Rdata")
+
+
+
+
+# 2014 data --------------
+load("../Data/PerformanceMeasurement/randomForestPerfMeas2014.Rdata")
+
+CheckTibble14 = data.frame(Method = randomForestPerfMeas2014$Method, Sampling = randomForestPerfMeas2014$Sampling, QB = NA, WR = NA, RB = NA, Together = NA, stringsAsFactors = FALSE)
+for(i in 1:nrow(randomForestPerfMeas2014)){
+  CheckTibble14$QB[i] = randomForestPerfMeas2014$QB_TP[i] + randomForestPerfMeas2014$QB_TN[i] + randomForestPerfMeas2014$QB_FN[i] + randomForestPerfMeas2014$QB_FP[i]
+  CheckTibble14$WR[i] = randomForestPerfMeas2014$WR_TP[i] + randomForestPerfMeas2014$WR_TN[i] + randomForestPerfMeas2014$WR_FN[i] + randomForestPerfMeas2014$WR_FP[i]
+  CheckTibble14$RB[i] = randomForestPerfMeas2014$RB_TP[i] + randomForestPerfMeas2014$RB_TN[i] + randomForestPerfMeas2014$RB_FN[i] + randomForestPerfMeas2014$RB_FP[i]
+  CheckTibble14$Together[i] = randomForestPerfMeas2014$Together_TP[i] + randomForestPerfMeas2014$Together_TN[i] + randomForestPerfMeas2014$Together_FN[i] + randomForestPerfMeas2014$Together_FP[i]
+}
+
+
+# Compute the Accuracy (based on the number of correct classifications)
+PerfMeasTibble14 = data.frame(Method = randomForestPerfMeas2014$Method, Sampling = randomForestPerfMeas2014$Sampling, QB = NA, WR = NA, RB = NA, Together = NA, stringsAsFactors = FALSE)
+for(i in 1:nrow(randomForestPerfMeas2014)){
+  PerfMeasTibble14$QB[i] = (randomForestPerfMeas2014$QB_TP[i] + randomForestPerfMeas2014$QB_TN[i])/(randomForestPerfMeas2014$QB_TP[i] + randomForestPerfMeas2014$QB_TN[i] + randomForestPerfMeas2014$QB_FN[i] + randomForestPerfMeas2014$QB_FP[i])
+  PerfMeasTibble14$WR[i] = (randomForestPerfMeas2014$WR_TP[i] + randomForestPerfMeas2014$WR_TN[i])/(randomForestPerfMeas2014$WR_TP[i] + randomForestPerfMeas2014$WR_TN[i] + randomForestPerfMeas2014$WR_FN[i] + randomForestPerfMeas2014$WR_FP[i])
+  PerfMeasTibble14$RB[i] = (randomForestPerfMeas2014$RB_TP[i] + randomForestPerfMeas2014$RB_TN[i])/(randomForestPerfMeas2014$RB_TP[i] + randomForestPerfMeas2014$RB_TN[i] + randomForestPerfMeas2014$RB_FN[i] + randomForestPerfMeas2014$RB_FP[i])
+  PerfMeasTibble14$Together[i] = (randomForestPerfMeas2014$Together_TP[i] + randomForestPerfMeas2014$Together_TN[i])/(randomForestPerfMeas2014$Together_TP[i] + randomForestPerfMeas2014$Together_TN[i] + randomForestPerfMeas2014$Together_FN[i] + randomForestPerfMeas2014$Together_FP[i])
+}
