@@ -1,0 +1,102 @@
+---
+title: "README for Data Sampling"
+author: "Group 2"
+date: "02 12 2019"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+**Corresponding R Scripts:** [Data_Sampling_ROSE](https://github.com/NicSchuler/DSF_NFLDraftPrediction/tree/master/Project_Scripts);
+[Data_Sampling_Smote](https://github.com/NicSchuler/DSF_NFLDraftPrediction/tree/master/Project_Scripts).
+
+# 1. Introduction
+
+Allgemeiner Teil wird von Ruben verfasst.
+
+# 2. Allgemeiner Teil
+
+Allgemeiner Teil wird von Ruben verfasst.
+
+Inputs:
+
+Problematik anhand der Klassenverteilung unserer Daten darlegen.
+Ansätze wie diesem Umstand zu begegnen ist, darlegen und die vorliegend verwendeten Techniken aufzählen.
+Darlegen, dass wir die _3 Daten von 2007 bis 2013 samplen und diese sogleich in den Analysen als training set für die Modelle dienen.
+
+# 3. Random Oversampling for the Minority Class
+
+In order to deal with imbalanced data random oversampling increases the weight of the minority class, here drafted CFPs (class 1), by randomly replicating the minority class instances. This technique is known to increase the likelihood of occurring overfitting, although random oversampling does not increase information.
+Since the prevalent class, here class 0, amounts to 2011 observations, to obtain a balanced 
+sample by random oversampling, the new sample size needs to be set to 4022.
+
+## 3.1 Implementation with ROSE-Package
+
+The Package Random Over-Sampling Examples (ROSE) provides functions to deal with binary classification problems in the presence of imbalanced classes. ROSE contains the function `ovun.sample` that implements traditional remedies to the class imbalance, such as oversampling the minority class (see present chapter), undersampling the majority class (see chapter 4), or a combination of over- and undersampling (see chapter 5). In order to perform the resampling technique `ovun.sample` is endowed with the argument method, which takes one value among `over`, `under` and `both`. 
+
+For randomly oversampling the minority class we make use of the argument `over`. This option determines oversampling with replacement from the minority class, here class 1, until a specified sample size `N` is reached. Since the prevalent class, here class 0, amounts to 2011 observations, to obtain a balanced sample by oversampling, we need to set the new sample size to 4022. The function `ovun.sample` generates a list from which we extract the new augmented data; the result is a new balanced data set:
+
+```
+CleanClass2007to2013_3_oversampling <- ovun.sample(Drafted~., data=CleanClass2007to2013_3, method="over",N=4022)
+
+CleanClass2007to2013_3_oversampling <- as.data.frame(CleanClass2007to2013_3_oversampling$data) 
+
+table(CleanClass2007to2013_3_oversampling$Drafted)
+
+   0    1 
+2011 2011 
+```
+Alternatively, we could have designed the oversampling by setting argument `p` of the function `ovun.sample`, which represents the probability of the positive class in the new augmented sample. In this case, the proportion of positive examples would be only approximatively equal to the specified `p`.
+
+# 4. Random Undersampling for the Majority Class
+
+Through random undersampling for the majority class, here class 0, a randomly choosen subset from the class with more instances is selected to match the number of samples coming from each class. This method can potentially lead to loss of information from the left-out samples. On the other hand, if instances of the majority class are near to others, this technique could yield robust results. Since the minority class, here class 1, amounts to 327 observations, to obtain a balanced sample by random undersampling, we randomly pick 327 observations out of the 2011 not drafted cases.
+
+## 4.1 Implementation with ROSE-Package
+
+For randomly undersampling the majority class with the function `ovun.sample` from ROSE-package we make use of the argument `under`. This option determines simple undersampling without replacement of the majority class, here class 0, until the specified sample size  `N ` is reached. Since the minority class, here class 1, amounts to 327 observations, to obtain a balanced sample by undersampling, we need to set the new sample size to 654. Again, the function `ovun.sample` generates a list from which we extract the new augmented data; the result is a new balanced data set:
+
+```
+CleanClass2007to2013_3_undersampling <- ovun.sample(Drafted~.,data=CleanClass2007to2013_3,method="under",N=654)
+
+CleanClass2007to2013_3_undersampling <- as.data.frame(CleanClass2007to2013_3_undersampling$data) 
+
+table(CleanClass2007to2013_3_undersampling$Drafted)
+
+  0   1 
+327 327 
+```
+Alternatively, we could have designed the undersampling by setting argument `p`, see explenation above in chapter 3.1.
+
+# 5. Combination of Over- and Undersampling
+
+Applying a combination of over- and undersampling both the minority class, here class 1, is oversampled with replacement and the majority class, here class 0, is undersampled without replacement. In essence, the minority class is oversampled to reach a size definite as a realization of a binomial random variable with probability `p`, the probability of the positive class in the new augmented sample, and size `N`. The undersampling for the majority class is then performed correspondingly, to abide by the specified `N`.
+
+## 5.1 Implementation with ROSE-Package
+
+For the application of a combination of over- and undersampling with the function `ovun.sample` from ROSE-package we make use of the argument `both`. In this case, both the arguments `N` and `p` have to be set to establish the amount of oversampling and undersampling. We set the new sample size `N` to 2338 according to the initial total size of our unsampled data. Argument `p` is set to 0.5, which is the default value. Again, the function `ovun.sample` generates a list from which we extract the new augmented data; the result is a new balanced data set:
+
+```
+CleanClass2007to2013_3_both <- ovun.sample(Drafted~., data=CleanClass2007to2013_3, method="both", 
+                                                p=0.5,     # probability of class 1 in new sample; default 0.5.
+                                                seed=6969, # specify random seed
+                                                N=2338)    # specified sample according to initial sample size 
+
+CleanClass2007to2013_3_both <- as.data.frame(CleanClass2007to2013_3_both$data) 
+
+table(CleanClass2007to2013_3_both$Drafted)
+
+   0    1 
+1150 1188 
+```
+
+# 6. Synthetic Data Generation
+
+Wird von Ruben verfasst.
+
+## 6.1 Implementation with SMOTE-Package
+
+Wird von Ruben verfasst.
+
+
