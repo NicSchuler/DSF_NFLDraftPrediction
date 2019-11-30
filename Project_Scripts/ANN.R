@@ -132,6 +132,7 @@ ANN_grad <- function(ANN_par, L_i_size, L_h_size, L_o_size, x, y, lambda){
   grad <- c(as.vector(theta1_grad), as.vector(theta2_grad))
 }
 
+
 # ANN for QB ----
 
 # Select years 2007 through 2013 as training data
@@ -181,12 +182,23 @@ BP_par <- BP_pred$par
 theta1_train <- matrix(data = BP_par[1:(L_h_size * (L_i_size + 1))], nrow = L_h_size)
 theta2_train <- matrix(data = BP_par[(1 + (L_h_size * (L_i_size + 1))):length(BP_par)], nrow = L_o_size)
 
-# Exploring the training fit
-a_1 <- rbind(1, t(x))
+# Exploring the training fit on unsampled data
+D_uns <- cleanData %>% filter(., Year < 2014, Position == "QB") %>% drop_na(.)
+x_uns <- as.matrix(D_uns %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
+
+# Standardize the unsampled training data
+for (i in 1:ncol(x_uns)) {
+  x_uns[,i] <- standFun(x_uns[,i])
+}
+
+# Replace variables that are consistently zero and therefore yield NA when standardized with zero again
+x_uns[is.na(x_uns)] <- 0
+
+a_1 <- rbind(1, t(x_uns))
 a_2 <- rbind(1, sigmoid(theta1_train %*% a_1))
 a_3 <- sigmoid(theta2_train %*% a_2)
 
-train_QB <- tibble("Code" = cleanData_QB$Player.Code, "Name" = cleanData_QB$Name, "pred" = as.vector(a_3), "Drafted" = cleanData_QB$Drafted)
+train_QB <- tibble("Code" = D_uns$Player.Code, "Name" = D_uns$Name, "Drafted" = D_uns$Drafted, "pred" = as.vector(a_3))
 
 # Take the year 2014 as testing data
 cleanData_QB_test <- cleanData %>% filter(., Position == "QB", Year == 2014) %>% drop_na(.)
@@ -206,6 +218,7 @@ a_3 <- sigmoid(theta2_train %*% a_2)
 
 # Summarize the results
 pred_QB <- tibble("Code" = cleanData_QB_test$Player.Code, "Name" = cleanData_QB_test$Name, "pred" = as.vector(a_3), "Drafted" = cleanData_QB_test$Drafted)
+
 
 # ANN for RB ----
 
@@ -256,12 +269,23 @@ BP_par <- BP_pred$par
 theta1_train <- matrix(data = BP_par[1:(L_h_size * (L_i_size + 1))], nrow = L_h_size)
 theta2_train <- matrix(data = BP_par[(1 + (L_h_size * (L_i_size + 1))):length(BP_par)], nrow = L_o_size)
 
-# Exploring the training fit
-a_1 <- rbind(1, t(x))
+# Exploring the training fit on unsampled data
+D_uns <- cleanData %>% filter(., Year < 2014, Position == "RB") %>% drop_na(.)
+x_uns <- as.matrix(D_uns %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
+
+# Standardize the unsampled training data
+for (i in 1:ncol(x_uns)) {
+  x_uns[,i] <- standFun(x_uns[,i])
+}
+
+# Replace variables that are consistently zero and therefore yield NA when standardized with zero again
+x_uns[is.na(x_uns)] <- 0
+
+a_1 <- rbind(1, t(x_uns))
 a_2 <- rbind(1, sigmoid(theta1_train %*% a_1))
 a_3 <- sigmoid(theta2_train %*% a_2)
 
-train_RB <- tibble("Code" = cleanData_RB$Player.Code, "Name" = cleanData_RB$Name, "pred" = as.vector(a_3), "Drafted" = cleanData_RB$Drafted)
+train_RB <- tibble("Code" = D_uns$Player.Code, "Name" = D_uns$Name, "Drafted" = D_uns$Drafted, "pred" = as.vector(a_3))
 
 # Take the year 2014 as testing data
 cleanData_RB_test <- cleanData %>% filter(., Position == "RB", Year == 2014) %>%  drop_na(.)
@@ -331,12 +355,23 @@ BP_par <- BP_pred$par
 theta1_train <- matrix(data = BP_par[1:(L_h_size * (L_i_size + 1))], nrow = L_h_size)
 theta2_train <- matrix(data = BP_par[(1 + (L_h_size * (L_i_size + 1))):length(BP_par)], nrow = L_o_size)
 
-# Exploring the training fit
-a_1 <- rbind(1, t(x))
+# Exploring the training fit on unsampled data
+D_uns <- cleanData %>% filter(., Year < 2014, Position == "WR") %>% drop_na(.)
+x_uns <- as.matrix(D_uns %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
+
+# Standardize the unsampled training data
+for (i in 1:ncol(x_uns)) {
+  x_uns[,i] <- standFun(x_uns[,i])
+}
+
+# Replace variables that are consistently zero and therefore yield NA when standardized with zero again
+x_uns[is.na(x_uns)] <- 0
+
+a_1 <- rbind(1, t(x_uns))
 a_2 <- rbind(1, sigmoid(theta1_train %*% a_1))
 a_3 <- sigmoid(theta2_train %*% a_2)
 
-train_WR <- tibble("Code" = cleanData_WR$Player.Code, "Name" = cleanData_WR$Name, "pred" = as.vector(a_3), "Drafted" = cleanData_WR$Drafted)
+train_WR <- tibble("Code" = D_uns$Player.Code, "Name" = D_uns$Name, "Drafted" = D_uns$Drafted, "pred" = as.vector(a_3))
 
 # Take the year 2014 as testing data
 cleanData_WR_test <- cleanData %>% filter(., Position == "WR", Year == 2014) %>% drop_na(.)
@@ -356,6 +391,7 @@ a_3 <- sigmoid(theta2_train %*% a_2)
 
 # Summarize the results
 pred_WR <- tibble("Code" = cleanData_WR_test$Player.Code, "Name" = cleanData_WR_test$Name, "pred" = as.vector(a_3), "Drafted" = cleanData_WR_test$Drafted)
+
 
 # ANN for all positions ----
 
@@ -406,12 +442,23 @@ BP_par <- BP_pred$par
 theta1_train <- matrix(data = BP_par[1:(L_h_size * (L_i_size + 1))], nrow = L_h_size)
 theta2_train <- matrix(data = BP_par[(1 + (L_h_size * (L_i_size + 1))):length(BP_par)], nrow = L_o_size)
 
-# Exploring the training fit
-a_1 <- rbind(1, t(x))
+# Exploring the training fit on unsampled data
+D_uns <- cleanData %>% filter(., Year < 2014) %>% drop_na(.)
+x_uns <- as.matrix(D_uns %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
+
+# Standardize the unsampled training data
+for (i in 1:ncol(x_uns)) {
+  x_uns[,i] <- standFun(x_uns[,i])
+}
+
+# Replace variables that are consistently zero and therefore yield NA when standardized with zero again
+x_uns[is.na(x_uns)] <- 0
+
+a_1 <- rbind(1, t(x_uns))
 a_2 <- rbind(1, sigmoid(theta1_train %*% a_1))
 a_3 <- sigmoid(theta2_train %*% a_2)
 
-train_all <- tibble("Code" = cleanData_all$Player.Code, "Name" = cleanData_all$Name, "pred" = as.vector(a_3), "Drafted" = cleanData_all$Drafted)
+train_all <- tibble("Code" = D_uns$Player.Code, "Name" = D_uns$Name, "Drafted" = D_uns$Drafted, "pred" = as.vector(a_3))
 
 # Take the year 2014 as testing data
 cleanData_all_test <- cleanData %>% filter(., Year == 2014) %>% drop_na(.)
