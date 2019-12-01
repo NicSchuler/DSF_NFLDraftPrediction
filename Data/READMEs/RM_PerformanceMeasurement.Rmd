@@ -75,7 +75,7 @@ Interpretations of models are always quite difficult, but the following thoughts
 
 We would like to close the circle to one of our fist lessons in machine learning, in which we were taught the following very high level formula for models (the right part). Y denotes the true outcome (in our case whether a player is drafted or not), f(X) is the true pattern that describes it, and $\epsilon$ is the noise, which appears to be random. With our models (the left part) we try to predict a $\hat{Y}$, which shall be as close as possible to the true Y.
 
-$$\hat{f}(X) = \hat{Y} \approx Y = f(X) + \varepsilon$$
+$$\hat{f}(X) = \hat{Y} \longrightarrow Y = f(X) + \varepsilon$$
 
 Looking at this inequation we can think of three possibilities, why our models make so many mistakes:
 
