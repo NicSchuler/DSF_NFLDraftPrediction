@@ -15,7 +15,7 @@ urlcolor: blue
 After training a model it is important to check how well it performes. Since we not only trained one model but 120 in total (6 algos * 5 samplings * 4 positions), it is even more important to compare all the different models to see which one is the best. For our business case, this means that we want to see which combination of method and sampling we should take to predict which position, or if we even have a model, which does it better when we leave them together.
 
 ## How to compare the method/sampling combinations for all positions
-After training the models with 10-fold cross-validation, we applied them on all the (unsampled) data from 2007 to 2013 to obtain the true positives, true negatives, false positives and false negatives on the training set. At the end of every model-script, we save this information separately, to bring it all together in the script 'PerformanceMeasurement.R'.
+After training the models with 10-fold cross-validation, we applied them on all the (unsampled) data from 2007 to 2013 to obtain the true positives, true negatives, false positives and false negatives on the training set. At the end of every model-script, we save this information separately, to bring it all together in the script 'PerformanceMeasurement.R'. At the same time (and in the same scripts) we also compute the testing fit on the 2014 testing data.
 
 The first step, is to bring them all into one dataframe, to use them easier. Then we make sure, that we used the same, unsampled data by computing the sums of TP, TN, FP, FN, for every method/sampling/position combination. In the CheckTibble we now see, that for every position the whole column contains always the same number, which means this is the case.
 
@@ -26,27 +26,37 @@ $$\text{Precision (Positice Perdictive Value)} = \frac{TP}{TP+FP}$$
 $$\text{Recall (Sensitivity)} = \frac{TP}{TP+FN}$$
 $$\text{F1 score (harmonic mean of precision and recall)}= 2*\frac{Precision * Recall}{Precision + Recall}$$
 
-The result is a table showing the percentage of correct classification for all the 120 model/sampling/position combination. This table is quite big, but it is still interesting to have a look at it, to see how well which combination performes.
+The result is a table showing the Accuracy, Precision, Recall and F1 scores for all the 120 model/sampling/position combination. We decided to us the F1 score as the model estimator, because is more sensitive to the inequality of availability of drafted vs. undrafted players in the target value. Therefore we just visualize the F1 score and the accuracy of all the models for the testing set. This table is quite big, but it is still interesting to have a look at it, to see how well which combination performes.
 
-```{r echo=FALSE}
-load("../PerformanceMeasurement/BestModels.Rdata")
-load("../PerformanceMeasurement/PerfMeasAllModels.Rdata")
+\newpage
+
+```{r echo=FALSE, include=FALSE}
+library(tidyverse)
+load("../PerformanceMeasurement/BestModels14.Rdata")
+load("../PerformanceMeasurement/PerfMeasAllModels14.Rdata")
+PerfMeasTibble14_F1 = PerfMeasTibble14 %>%
+  select("Method","Sampling","QB_F1", "WR_F1", "RB_F1", "Together_F1")
+PerfMeasTibble14_Acc = PerfMeasTibble14 %>%
+  select("Method","Sampling","QB_Acc", "WR_Acc", "RB_Acc", "Together_Acc")
 ```
 ```{r echo = FALSE}
-knitr::kable(PerfMeasTibble, caption = "Ratio of correct classification", digits=4)
+knitr::kable(PerfMeasTibble14_F1, caption = "F1 score by Model/Position and Sampling on 2014 unsampled testing data", digits=4)
+knitr::kable(PerfMeasTibble14_Acc, caption = "Accuracy by Model/Position and Sampling on 2014 unsampled testing data", digits=4)
 ```
 
 We can see these two tendencies in the models:
 
-* Better performance with unsampled data, than with sampled data
+* Mostly better performance with unsampled data, than with sampled data
 * Better performance when we split the positions manually
 
 ## Our best models
-With regards to the business case, we now need to decide which model/models we will use to predict the 2014 NFL Draft. Here you can see the best model/sampling combination for all positions.
 
 ```{r echo = FALSE}
-knitr::kable(ResultTibble, caption = "The best model/sampling combinations by position", digits=4)
+knitr::kable(ResultTibble14, caption = "The best model/sampling combinations by position", digits=4)
 ```
+
+
+
 
 ## Discussion
 The great and sometimes perfect results of the random forest model show a high risk of a massive overfit. The other models with accuracies between 89% and 93% seem to be very good at the first sight. But we have to keep the reason for filtering out the players with <10 played games and sampling the data in mind. Here we applied the models to the unsampled but filtered data, which only contains 12.4% of drafted players. This means, that a model predicting "not drafted" for every player would not perform much worse, since it would still have an accuracy of 87.6%. 
@@ -54,16 +64,6 @@ The great and sometimes perfect results of the random forest model show a high r
 
 ## Business case: Predicting the 2014 NFL Draft
 According to this analysis, we should choose random forest to predict which Quarterbacks, Running Backs and Wide Receivers will be picked in the 2014 NFL Draft. We will first have a look at the results we get, using the eight best models, since they are very close with their performance on the set from 2007 to 2013. 
-
-```{r echo=FALSE}
-library(tidyverse)
-load("../PerformanceMeasurement/PerfMeasRF14.Rdata")
-PerfMeasTibble14 = PerfMeasTibble14 %>%
-  filter(Sampling %in% c("no_sampling", "oversampling"))
-```
-```{r echo = FALSE}
-knitr::kable(PerfMeasTibble14, caption = "Ratio of correct classification", digits=4)
-```
 
 The 2014 data set only contains 7.01% drafted players. Looking at the performance of this model, we see, that the model does not predict 
 Here we see, that the model only 

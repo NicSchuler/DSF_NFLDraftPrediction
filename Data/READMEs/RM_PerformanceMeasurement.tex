@@ -102,8 +102,8 @@ combination, which is computed in the script `PerformanceMeasurement.R'.
 measurement}\label{the-goal-of-our-performance-measurement}}
 
 After training a model it is important to check how well it performes.
-Since we not only trained one model but 140 in total (7 algos * 5
-datasets * 4 positions), it is even more important to compare all the
+Since we not only trained one model but 120 in total (6 algos * 5
+samplings * 4 positions), it is even more important to compare all the
 different models to see which one is the best. For our business case,
 this means that we want to see which combination of method and sampling
 we should take to predict which position, or if we even have a model,
@@ -115,12 +115,11 @@ positions}\label{how-to-compare-the-methodsampling-combinations-for-all-position
 
 After training the models with 10-fold cross-validation, we applied them
 on all the (unsampled) data from 2007 to 2013 to obtain the true
-positives, true negatives, false positives and false negatives. Since we
-used the cross-validation for training, this will not give us the
-training error, but the testing error we get with all the available data
-prior to the 2014 NFL Draft. At the end of every model-script, we save
-this information separately, to bring it all together in the script
-`PerformanceMeasurement.R'.
+positives, true negatives, false positives and false negatives on the
+training set. At the end of every model-script, we save this information
+separately, to bring it all together in the script
+`PerformanceMeasurement.R'. At the same time (and in the same scripts)
+we also compute the testing fit on the 2014 testing data.
 
 The first step, is to bring them all into one dataframe, to use them
 easier. Then we make sure, that we used the same, unsampled data by
@@ -129,73 +128,129 @@ combination. In the CheckTibble we now see, that for every position the
 whole column contains always the same number, which means this is the
 case.
 
-Then we calculate the ratio of correct classification, which is equal
-to:
+Then we calculate the Accuracy, Precision, Recall and the F1 score:
 
-\[\frac{\text{Correct Classifications}}{\text{All Classifications}} = \frac{TP + TN}{TP+TP+FP+FN}\]
+\[\text{Accuracy} = \frac{\text{Correct Classifications}}{\text{All Classifications}} = \frac{TP + TN}{TP+TN+FP+FN}\]
+\[\text{Precision (Positice Perdictive Value)} = \frac{TP}{TP+FP}\]
+\[\text{Recall (Sensitivity)} = \frac{TP}{TP+FN}\]
+\[\text{F1 score (harmonic mean of precision and recall)}= 2*\frac{Precision * Recall}{Precision + Recall}\]
 
-The result is a table showing the percentage of correct classification
-for all the 140 model/sampling/position combination. This table is quite
-big, but it is still interesting to have a look at it, to see how well
-which combination performes.
+The result is a table showing the Accuracy, Precision, Recall and F1
+scores for all the 120 model/sampling/position combination. We decided
+to us the F1 score as the model estimator, because is more sensitive to
+the inequality of availability of drafted vs.~undrafted players in the
+target value. Therefore we just visualize the F1 score and the accuracy
+of all the models for the testing set. This table is quite big, but it
+is still interesting to have a look at it, to see how well which
+combination performes.
+
+\newpage
 
 \begin{longtable}[]{@{}llrrrr@{}}
-\caption{Ratio of correct classification}\tabularnewline
+\caption{F1 score by Model/Position and Sampling on 2014 unsampled
+testing data}\tabularnewline
 \toprule
-Method & Sampling & QB & WR & RB & Together\tabularnewline
+Method & Sampling & QB\_F1 & WR\_F1 & RB\_F1 &
+Together\_F1\tabularnewline
 \midrule
 \endfirsthead
 \toprule
-Method & Sampling & QB & WR & RB & Together\tabularnewline
+Method & Sampling & QB\_F1 & WR\_F1 & RB\_F1 &
+Together\_F1\tabularnewline
 \midrule
 \endhead
-ClassificationTree & no\_sampling & 0.9098 & 0.9208 & 0.9156 &
-0.8939\tabularnewline
-ClassificationTree & oversampling & 0.8780 & 0.8415 & 0.8631 &
-0.7930\tabularnewline
-ClassificationTree & undersampling & 0.7098 & 0.8254 & 0.8137 &
-0.7938\tabularnewline
-ClassificationTree & Rose\_both & 0.8317 & 0.7985 & 0.8057 &
-0.7746\tabularnewline
-ClassificationTree & Smote & 0.8439 & 0.8062 & 0.7850 &
-0.7998\tabularnewline
-KNN & no\_sampling & 0.8488 & 0.8892 & 0.8646 & 0.8755\tabularnewline
-KNN & oversampling & 0.8366 & 0.8915 & 0.8519 & 0.8725\tabularnewline
-KNN & undersampling & 0.6463 & 0.8331 & 0.7962 & 0.7994\tabularnewline
-KNN & Rose\_both & 0.7317 & 0.8192 & 0.7834 & 0.7981\tabularnewline
-KNN & Smote & 0.8610 & 0.9023 & 0.8726 & 0.8918\tabularnewline
-NaiveBayes & no\_sampling & 0.8268 & 0.8908 & 0.8758 &
-0.8901\tabularnewline
-NaiveBayes & oversampling & 0.7000 & 0.7746 & 0.8137 &
-0.7998\tabularnewline
-NaiveBayes & undersampling & 0.6878 & 0.7946 & 0.8328 &
-0.7968\tabularnewline
-NaiveBayes & Rose\_both & 0.7341 & 0.7231 & 0.8615 &
-0.7930\tabularnewline
-NaiveBayes & Smote & 0.7317 & 0.8077 & 0.7213 & 0.8798\tabularnewline
-randomForest & no\_sampling & 1.0000 & 0.9977 & 1.0000 &
-0.9979\tabularnewline
-randomForest & oversampling & 1.0000 & 0.9985 & 1.0000 &
-0.9996\tabularnewline
-randomForest & undersampling & 0.7415 & 0.8838 & 0.8344 &
-0.8499\tabularnewline
-randomForest & Rose\_both & 0.9073 & 0.9462 & 0.9395 &
-0.9371\tabularnewline
-randomForest & Smote & 1.0000 & 0.9962 & 1.0000 & 0.9983\tabularnewline
-ANN & no\_sampling & 0.8488 & 0.9054 & 0.8838 & 0.8828\tabularnewline
-ANN & oversampling & 0.8593 & 0.8664 & 0.8574 & 0.8531\tabularnewline
-ANN & undersampling & 0.8559 & 0.8771 & 0.8708 & 0.8440\tabularnewline
-ANN & Rose\_both & 0.8923 & 0.8570 & 0.8558 & 0.8512\tabularnewline
-ANN & Smote & 0.8639 & 0.8853 & 0.8692 & 0.8628\tabularnewline
-LogisticRegression & no\_sampling & 0.8510 & 0.9072 & 0.8938 &
-0.8980\tabularnewline
-LogisticRegression & oversampling & 0.7876 & 0.8608 & 0.8246 &
-0.8432\tabularnewline
-LogisticRegression & undersampling & 0.7678 & 0.8637 & 0.8167 &
-0.8432\tabularnewline
-LogisticRegression & Rose\_both & 0.7879 & 0.8606 & 0.8248 &
-0.8451\tabularnewline
-LogisticRegression & Smote & NA & NA & NA & NA\tabularnewline
+ClassificationTree & no\_sampling & 0.5161 & 0.1702 & 0.4000 &
+0.2299\tabularnewline
+ClassificationTree & oversampling & 0.3913 & 0.3621 & 0.3774 &
+0.3280\tabularnewline
+ClassificationTree & undersampling & 0.3175 & 0.3443 & 0.3385 &
+0.3294\tabularnewline
+ClassificationTree & Rose\_both & 0.3462 & 0.3281 & 0.2667 &
+0.2814\tabularnewline
+ClassificationTree & Smote & 0.3830 & 0.3559 & 0.2759 &
+0.3399\tabularnewline
+randomForest & no\_sampling & 0.3704 & 0.2979 & 0.4516 &
+0.3619\tabularnewline
+randomForest & oversampling & 0.3750 & 0.3881 & 0.3902 &
+0.4122\tabularnewline
+randomForest & undersampling & 0.3279 & 0.3393 & 0.3380 &
+0.3443\tabularnewline
+randomForest & Rose\_both & 0.4255 & 0.4043 & 0.3600 &
+0.3776\tabularnewline
+randomForest & Smote & 0.4211 & 0.3765 & 0.3922 & 0.3860\tabularnewline
+ANN & no\_sampling & 0.6154 & 0.3860 & 0.5294 & 0.4779\tabularnewline
+ANN & oversampling & 0.2857 & 0.2683 & 0.2376 & 0.2573\tabularnewline
+ANN & undersampling & 0.2933 & 0.2635 & 0.2376 & 0.2683\tabularnewline
+ANN & Rose\_both & 0.3056 & 0.2500 & 0.2330 & 0.2611\tabularnewline
+ANN & Smote & 0.2941 & 0.2316 & 0.2286 & 0.2472\tabularnewline
+KNN & no\_sampling & 0.2727 & 0.3684 & 0.2500 & 0.3636\tabularnewline
+KNN & oversampling & 0.3390 & 0.2617 & 0.2222 & 0.3289\tabularnewline
+KNN & undersampling & 0.3226 & 0.3878 & 0.3288 & 0.3504\tabularnewline
+KNN & Rose\_both & 0.3175 & 0.2222 & 0.2169 & 0.2868\tabularnewline
+KNN & Smote & 0.3636 & 0.2752 & 0.2857 & 0.3333\tabularnewline
+NaiveBayes & no\_sampling & 0.4348 & 0.2812 & 0.1739 &
+0.1194\tabularnewline
+NaiveBayes & oversampling & 0.3279 & 0.2833 & 0.2456 &
+0.2941\tabularnewline
+NaiveBayes & undersampling & 0.3279 & 0.2667 & 0.3265 &
+0.2737\tabularnewline
+NaiveBayes & Rose\_both & 0.3571 & 0.2432 & 0.1379 &
+0.2900\tabularnewline
+NaiveBayes & Smote & 0.3571 & 0.2906 & 0.2667 & 0.3457\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}llrrrr@{}}
+\caption{Accuracy by Model/Position and Sampling on 2014 unsampled
+testing data}\tabularnewline
+\toprule
+Method & Sampling & QB\_Acc & WR\_Acc & RB\_Acc &
+Together\_Acc\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Method & Sampling & QB\_Acc & WR\_Acc & RB\_Acc &
+Together\_Acc\tabularnewline
+\midrule
+\endhead
+ClassificationTree & no\_sampling & 0.8707 & 0.8911 & 0.9082 &
+0.9000\tabularnewline
+ClassificationTree & oversampling & 0.7586 & 0.7933 & 0.8316 &
+0.7493\tabularnewline
+ClassificationTree & undersampling & 0.6293 & 0.7765 & 0.7806 &
+0.7448\tabularnewline
+ClassificationTree & Rose\_both & 0.7069 & 0.7598 & 0.7194 &
+0.7179\tabularnewline
+ClassificationTree & Smote & 0.7500 & 0.7877 & 0.6786 &
+0.7507\tabularnewline
+randomForest & no\_sampling & 0.8534 & 0.9078 & 0.9133 &
+0.9000\tabularnewline
+randomForest & oversampling & 0.8276 & 0.8855 & 0.8724 &
+0.8851\tabularnewline
+randomForest & undersampling & 0.6466 & 0.7933 & 0.7602 &
+0.7612\tabularnewline
+randomForest & Rose\_both & 0.7672 & 0.8436 & 0.8367 &
+0.8179\tabularnewline
+randomForest & Smote & 0.8103 & 0.8520 & 0.8418 & 0.8433\tabularnewline
+ANN & no\_sampling & 0.9138 & 0.9022 & 0.9184 & 0.9119\tabularnewline
+ANN & oversampling & 0.5690 & 0.6648 & 0.6071 & 0.6209\tabularnewline
+ANN & undersampling & 0.5431 & 0.6564 & 0.6071 & 0.6418\tabularnewline
+ANN & Rose\_both & 0.5690 & 0.6480 & 0.5969 & 0.6284\tabularnewline
+ANN & Smote & 0.5862 & 0.5922 & 0.5867 & 0.6000\tabularnewline
+KNN & no\_sampling & 0.8621 & 0.9330 & 0.9388 & 0.9269\tabularnewline
+KNN & oversampling & 0.6638 & 0.7793 & 0.6786 & 0.7746\tabularnewline
+KNN & undersampling & 0.6379 & 0.8324 & 0.7500 & 0.7731\tabularnewline
+KNN & Rose\_both & 0.6293 & 0.7067 & 0.6684 & 0.7104\tabularnewline
+KNN & Smote & 0.6983 & 0.7793 & 0.7194 & 0.7672\tabularnewline
+NaiveBayes & no\_sampling & 0.7759 & 0.8715 & 0.9031 &
+0.9119\tabularnewline
+NaiveBayes & oversampling & 0.6466 & 0.7598 & 0.7806 &
+0.7851\tabularnewline
+NaiveBayes & undersampling & 0.6466 & 0.7542 & 0.8316 &
+0.7940\tabularnewline
+NaiveBayes & Rose\_both & 0.6897 & 0.6872 & 0.8724 &
+0.7881\tabularnewline
+NaiveBayes & Smote & 0.6897 & 0.7682 & 0.6633 & 0.8418\tabularnewline
 \bottomrule
 \end{longtable}
 
@@ -204,7 +259,7 @@ We can see these two tendencies in the models:
 \begin{itemize}
 \tightlist
 \item
-  Better performance with unsampled data, than with sampled data
+  Mostly better performance with unsampled data, than with sampled data
 \item
   Better performance when we split the positions manually
 \end{itemize}
@@ -212,25 +267,21 @@ We can see these two tendencies in the models:
 \hypertarget{our-best-models}{%
 \subsection{Our best models}\label{our-best-models}}
 
-With regards to the business case, we now need to decide which
-model/models we will use to predict the 2014 NFL Draft. Here you can see
-the best model/sampling combination for all positions.
-
-\begin{longtable}[]{@{}lllr@{}}
+\begin{longtable}[]{@{}lllrr@{}}
 \caption{The best model/sampling combinations by
 position}\tabularnewline
 \toprule
-Position & Method & Sampling & Accuracy\tabularnewline
+Position & Method & Sampling & F1 & Accuracy\tabularnewline
 \midrule
 \endfirsthead
 \toprule
-Position & Method & Sampling & Accuracy\tabularnewline
+Position & Method & Sampling & F1 & Accuracy\tabularnewline
 \midrule
 \endhead
-QB & randomForest & no\_sampling & 1.0000\tabularnewline
-WR & randomForest & oversampling & 0.9985\tabularnewline
-RB & randomForest & no\_sampling & 1.0000\tabularnewline
-Together & randomForest & oversampling & 0.9996\tabularnewline
+QB & ANN & no\_sampling & 0.6154 & 0.9138\tabularnewline
+WR & randomForest & Rose\_both & 0.4043 & 0.8436\tabularnewline
+RB & ANN & no\_sampling & 0.5294 & 0.9184\tabularnewline
+Together & ANN & no\_sampling & 0.4779 & 0.9119\tabularnewline
 \bottomrule
 \end{longtable}
 
@@ -246,6 +297,20 @@ to the unsampled but filtered data, which only contains 12.4\% of
 drafted players. This means, that a model predicting ``not drafted'' for
 every player would not perform much worse, since it would still have an
 accuracy of 87.6\%.
+
+\hypertarget{business-case-predicting-the-2014-nfl-draft}{%
+\subsection{Business case: Predicting the 2014 NFL
+Draft}\label{business-case-predicting-the-2014-nfl-draft}}
+
+According to this analysis, we should choose random forest to predict
+which Quarterbacks, Running Backs and Wide Receivers will be picked in
+the 2014 NFL Draft. We will first have a look at the results we get,
+using the eight best models, since they are very close with their
+performance on the set from 2007 to 2013.
+
+The 2014 data set only contains 7.01\% drafted players. Looking at the
+performance of this model, we see, that the model does not predict Here
+we see, that the model only
 
 Interpretations of models are always quite difficult, but the following
 thoughts are pretty likely to be true, according to the TP/TN/FP/FN. Our
@@ -265,7 +330,7 @@ describes it, and \(\epsilon\) is the noise, which appears to be random.
 With our models (the left part) we try to predict a \(\hat{Y}\), which
 shall be as close as possible to the true Y.
 
-\[\hat{f}(X) = \hat{Y} \approx Y = f(X) + \epsilon\] Looking at this
+\[\hat{f}(X) = \hat{Y} \approx Y = f(X) + \varepsilon\] Looking at this
 inequation we can think of three possibilities, why our models make so
 many mistakes:
 
@@ -277,7 +342,7 @@ many mistakes:
 \item
   The data is not good enough
 \item
-  The NFL draft contains a pretty large \(\epsilon\)
+  The NFL draft contains a pretty large \(\varepsilon\)
 \end{itemize}
 
 

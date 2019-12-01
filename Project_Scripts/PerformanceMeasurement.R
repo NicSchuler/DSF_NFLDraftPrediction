@@ -139,8 +139,35 @@ for(i in 1:nrow(PerfMeasTibble14)){
   PerfMeasTibble14$Together_F1[i] = 2*(PerfMeasTibble14$Together_Pre[i]*PerfMeasTibble14$Together_Rec[i])/(PerfMeasTibble14$Together_Pre[i] + PerfMeasTibble14$Together_Rec[i])
 }
 
+# Look for the best Combinations
+# Create an empty dataframe
+ResultTibble14 = data.frame(Position = c("QB", "WR", "RB", "Together"), Method = NA, Sampling = NA, F1 = NA, Accuracy = NA)
+
+# Fill the Methods
+ResultTibble14$Method[1] = PerfMeasTibble14$Method[which.max(PerfMeasTibble14$QB_F1)]
+ResultTibble14$Method[2] = PerfMeasTibble14$Method[which.max(PerfMeasTibble14$WR_F1)]
+ResultTibble14$Method[3] = PerfMeasTibble14$Method[which.max(PerfMeasTibble14$RB_F1)]
+ResultTibble14$Method[4] = PerfMeasTibble14$Method[which.max(PerfMeasTibble14$Together_F1)]
+
+# Fill the Sampling methods
+ResultTibble14$Sampling[1] = PerfMeasTibble14$Sampling[which.max(PerfMeasTibble14$QB_F1)]
+ResultTibble14$Sampling[2] = PerfMeasTibble14$Sampling[which.max(PerfMeasTibble14$WR_F1)]
+ResultTibble14$Sampling[3] = PerfMeasTibble14$Sampling[which.max(PerfMeasTibble14$RB_F1)]
+ResultTibble14$Sampling[4] = PerfMeasTibble14$Sampling[which.max(PerfMeasTibble14$Together_F1)]
+
+# Fill the value of F1-Score
+ResultTibble14$F1[1] = PerfMeasTibble14$QB_F1[which.max(PerfMeasTibble14$QB_F1)]
+ResultTibble14$F1[2] = PerfMeasTibble14$WR_F1[which.max(PerfMeasTibble14$WR_F1)]
+ResultTibble14$F1[3] = PerfMeasTibble14$RB_F1[which.max(PerfMeasTibble14$RB_F1)]
+ResultTibble14$F1[4] = PerfMeasTibble14$Together_F1[which.max(PerfMeasTibble14$Together_F1)]
+
+# Fill the value of Accuracy
+ResultTibble14$Accuracy[1] = PerfMeasTibble14$QB_Acc[which.max(PerfMeasTibble14$QB_F1)]
+ResultTibble14$Accuracy[2] = PerfMeasTibble14$WR_Acc[which.max(PerfMeasTibble14$WR_F1)]
+ResultTibble14$Accuracy[3] = PerfMeasTibble14$RB_Acc[which.max(PerfMeasTibble14$RB_F1)]
+ResultTibble14$Accuracy[4] = PerfMeasTibble14$Together_Acc[which.max(PerfMeasTibble14$Together_F1)]
 
 
 
-
-save(PerfMeasTibble14, file="../Data/PerformanceMeasurement/PerfMeasRF14.Rdata")
+save(ResultTibble14, file="../Data/PerformanceMeasurement/BestModels14.Rdata")
+save(PerfMeasTibble14, file="../Data/PerformanceMeasurement/PerfMeasAllModels14.Rdata")
