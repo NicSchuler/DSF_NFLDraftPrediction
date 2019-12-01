@@ -48,16 +48,42 @@ knitr::kable(ResultTibble, caption = "The best model/sampling combinations by po
 ## Discussion
 The great and sometimes perfect results of the random forest model show a high risk of a massive overfit. The other models with accuracies between 89% and 93% seem to be very good at the first sight. But we have to keep the reason for filtering out the players with <10 played games and sampling the data in mind. Here we applied the models to the unsampled but filtered data, which only contains 12.4% of drafted players. This means, that a model predicting "not drafted" for every player would not perform much worse, since it would still have an accuracy of 87.6%. 
 
+
+## Business case: Predicting the 2014 NFL Draft
+According to this analysis, we should choose random forest to predict which Quarterbacks, Running Backs and Wide Receivers will be picked in the 2014 NFL Draft. We will first have a look at the results we get, using the eight best models, since they are very close with their performance on the set from 2007 to 2013. 
+
+```{r echo=FALSE}
+library(tidyverse)
+load("../PerformanceMeasurement/PerfMeasRF14.Rdata")
+PerfMeasTibble14 = PerfMeasTibble14 %>%
+  filter(Sampling %in% c("no_sampling", "oversampling"))
+```
+```{r echo = FALSE}
+knitr::kable(PerfMeasTibble14, caption = "Ratio of correct classification", digits=4)
+```
+
+The 2014 data set only contains 7.01% drafted players. Looking at the performance of this model, we see, that the model does not predict 
+Here we see, that the model only 
+
+
+
+
+
+
+
+
+
+
 Interpretations of models are always quite difficult, but the following thoughts are pretty likely to be true, according to the TP/TN/FP/FN. Our models are pretty good at predicting the likelihood of players being drafted that didn't perform very well in college football being low. It probably also does not too bad in predicting great players to be drafted, that nearly must be picked (and probably are picked early in the draft). But there is probably much room for improvement for all the players that still performed well in college, and might or might not be drafted.
 
 We would like to close the circle to one of our fist lessons in machine learning, in which we were taught the following very high level formula for models (the right part). Y denotes the true outcome (in our case whether a player is drafted or not), f(X) is the true pattern that describes it, and $\epsilon$ is the noise, which appears to be random. With our models (the left part) we try to predict a $\hat{Y}$, which shall be as close as possible to the true Y.
 
-$$\hat{f}(X) = \hat{Y} \approx Y = f(X) + \epsilon$$
+$$\hat{f}(X) = \hat{Y} \approx Y = f(X) + \varepsilon$$
 Looking at this inequation we can think of three possibilities, why our models make so many mistakes:
 
 * Our models $\hat{f_i}(X)$ do not include enough variables and/or are not sophisticated enough
 * The data is not good enough
-* The NFL draft contains a pretty large $\epsilon$ 
+* The NFL draft contains a pretty large $\varepsilon$
 
 
 
