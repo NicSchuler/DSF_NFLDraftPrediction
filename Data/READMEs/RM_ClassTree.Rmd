@@ -40,21 +40,37 @@ for(i in 1:nrow(ClassificationTreePerfMeas)){
   PerfMeasPerc$Together[i] = (ClassificationTreePerfMeas$Together_TP[i] + ClassificationTreePerfMeas$Together_TN[i])/(ClassificationTreePerfMeas$Together_TP[i] + ClassificationTreePerfMeas$Together_TN[i] + ClassificationTreePerfMeas$Together_FN[i] + ClassificationTreePerfMeas$Together_FP[i])
 }
 
+load("../PerformanceMeasurement/ClassificationTreePerfMeas14.Rdata")
+ClassificationTreePerfMeas14_1 = ClassificationTreePerfMeas14 %>%
+  select(-c(Method, Sampling))
+PerfMeas14 = as.data.frame(t(ClassificationTreePerfMeas14_1))
+names(PerfMeas14) = c("No Sampling", "Oversampling", "Undersampling", "Rose Both", "Smote")
+PerfMeasPerc14 = data.frame(Sampling = ClassificationTreePerfMeas14$Sampling, QB = NA, WR = NA, RB = NA, Together = NA, stringsAsFactors = FALSE)
+for(i in 1:nrow(ClassificationTreePerfMeas14)){
+  PerfMeasPerc14$QB[i] = (ClassificationTreePerfMeas14$QB_TP[i] + ClassificationTreePerfMeas14$QB_TN[i])/(ClassificationTreePerfMeas14$QB_TP[i] + ClassificationTreePerfMeas14$QB_TN[i] + ClassificationTreePerfMeas14$QB_FN[i] + ClassificationTreePerfMeas14$QB_FP[i])
+  PerfMeasPerc14$WR[i] = (ClassificationTreePerfMeas14$WR_TP[i] + ClassificationTreePerfMeas14$WR_TN[i])/(ClassificationTreePerfMeas14$WR_TP[i] + ClassificationTreePerfMeas14$WR_TN[i] + ClassificationTreePerfMeas14$WR_FN[i] + ClassificationTreePerfMeas14$WR_FP[i])
+  PerfMeasPerc14$RB[i] = (ClassificationTreePerfMeas14$RB_TP[i] + ClassificationTreePerfMeas14$RB_TN[i])/(ClassificationTreePerfMeas14$RB_TP[i] + ClassificationTreePerfMeas14$RB_TN[i] + ClassificationTreePerfMeas14$RB_FN[i] + ClassificationTreePerfMeas14$RB_FP[i])
+  PerfMeasPerc14$Together[i] = (ClassificationTreePerfMeas14$Together_TP[i] + ClassificationTreePerfMeas14$Together_TN[i])/(ClassificationTreePerfMeas14$Together_TP[i] + ClassificationTreePerfMeas14$Together_TN[i] + ClassificationTreePerfMeas14$Together_FN[i] + ClassificationTreePerfMeas14$Together_FP[i])
+}
 ```
 
 ```{r echo = FALSE}
-knitr::kable(PerfMeas, caption = "True Positives/Negatives and False Positives/Negatives of the trees for the different models")
+knitr::kable(PerfMeas, caption = "True Positives/Negatives and False Positives/Negatives of the trees for the different models on training data")
+knitr::kable(PerfMeas14, caption = "True Positives/Negatives and False Positives/Negatives of the trees for the different models on testing data")
 ```
 
 In order to compare them better, we will now have a look at the ratio of correct classification, which is equal to:
 
-\begin{center}
-$\frac{Correct Classifications}{All Classifications} = \frac{TP + TN}{TP+TP+FP+FN}$
-\end{center}
+$$\frac{Correct Classifications}{All Classifications} = \frac{TP + TN}{TP+TP+FP+FN}$$
 
 
 ```{r echo = FALSE}
-knitr::kable(PerfMeasPerc, caption = "Percentage of right classifications", digits=4)
+knitr::kable(PerfMeasPerc, caption = "Percentage of right classifications on training data", digits=4)
+```
+
+\newpage
+```{r echo = FALSE}
+knitr::kable(PerfMeasPerc14, caption = "Percentage of right classifications on testing data", digits=4)
 ```
 
 ## Conclusion
@@ -63,9 +79,8 @@ As we see, the models for the manually separated positions mostly perform better
 Within the Classification tree models, the highest accuracy could be obtained, by using the three models for the manually separated positions with a weighted average accuracy of 91.74%. Keeping in mind, that a model that always predicts '0' would also have an accuracy of 87.6%, this models performance, which looks very good on the first sight, is only a quite small improvement.
 
 
-
-
 ## Appendix
+\newpage
 
 ![Tree for QB/WR/RB together on unsampled data](../../Project_Scripts/TogethertreeNS.jpg){#id .class width=50%}
 

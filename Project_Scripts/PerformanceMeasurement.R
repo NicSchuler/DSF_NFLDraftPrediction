@@ -96,8 +96,9 @@ load("../Data/PerformanceMeasurement/ClassificationTreePerfMeas14.Rdata")
 load("../Data/PerformanceMeasurement/ANNPerfMeas2014.Rdata")
 load("../Data/PerformanceMeasurement/NaiveBayesPerfMeasTest.Rdata")
 load("../Data/PerformanceMeasurement/KNNPerfMeasTest.Rdata")
+load("../Data/PerformanceMeasurement/LogisticRegressionPerfMeas2014.Rdata")
 
-PerfMeas14 = as.data.frame(rbind(ClassificationTreePerfMeas14, randomForestPerfMeas2014, ANNPerfMeas2014, KNNPerfMeasTest, NaiveBayesPerfMeasTest))
+PerfMeas14 = as.data.frame(rbind(ClassificationTreePerfMeas14, randomForestPerfMeas2014, ANNPerfMeas2014, KNNPerfMeasTest, NaiveBayesPerfMeasTest, LogisticRegressionPerfMeas2014))
 
 CheckTibble14 = data.frame(Method = PerfMeas14$Method, Sampling = PerfMeas14$Sampling, QB = NA, WR = NA, RB = NA, Together = NA, stringsAsFactors = FALSE)
 for(i in 1:nrow(PerfMeas14)){

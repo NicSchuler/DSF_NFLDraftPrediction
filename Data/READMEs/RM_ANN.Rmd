@@ -80,9 +80,17 @@ In order to gain an oversight of the model performance, the ANN models are teste
 ```{r, include=FALSE}
 library(tidyverse)
 load("../PerformanceMeasurement/ANNPerfMeas.Rdata")
+ANNPerfMeas1 = ANNPerfMeas %>%
+  select(-c(Method, Sampling))
+PerfMeas = as.data.frame(t(ANNPerfMeas1))
+names(PerfMeas) = c("No Sampling", "Oversampling", "Undersampling", "Rose Both", "Smote")
 load("../PerformanceMeasurement/ANNPerfMeas2014.Rdata")
+ANNPerfMeas2014_1 = ANNPerfMeas2014 %>%
+  select(-c(Method, Sampling))
+PerfMeas2014 = as.data.frame(t(ANNPerfMeas2014_1))
+names(PerfMeas2014) = c("No Sampling", "Oversampling", "Undersampling", "Rose Both", "Smote")
 ```
 ```{r echo = FALSE}
-knitr::kable(ANNPerfMeas, caption = "training data performance")
-knitr::kable(ANNPerfMeas2014, caption = "testing data performance")
+knitr::kable(PerfMeas, caption = "training data performance")
+knitr::kable(PerfMeas2014, caption = "testing data performance")
 ```

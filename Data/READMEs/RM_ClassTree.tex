@@ -148,7 +148,7 @@ from 2007 to 2013 to compare the classification errors.
 
 \begin{longtable}[]{@{}lrrrrr@{}}
 \caption{True Positives/Negatives and False Positives/Negatives of the
-trees for the different models}\tabularnewline
+trees for the different models on training data}\tabularnewline
 \toprule
 & No Sampling & Oversampling & Undersampling & Rose Both &
 Smote\tabularnewline
@@ -178,15 +178,46 @@ Together\_FN & 211 & 36 & 37 & 38 & 56\tabularnewline
 \bottomrule
 \end{longtable}
 
+\begin{longtable}[]{@{}lrrrrr@{}}
+\caption{True Positives/Negatives and False Positives/Negatives of the
+trees for the different models on testing data}\tabularnewline
+\toprule
+& No Sampling & Oversampling & Undersampling & Rose Both &
+Smote\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+& No Sampling & Oversampling & Undersampling & Rose Both &
+Smote\tabularnewline
+\midrule
+\endhead
+QB\_TP & 8 & 9 & 10 & 9 & 9\tabularnewline
+QB\_TN & 93 & 79 & 63 & 73 & 78\tabularnewline
+QB\_FP & 12 & 26 & 42 & 32 & 27\tabularnewline
+QB\_FN & 3 & 2 & 1 & 2 & 2\tabularnewline
+WR\_TP & 4 & 21 & 21 & 21 & 21\tabularnewline
+WR\_TN & 315 & 263 & 257 & 251 & 261\tabularnewline
+WR\_FP & 21 & 73 & 79 & 85 & 75\tabularnewline
+WR\_FN & 18 & 1 & 1 & 1 & 1\tabularnewline
+RB\_TP & 6 & 10 & 11 & 10 & 12\tabularnewline
+RB\_TN & 172 & 153 & 142 & 131 & 121\tabularnewline
+RB\_FP & 10 & 29 & 40 & 51 & 61\tabularnewline
+RB\_FN & 8 & 4 & 3 & 4 & 2\tabularnewline
+Together\_TP & 10 & 41 & 42 & 37 & 43\tabularnewline
+Together\_TN & 593 & 461 & 457 & 444 & 460\tabularnewline
+Together\_FP & 30 & 162 & 166 & 179 & 163\tabularnewline
+Together\_FN & 37 & 6 & 5 & 10 & 4\tabularnewline
+\bottomrule
+\end{longtable}
+
 In order to compare them better, we will now have a look at the ratio of
 correct classification, which is equal to:
 
-\begin{center}
-$\frac{Correct Classifications}{All Classifications} = \frac{TP + TN}{TP+TP+FP+FN}$
-\end{center}
+\[\frac{Correct Classifications}{All Classifications} = \frac{TP + TN}{TP+TP+FP+FN}\]
 
 \begin{longtable}[]{@{}lrrrr@{}}
-\caption{Percentage of right classifications}\tabularnewline
+\caption{Percentage of right classifications on training
+data}\tabularnewline
 \toprule
 Sampling & QB & WR & RB & Together\tabularnewline
 \midrule
@@ -200,6 +231,27 @@ oversampling & 0.8780 & 0.8415 & 0.8631 & 0.7930\tabularnewline
 undersampling & 0.7098 & 0.8254 & 0.8137 & 0.7938\tabularnewline
 Rose\_both & 0.8317 & 0.7985 & 0.8057 & 0.7746\tabularnewline
 Smote & 0.8439 & 0.8062 & 0.7850 & 0.7998\tabularnewline
+\bottomrule
+\end{longtable}
+
+\newpage
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Percentage of right classifications on testing
+data}\tabularnewline
+\toprule
+Sampling & QB & WR & RB & Together\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Sampling & QB & WR & RB & Together\tabularnewline
+\midrule
+\endhead
+no\_sampling & 0.8707 & 0.8911 & 0.9082 & 0.9000\tabularnewline
+oversampling & 0.7586 & 0.7933 & 0.8316 & 0.7493\tabularnewline
+undersampling & 0.6293 & 0.7765 & 0.7806 & 0.7448\tabularnewline
+Rose\_both & 0.7069 & 0.7598 & 0.7194 & 0.7179\tabularnewline
+Smote & 0.7500 & 0.7877 & 0.6786 & 0.7507\tabularnewline
 \bottomrule
 \end{longtable}
 
@@ -222,6 +274,8 @@ only a quite small improvement.
 
 \hypertarget{appendix}{%
 \subsection{Appendix}\label{appendix}}
+
+\newpage
 
 \begin{figure}
 \hypertarget{id}{%
