@@ -35,6 +35,7 @@ cleanData_QB <- cleanData %>% filter(., Year < 2014, Position == "QB") %>% drop_
 # cleanData_QB <- cleanData_s %>% filter(., Year < 2014, Position == "QB") %>% drop_na(.) # use this line when working with sampled data
 
 x <- cleanData_QB %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
+# x <- cleanData_QB %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted) # use this line with SMOTE sampling
 
 # Randomly shuffle the data for cross validation
 set.seed(6969)
@@ -132,6 +133,7 @@ cleanData_RB <- cleanData %>% filter(., Year < 2014, Position == "RB") %>% drop_
 # cleanData_RB <- cleanData_s %>% filter(., Year < 2014, Position == "RB") %>% drop_na(.) # use this line when working with sampled data
 
 x <- cleanData_RB %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
+# x <- cleanData_RB %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted) # use this line with SMOTE sampling
 
 # Randomly shuffle the data for cross validation
 set.seed(6969)
@@ -229,6 +231,7 @@ cleanData_WR <- cleanData %>% filter(., Year < 2014, Position == "WR") %>% drop_
 # cleanData_WR <- cleanData_s %>% filter(., Year < 2014, Position == "WR") %>% drop_na(.) # use this line when working with sampled data
 
 x <- cleanData_WR %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
+# x <- cleanData_WR %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted) # use this line with SMOTE sampling
 
 # Randomly shuffle the data for cross validation
 set.seed(6969)
@@ -326,6 +329,7 @@ cleanData_all <- cleanData %>% filter(., Year < 2014) %>% drop_na(.)
 # cleanData_all <- cleanData_s %>% filter(., Year < 2014) %>% drop_na(.) # use this line when working with sampled data
 
 x <- cleanData_all %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
+# x <- cleanData_all %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted) # use this line with SMOTE sampling
 
 # Randomly shuffle the data for cross validation
 set.seed(6969)
