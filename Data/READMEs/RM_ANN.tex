@@ -1,0 +1,371 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={README for Artificial Neural Network (ANN)},
+            pdfauthor={Group 2},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{README for Artificial Neural Network (ANN)}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Group 2}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{02 12 2019}
+
+
+\begin{document}
+\maketitle
+
+\textbf{Corresponding R Script:}
+\href{https://github.com/NicSchuler/DSF_NFLDraftPrediction/blob/master/Project_Scripts/ANN.R}{ANN}
+
+\hypertarget{introduction}{%
+\section{1. Introduction}\label{introduction}}
+
+The goal of this project is to make a prediction about the likelilhood
+of College Football (CFB) players to be drafted into the professional
+football league (NFL). In order to achieve this, different aspects of a
+CFB player's college career are being used as features
+\(p_{1}, ..., p_{n}\). These include game statistics such as rush
+attempts \texttt{Rush.Att} or yards ran after a pass \texttt{Pass.Yard}.
+To solve this problem, one of the methods employed is an artificial
+neural network (ANN). ANNs consist of connected nodes and are not too
+dissimilar to a human brain in that they derive their ``intelligence''
+from the structure of their ``neurons'' and the strength of the
+``synapses'' (edges) between these nodes. For this project, an ANN with
+one input layer with the size of the number of features in the
+underlying dataset, one hidden layer with ten nodes and an output layer
+of the size of one was used to solve the CFB player classification
+problem. The main advantages of ANN include its ability to model
+complex, non-linear relationships between input and output variables,
+its ability to infer generalized relationships on data it has never seen
+before, its robustness towards local minima in the cost function as well
+as its universality property, meaning it can fit any problem, provided
+it is sufficiently large.
+
+\hypertarget{ann-setup-and-backpropagation}{%
+\section{2. ANN Setup and
+Backpropagation}\label{ann-setup-and-backpropagation}}
+
+The feedforward ANN used in this project is set up with three layers: an
+input layer of the size of the number of features in the data, one
+hidden layer consisting of ten nodes and an output layer containing a
+single node. Having one hidden layer was deemed to be sufficient due to
+the complexity of the underlying problem and the rule of thumb commonly
+used to determine the size of the hidden layer is to take the mean
+between the number of nodes in the input layer and the output layer. The
+output layer was constructed to have one single node because the
+classification problem at hand only determines between levels of one
+class (drafted or not). A more generalized approach to ANN setup with
+respects to the hidden layer would be to go through the process of
+pruning, meaning starting out with a number of nodes that is rather too
+large for the underlying problem and then subsequently eliminating
+acitvations with corresponding weights close to zero.
+
+In order to train the ANN, a process called backpropagation is applied.
+This refers to the act of feeding labeled data into the network,
+analyzing the cost (squared difference between the desired and actual
+output) of the current combination of biases \(b_{1},...,b_{i}\),
+activations \(a_{1},...,a_{i}\) and weights \(w_{1},...,w_{i}\) and
+adjusting according to their influence on any given node in the
+direction of greatest descent in the cost function \(\nabla_{a}C\).
+Every acitvation \(a_L\) of layer \(L\) is given by the activation
+function \(\sigma'(z_{L})\) with \(z_{L}=w_{L}a_{L-1}+b_{L}\). In this
+project a logistic function was chosen as the activation function:
+
+\[\sigma'(z)=\frac{1}{1+e^{-z}}\]
+
+Subsequently, all changing effects for all neurons in the network are
+added together and propagated backwards through the network, hence the
+name backpropagation. This is repeated for all instances of training
+data resulting in an average change over all training data which is
+proportional to the negative gradient of the cost function:
+
+\[\delta_L=\nabla_aC\odot\sigma'(z_L)\]
+
+Because every activation is dependent on the bias \(b\) and weight \(w\)
+as well as the connected activations from the previous layer, the total
+change in the cost function is also dependent on the \(z\) which sums up
+these values for the previous layer (the layer index \(L\) is given as a
+superscript):
+
+\[\frac{\partial C_0}{\partial w^{L}}=\frac{\partial z^L}{\partial w^L}\frac{\partial a^L}{\partial z^L}\frac{\partial C_0^L}{\partial a^L}\]
+
+When combined with the sensitivity of the cost function to changes in
+bias \(\frac{\partial C_0}{\partial b^L}\), this yields the combined
+change to be made (the previous layer is indexed by \(k\) and the
+current layer is indexed by \(j\)):
+
+\[\frac{\partial C}{\partial w_{jk}^l}=a_{k}^{l-1}\delta_j^l\,\, and \,\,\frac{\partial C}{\partial b_j^l}=\delta_j^l, \,\, with\,\,\delta^l=((w^{l+1})^T\delta^{l+1})\odot\sigma'(z^l)\]
+
+\hypertarget{data-standardization}{%
+\section{3. Data Standardization}\label{data-standardization}}
+
+Because an ANN posesses the ability to infer generalized relationships
+on the training data without imposing any limitations on distribution
+etc., it is not sensitive to differently scaled or centered features and
+therefore does not change depending on monotonic transformation of the
+input data. This means that there is no need to standardize the data
+used, event though it is differently scaled across features (see
+\href{https://github.com/NicSchuler/DSF_NFLDraftPrediction/tree/master/Data/READMEs}{RM\_DataHandling})
+
+\hypertarget{tuning-the-model}{%
+\section{4. Tuning the model}\label{tuning-the-model}}
+
+As previously described, the ANN model could be tuned in terms of number
+of hidden layers and especially on the number of nodes in the hidden
+layer(s). Due to time and ressource constraints of this project, this is
+not done in the ANN script, which leaves room for future improvement.
+For the case at hand it is simply assumed to be sufficient to have one
+hidden layer and the number of hidden nodes is determined by the general
+rule of thumb descriped above. As the topic of ANNs is exceedingly deep,
+there are a multitude of optimization functions available to optimize
+ANN performance such as the Beale function, which, again due to project
+constraints, have been neglected in this project.
+
+\hypertarget{implementation-in-r}{%
+\section{5. Implementation in R}\label{implementation-in-r}}
+
+The application of ANN in R is explained below. All code is included in
+the
+\href{https://github.com/NicSchuler/DSF_NFLDraftPrediction/blob/master/Project_Scripts/ANN.R}{ANN
+script} and step-by-step comments are provided.
+
+\hypertarget{training-the-ann-model}{%
+\subsection{5.1 Training the ANN Model}\label{training-the-ann-model}}
+
+For training the data from years 2007 to 2013 of all unsampled and
+sampled datasets are used respectively. The ANN model is trained using
+the \texttt{nlminb()} function of the \texttt{h2o} package which
+implements quasi-Newton optimization methods. These are used in order to
+reduce computational power that would be needed for full Newton's
+methods in order to find the twice differentiable global minimum of a
+complex non-linear function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{BP_pred <-}\StringTok{ }\KeywordTok{nlminb}\NormalTok{(}\DataTypeTok{start =}\NormalTok{ ANN_par,}
+                 \DataTypeTok{objective =}\NormalTok{ ANN_cost, }
+                 \DataTypeTok{gradient =}\NormalTok{ ANN_grad,}
+                 \DataTypeTok{hessian =} \OtherTok{NULL}\NormalTok{,}
+                 \DataTypeTok{L_i_size =}\NormalTok{ L_i_size,}
+                 \DataTypeTok{L_h_size =}\NormalTok{ L_h_size,}
+                 \DataTypeTok{L_o_size =}\NormalTok{ L_o_size,}
+                 \DataTypeTok{x =}\NormalTok{ x, }\DataTypeTok{y =}\NormalTok{ y,}
+                 \DataTypeTok{lambda =} \DecValTok{1}\NormalTok{,}
+                 \DataTypeTok{control =}\NormalTok{ options)}
+\end{Highlighting}
+\end{Shaded}
+
+As the \texttt{start} parameter, the combined thetas containing only 1s
+is passed. The \texttt{ANN\_cost} and \texttt{ANN\_grad} functions have
+been previously defined as the cost and gradient function to optimize.
+The \texttt{L\_i\_size}, \texttt{L\_h\_size} and \texttt{L\_o\_size}
+arguments define the dimensions of the input, hidden and output layers
+as described above.
+
+The resulting vetor of the two thetas is then saved to be used for
+prediction on unlabeled testing data later on:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{BP_par <-}\StringTok{ }\NormalTok{BP_pred}\OperatorTok{$}\NormalTok{par}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{variable-importance}{%
+\subsection{5.2 Variable Importance}\label{variable-importance}}
+
+Largely due to the universality property of ANNs, variable importance
+and the construction of hypermodels including preliminary methods for
+variable selection have not been implemented. This is following the
+logic that an ANN should be capable of dealing with a mixture of
+features of differing importance by assigning very small weights to the
+corresponding nodes. Because it is not clear if the neural network is
+tuned optimally, it is not possible to give statements about the
+universality of the specific ANN used in this project. Because there is
+a possibility that the underlying ANN is oversimplified in respects to
+the problem at hand, this leaves room for future improvement.
+
+\hypertarget{model-performance}{%
+\subsection{5.3 Model Performance}\label{model-performance}}
+
+In order to gain an oversight of the model performance, the ANN models
+are tested on their training (using the years 2007 through 2013) and
+testing (using the year 2014) fit for all positions and all sampling
+methods. Both are based on unsampled data, allowing for the model's
+predictive ability on imbalanced class sizes, as they occur in the
+underlying business case, to be analyzed. The training and testing data
+performance can be viewed below (also see the
+\href{https://github.com/NicSchuler/DSF_NFLDraftPrediction/blob/master/Data/READMEs/RM_PerformanceMeasurement.pdf}{between
+model comparison}):
+
+\begin{longtable}[]{@{}llrrrrrrrrrrrrrrrr@{}}
+\caption{training data performance}\tabularnewline
+\toprule
+Method & Sampling & QB\_TP & QB\_TN & QB\_FP & QB\_FN & WR\_TP & WR\_TN
+& WR\_FP & WR\_FN & RB\_TP & RB\_TN & RB\_FP & RB\_FN & Together\_TP &
+Together\_TN & Together\_FP & Together\_FN\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Method & Sampling & QB\_TP & QB\_TN & QB\_FP & QB\_FN & WR\_TP & WR\_TN
+& WR\_FP & WR\_FN & RB\_TP & RB\_TN & RB\_FP & RB\_FN & Together\_TP &
+Together\_TN & Together\_FP & Together\_FN\tabularnewline
+\midrule
+\endhead
+ANN & no\_sampling & 32 & 316 & 41 & 21 & 81 & 1096 & 83 & 40 & 38 & 517
+& 52 & 21 & 140 & 1924 & 187 & 87\tabularnewline
+ANN & oversampling & 73 & 180 & 0 & 157 & 159 & 768 & 5 & 368 & 84 & 344
+& 6 & 194 & 313 & 1269 & 14 & 742\tabularnewline
+ANN & undersampling & 73 & 176 & 0 & 161 & 158 & 761 & 6 & 375 & 83 &
+347 & 7 & 191 & 311 & 1301 & 16 & 710\tabularnewline
+ANN & Rose\_both & 73 & 172 & 0 & 165 & 159 & 746 & 5 & 390 & 84 & 351 &
+6 & 187 & 314 & 1263 & 13 & 748\tabularnewline
+ANN & Smote & 72 & 199 & 1 & 138 & 162 & 708 & 2 & 428 & 84 & 334 & 6 &
+204 & 314 & 1229 & 13 & 782\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}llrrrrrrrrrrrrrrrr@{}}
+\caption{testing data performance}\tabularnewline
+\toprule
+Method & Sampling & QB\_TP & QB\_TN & QB\_FP & QB\_FN & WR\_TP & WR\_TN
+& WR\_FP & WR\_FN & RB\_TP & RB\_TN & RB\_FP & RB\_FN & Together\_TP &
+Together\_TN & Together\_FP & Together\_FN\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Method & Sampling & QB\_TP & QB\_TN & QB\_FP & QB\_FN & WR\_TP & WR\_TN
+& WR\_FP & WR\_FN & RB\_TP & RB\_TN & RB\_FP & RB\_FN & Together\_TP &
+Together\_TN & Together\_FP & Together\_FN\tabularnewline
+\midrule
+\endhead
+ANN & no\_sampling & 8 & 98 & 3 & 7 & 11 & 312 & 11 & 24 & 9 & 171 & 5 &
+11 & 27 & 584 & 20 & 39\tabularnewline
+ANN & oversampling & 10 & 56 & 1 & 49 & 22 & 216 & 0 & 120 & 12 & 107 &
+2 & 75 & 44 & 372 & 3 & 251\tabularnewline
+ANN & undersampling & 11 & 52 & 0 & 53 & 22 & 213 & 0 & 123 & 12 & 107 &
+2 & 75 & 44 & 386 & 3 & 237\tabularnewline
+ANN & Rose\_both & 11 & 55 & 0 & 50 & 21 & 211 & 1 & 125 & 12 & 105 & 2
+& 77 & 44 & 377 & 3 & 246\tabularnewline
+ANN & Smote & 10 & 58 & 1 & 47 & 22 & 190 & 0 & 146 & 12 & 103 & 2 & 79
+& 44 & 358 & 3 & 265\tabularnewline
+\bottomrule
+\end{longtable}
+
+
+\end{document}
