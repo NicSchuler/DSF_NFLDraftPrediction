@@ -354,7 +354,7 @@ predict_WR <- predict(NB_WR, newdata = Data2007to2013_WR)
 confusionMatrix(predict_WR, Data2007to2013_WR$Drafted)
 
 # Predictions
-predict_WR <- predict(KNN_WR, newdata=Data2007to2013_WR)
+predict_WR <- predict(NB_WR, newdata=Data2007to2013_WR)
 confusionMatrix(predict_WR, Data2007to2013_WR$Drafted)
 
 CheckList_WR = cbind.data.frame(Data2007to2013_WR$Drafted,predict_WR)
