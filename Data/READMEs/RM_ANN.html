@@ -425,125 +425,141 @@ summary {
 <caption>training data performance</caption>
 <thead>
 <tr class="header">
-<th align="left">Method</th>
-<th align="left">Sampling</th>
-<th align="right">QB_TP</th>
-<th align="right">QB_TN</th>
-<th align="right">QB_FP</th>
-<th align="right">QB_FN</th>
-<th align="right">WR_TP</th>
-<th align="right">WR_TN</th>
-<th align="right">WR_FP</th>
-<th align="right">WR_FN</th>
-<th align="right">RB_TP</th>
-<th align="right">RB_TN</th>
-<th align="right">RB_FP</th>
-<th align="right">RB_FN</th>
-<th align="right">Together_TP</th>
-<th align="right">Together_TN</th>
-<th align="right">Together_FP</th>
-<th align="right">Together_FN</th>
+<th></th>
+<th align="right">No Sampling</th>
+<th align="right">Oversampling</th>
+<th align="right">Undersampling</th>
+<th align="right">Rose Both</th>
+<th align="right">Smote</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">ANN</td>
-<td align="left">no_sampling</td>
+<td>QB_TP</td>
 <td align="right">32</td>
-<td align="right">316</td>
-<td align="right">41</td>
-<td align="right">21</td>
-<td align="right">81</td>
-<td align="right">1096</td>
-<td align="right">83</td>
-<td align="right">40</td>
-<td align="right">38</td>
-<td align="right">517</td>
-<td align="right">52</td>
-<td align="right">21</td>
-<td align="right">140</td>
-<td align="right">1924</td>
-<td align="right">187</td>
-<td align="right">87</td>
-</tr>
-<tr class="even">
-<td align="left">ANN</td>
-<td align="left">oversampling</td>
 <td align="right">73</td>
-<td align="right">180</td>
-<td align="right">0</td>
-<td align="right">157</td>
-<td align="right">159</td>
-<td align="right">768</td>
-<td align="right">5</td>
-<td align="right">368</td>
-<td align="right">84</td>
-<td align="right">344</td>
-<td align="right">6</td>
-<td align="right">194</td>
-<td align="right">313</td>
-<td align="right">1269</td>
-<td align="right">14</td>
-<td align="right">742</td>
-</tr>
-<tr class="odd">
-<td align="left">ANN</td>
-<td align="left">undersampling</td>
 <td align="right">73</td>
-<td align="right">176</td>
-<td align="right">0</td>
-<td align="right">161</td>
-<td align="right">158</td>
-<td align="right">761</td>
-<td align="right">6</td>
-<td align="right">375</td>
-<td align="right">83</td>
-<td align="right">347</td>
-<td align="right">7</td>
-<td align="right">191</td>
-<td align="right">311</td>
-<td align="right">1301</td>
-<td align="right">16</td>
-<td align="right">710</td>
-</tr>
-<tr class="even">
-<td align="left">ANN</td>
-<td align="left">Rose_both</td>
 <td align="right">73</td>
-<td align="right">172</td>
-<td align="right">0</td>
-<td align="right">165</td>
-<td align="right">159</td>
-<td align="right">746</td>
-<td align="right">5</td>
-<td align="right">390</td>
-<td align="right">84</td>
-<td align="right">351</td>
-<td align="right">6</td>
-<td align="right">187</td>
-<td align="right">314</td>
-<td align="right">1263</td>
-<td align="right">13</td>
-<td align="right">748</td>
-</tr>
-<tr class="odd">
-<td align="left">ANN</td>
-<td align="left">Smote</td>
 <td align="right">72</td>
+</tr>
+<tr class="even">
+<td>QB_TN</td>
+<td align="right">316</td>
+<td align="right">180</td>
+<td align="right">176</td>
+<td align="right">172</td>
 <td align="right">199</td>
+</tr>
+<tr class="odd">
+<td>QB_FP</td>
+<td align="right">41</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
 <td align="right">1</td>
+</tr>
+<tr class="even">
+<td>QB_FN</td>
+<td align="right">21</td>
+<td align="right">157</td>
+<td align="right">161</td>
+<td align="right">165</td>
 <td align="right">138</td>
+</tr>
+<tr class="odd">
+<td>WR_TP</td>
+<td align="right">81</td>
+<td align="right">159</td>
+<td align="right">158</td>
+<td align="right">159</td>
 <td align="right">162</td>
+</tr>
+<tr class="even">
+<td>WR_TN</td>
+<td align="right">1096</td>
+<td align="right">768</td>
+<td align="right">761</td>
+<td align="right">746</td>
 <td align="right">708</td>
-<td align="right">2</td>
-<td align="right">428</td>
-<td align="right">84</td>
-<td align="right">334</td>
+</tr>
+<tr class="odd">
+<td>WR_FP</td>
+<td align="right">83</td>
+<td align="right">5</td>
 <td align="right">6</td>
+<td align="right">5</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td>WR_FN</td>
+<td align="right">40</td>
+<td align="right">368</td>
+<td align="right">375</td>
+<td align="right">390</td>
+<td align="right">428</td>
+</tr>
+<tr class="odd">
+<td>RB_TP</td>
+<td align="right">38</td>
+<td align="right">84</td>
+<td align="right">83</td>
+<td align="right">84</td>
+<td align="right">84</td>
+</tr>
+<tr class="even">
+<td>RB_TN</td>
+<td align="right">517</td>
+<td align="right">344</td>
+<td align="right">347</td>
+<td align="right">351</td>
+<td align="right">334</td>
+</tr>
+<tr class="odd">
+<td>RB_FP</td>
+<td align="right">52</td>
+<td align="right">6</td>
+<td align="right">7</td>
+<td align="right">6</td>
+<td align="right">6</td>
+</tr>
+<tr class="even">
+<td>RB_FN</td>
+<td align="right">21</td>
+<td align="right">194</td>
+<td align="right">191</td>
+<td align="right">187</td>
 <td align="right">204</td>
+</tr>
+<tr class="odd">
+<td>Together_TP</td>
+<td align="right">140</td>
+<td align="right">313</td>
+<td align="right">311</td>
 <td align="right">314</td>
+<td align="right">314</td>
+</tr>
+<tr class="even">
+<td>Together_TN</td>
+<td align="right">1924</td>
+<td align="right">1269</td>
+<td align="right">1301</td>
+<td align="right">1263</td>
 <td align="right">1229</td>
+</tr>
+<tr class="odd">
+<td>Together_FP</td>
+<td align="right">187</td>
+<td align="right">14</td>
+<td align="right">16</td>
 <td align="right">13</td>
+<td align="right">13</td>
+</tr>
+<tr class="even">
+<td>Together_FN</td>
+<td align="right">87</td>
+<td align="right">742</td>
+<td align="right">710</td>
+<td align="right">748</td>
 <td align="right">782</td>
 </tr>
 </tbody>
@@ -552,125 +568,141 @@ summary {
 <caption>testing data performance</caption>
 <thead>
 <tr class="header">
-<th align="left">Method</th>
-<th align="left">Sampling</th>
-<th align="right">QB_TP</th>
-<th align="right">QB_TN</th>
-<th align="right">QB_FP</th>
-<th align="right">QB_FN</th>
-<th align="right">WR_TP</th>
-<th align="right">WR_TN</th>
-<th align="right">WR_FP</th>
-<th align="right">WR_FN</th>
-<th align="right">RB_TP</th>
-<th align="right">RB_TN</th>
-<th align="right">RB_FP</th>
-<th align="right">RB_FN</th>
-<th align="right">Together_TP</th>
-<th align="right">Together_TN</th>
-<th align="right">Together_FP</th>
-<th align="right">Together_FN</th>
+<th></th>
+<th align="right">No Sampling</th>
+<th align="right">Oversampling</th>
+<th align="right">Undersampling</th>
+<th align="right">Rose Both</th>
+<th align="right">Smote</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">ANN</td>
-<td align="left">no_sampling</td>
+<td>QB_TP</td>
 <td align="right">8</td>
+<td align="right">10</td>
+<td align="right">11</td>
+<td align="right">11</td>
+<td align="right">10</td>
+</tr>
+<tr class="even">
+<td>QB_TN</td>
 <td align="right">98</td>
-<td align="right">3</td>
-<td align="right">7</td>
-<td align="right">11</td>
-<td align="right">312</td>
-<td align="right">11</td>
-<td align="right">24</td>
-<td align="right">9</td>
-<td align="right">171</td>
-<td align="right">5</td>
-<td align="right">11</td>
-<td align="right">27</td>
-<td align="right">584</td>
-<td align="right">20</td>
-<td align="right">39</td>
-</tr>
-<tr class="even">
-<td align="left">ANN</td>
-<td align="left">oversampling</td>
-<td align="right">10</td>
 <td align="right">56</td>
-<td align="right">1</td>
-<td align="right">49</td>
-<td align="right">22</td>
-<td align="right">216</td>
-<td align="right">0</td>
-<td align="right">120</td>
-<td align="right">12</td>
-<td align="right">107</td>
-<td align="right">2</td>
-<td align="right">75</td>
-<td align="right">44</td>
-<td align="right">372</td>
-<td align="right">3</td>
-<td align="right">251</td>
+<td align="right">52</td>
+<td align="right">55</td>
+<td align="right">58</td>
 </tr>
 <tr class="odd">
-<td align="left">ANN</td>
-<td align="left">undersampling</td>
-<td align="right">11</td>
-<td align="right">52</td>
-<td align="right">0</td>
-<td align="right">53</td>
-<td align="right">22</td>
-<td align="right">213</td>
-<td align="right">0</td>
-<td align="right">123</td>
-<td align="right">12</td>
-<td align="right">107</td>
-<td align="right">2</td>
-<td align="right">75</td>
-<td align="right">44</td>
-<td align="right">386</td>
+<td>QB_FP</td>
 <td align="right">3</td>
-<td align="right">237</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
 </tr>
 <tr class="even">
-<td align="left">ANN</td>
-<td align="left">Rose_both</td>
-<td align="right">11</td>
-<td align="right">55</td>
-<td align="right">0</td>
+<td>QB_FN</td>
+<td align="right">7</td>
+<td align="right">49</td>
+<td align="right">53</td>
 <td align="right">50</td>
-<td align="right">21</td>
-<td align="right">211</td>
-<td align="right">1</td>
-<td align="right">125</td>
-<td align="right">12</td>
-<td align="right">105</td>
-<td align="right">2</td>
-<td align="right">77</td>
-<td align="right">44</td>
-<td align="right">377</td>
-<td align="right">3</td>
-<td align="right">246</td>
+<td align="right">47</td>
 </tr>
 <tr class="odd">
-<td align="left">ANN</td>
-<td align="left">Smote</td>
-<td align="right">10</td>
-<td align="right">58</td>
-<td align="right">1</td>
-<td align="right">47</td>
+<td>WR_TP</td>
+<td align="right">11</td>
 <td align="right">22</td>
+<td align="right">22</td>
+<td align="right">21</td>
+<td align="right">22</td>
+</tr>
+<tr class="even">
+<td>WR_TN</td>
+<td align="right">312</td>
+<td align="right">216</td>
+<td align="right">213</td>
+<td align="right">211</td>
 <td align="right">190</td>
+</tr>
+<tr class="odd">
+<td>WR_FP</td>
+<td align="right">11</td>
 <td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>WR_FN</td>
+<td align="right">24</td>
+<td align="right">120</td>
+<td align="right">123</td>
+<td align="right">125</td>
 <td align="right">146</td>
+</tr>
+<tr class="odd">
+<td>RB_TP</td>
+<td align="right">9</td>
 <td align="right">12</td>
+<td align="right">12</td>
+<td align="right">12</td>
+<td align="right">12</td>
+</tr>
+<tr class="even">
+<td>RB_TN</td>
+<td align="right">171</td>
+<td align="right">107</td>
+<td align="right">107</td>
+<td align="right">105</td>
 <td align="right">103</td>
+</tr>
+<tr class="odd">
+<td>RB_FP</td>
+<td align="right">5</td>
 <td align="right">2</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td>RB_FN</td>
+<td align="right">11</td>
+<td align="right">75</td>
+<td align="right">75</td>
+<td align="right">77</td>
 <td align="right">79</td>
+</tr>
+<tr class="odd">
+<td>Together_TP</td>
+<td align="right">27</td>
 <td align="right">44</td>
+<td align="right">44</td>
+<td align="right">44</td>
+<td align="right">44</td>
+</tr>
+<tr class="even">
+<td>Together_TN</td>
+<td align="right">584</td>
+<td align="right">372</td>
+<td align="right">386</td>
+<td align="right">377</td>
 <td align="right">358</td>
+</tr>
+<tr class="odd">
+<td>Together_FP</td>
+<td align="right">20</td>
 <td align="right">3</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">3</td>
+</tr>
+<tr class="even">
+<td>Together_FN</td>
+<td align="right">39</td>
+<td align="right">251</td>
+<td align="right">237</td>
+<td align="right">246</td>
 <td align="right">265</td>
 </tr>
 </tbody>
