@@ -12,18 +12,21 @@ abstract: This Chapter is describes the evaluation of the best sampling and mode
 urlcolor: blue
 ---
 ## The goal of our performance measurement
-After training a model it is important to check how well it performes. Since we not only trained one model but 140 in total (7 algos * 5 datasets * 4 positions), it is even more important to compare all the different models to see which one is the best. For our business case, this means that we want to see which combination of method and sampling we should take to predict which position, or if we even have a model, which does it better when we leave them together.
+After training a model it is important to check how well it performes. Since we not only trained one model but 120 in total (6 algos * 5 samplings * 4 positions), it is even more important to compare all the different models to see which one is the best. For our business case, this means that we want to see which combination of method and sampling we should take to predict which position, or if we even have a model, which does it better when we leave them together.
 
 ## How to compare the method/sampling combinations for all positions
-After training the models with 10-fold cross-validation, we applied them on all the (unsampled) data from 2007 to 2013 to obtain the true positives, true negatives, false positives and false negatives. Since we used the cross-validation for training, this will not give us the training error, but the testing error we get with all the available data prior to the 2014 NFL Draft. At the end of every model-script, we save this information separately, to bring it all together in the script 'PerformanceMeasurement.R'.
+After training the models with 10-fold cross-validation, we applied them on all the (unsampled) data from 2007 to 2013 to obtain the true positives, true negatives, false positives and false negatives on the training set. At the end of every model-script, we save this information separately, to bring it all together in the script 'PerformanceMeasurement.R'.
 
 The first step, is to bring them all into one dataframe, to use them easier. Then we make sure, that we used the same, unsampled data by computing the sums of TP, TN, FP, FN, for every method/sampling/position combination. In the CheckTibble we now see, that for every position the whole column contains always the same number, which means this is the case.
 
-Then we calculate the ratio of correct classification, which is equal to:
+Then we calculate the Accuracy, Precision, Recall and the F1 score:
 
-$$\frac{\text{Correct Classifications}}{\text{All Classifications}} = \frac{TP + TN}{TP+TP+FP+FN}$$
+$$\text{Accuracy} = \frac{\text{Correct Classifications}}{\text{All Classifications}} = \frac{TP + TN}{TP+TN+FP+FN}$$
+$$\text{Precision (Positice Perdictive Value)} = \frac{TP}{TP+FP}$$
+$$\text{Recall (Sensitivity)} = \frac{TP}{TP+FN}$$
+$$\text{F1 score (harmonic mean of precision and recall)}= 2*\frac{Precision * Recall}{Precision + Recall}$$
 
-The result is a table showing the percentage of correct classification for all the 140 model/sampling/position combination. This table is quite big, but it is still interesting to have a look at it, to see how well which combination performes.
+The result is a table showing the percentage of correct classification for all the 120 model/sampling/position combination. This table is quite big, but it is still interesting to have a look at it, to see how well which combination performes.
 
 ```{r echo=FALSE}
 load("../PerformanceMeasurement/BestModels.Rdata")
