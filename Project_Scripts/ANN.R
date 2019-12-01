@@ -141,6 +141,7 @@ cleanData_QB <- cleanData %>% filter(., Year < 2014, Position == "QB") %>% drop_
 
 # Drop unimportant variables
 x <- as.matrix(cleanData_QB %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
+# x <- as.matrix(cleanData_QB %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted)) # use this line with SMOTE sampling
 y <- as.integer(as.vector(cleanData_QB$Drafted))
 
 # Standardize the training data
@@ -228,6 +229,7 @@ cleanData_RB <- cleanData %>% filter(., Year < 2014, Position == "RB") %>% drop_
 
 # Drop unimportant variables
 x <- as.matrix(cleanData_RB %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
+# x <- as.matrix(cleanData_RB %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted)) # use this line with SMOTE sampling
 y <- as.integer(as.vector(cleanData_RB$Drafted))
 
 # Standardize the training data
@@ -314,6 +316,7 @@ cleanData_WR <- cleanData %>% filter(., Year < 2014, Position == "WR") %>% drop_
 
 # Drop unimportant variables
 x <- as.matrix(cleanData_WR %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
+# x <- as.matrix(cleanData_WR %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted)) # use this line with SMOTE sampling
 y <- as.integer(as.vector(cleanData_WR$Drafted))
 
 # Standardize the training data
@@ -401,6 +404,7 @@ cleanData_all <- cleanData %>% filter(., Year < 2014) %>% drop_na(.)
 
 # Drop unimportant variables
 x <- as.matrix(cleanData_all %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted))
+# x <- as.matrix(cleanData_all %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted)) # use this line with SMOTE sampling
 y <- as.integer(as.vector(cleanData_all$Drafted))
 
 # Standardize the training data
