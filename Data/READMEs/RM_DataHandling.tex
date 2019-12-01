@@ -326,15 +326,7 @@ four sampled) contain following variables:
   Name: Name of the Player
 \item
   Class: A factor showing the college year the player was in when being
-  in draft class with levels:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    JR=Junior (3.year)
-  \item
-    SR=Senior (4.year)
-  \end{itemize}
+  in draft class with levels: JR=Junior (3.year) and SR=Senior (4.year)
 \item
   Position: A factor with Position of the Player (filtered for only
   QB=Quarterback, RB=Runningback, WR=Wide Receiver)
@@ -402,83 +394,6 @@ four sampled) contain following variables:
   Games.Played: Number of games played over both seasons (filter
   applied: \textgreater= 10)
 \end{itemize}
-
-\hypertarget{for-the-documentation}{%
-\section{For the Documentation:}\label{for-the-documentation}}
-
-For further details on this part, please see `RM\_DataHandling.pdf'.
-
-\hypertarget{data-source-1}{%
-\subsection{Data Source}\label{data-source-1}}
-
-Most of our data was uploaded some years ago to Kaggle
-(\url{https://www.kaggle.com/mhixon/college-football-statistics}), but
-has no relevant scprips that were made of it and try to predict the NFL
-Draft. These Datasets contain much more information about college
-football, than we would need.
-
-The best data sets (in order of lenght) about the NFL Combine and the
-Pro Day we found, is also one from Kaggle
-(\url{https://www.kaggle.com/kbanta11/nfl-combine}). Unfortunately it
-turned out that, compared to the College data, not even 10\% of the
-players have accessible Combine/Pro Day data, which is why we took them
-out again. Otherwise too many cells would contain NA and could not be
-analized with all the algorithms we want to use.
-
-The third data set we integrate, is from Pro Football reference
-(\url{https://www.pro-football-reference.com/play-index/draft-finder.cgi?}).
-It contains the information about the NFL Drafts from the last couple of
-years.
-
-\hypertarget{the-data-cleaning-process-1}{%
-\subsection{The data cleaning
-process}\label{the-data-cleaning-process-1}}
-
-In order to clean the data fast and easy and with only a few manual
-steps, we build a function, that will provide us the clean data sets in
-the formate we want them to be. This function is called getCleanClass2
-and is coded in the file `functionGetCleanClass2.R'. After putting them
-together and removing duplicates, we apply a filter on the games a
-player played, in order to remove observations containing errors
-(details explained in `RM\_DataHandling.pdf').
-
-\hypertarget{sampling-the-data-1}{%
-\subsection{Sampling the data}\label{sampling-the-data-1}}
-
-Because our target value is distributed very inequally (see table
-below), we applied 4 different sampling methods, to approach this issue.
-The methods are called `oversampling', `undersampling', `rose both' and
-`smote'. We then cross-validate the different data in all the models, to
-find the best data to use for training the optimal model.
-
-\begin{longtable}[]{@{}lrl@{}}
-\caption{Number of observations and Ratio of Drafted Players in the
-Dataframes}\tabularnewline
-\toprule
-& Observations & Drafted\_Ratio\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-& Observations & Drafted\_Ratio\tabularnewline
-\midrule
-\endhead
-Before filter & 6372 & 06.24\%\tabularnewline
-No Sampling & 3008 & 12.43\%\tabularnewline
-Oversampling & 4022 & 50.00\%\tabularnewline
-Undersampling & 654 & 50.00\%\tabularnewline
-Rose Both & 2338 & 50.81\%\tabularnewline
-Smote & 4221 & 52.35\%\tabularnewline
-\bottomrule
-\end{longtable}
-
-As we see, applying the filter Games.played \textgreater= 10 already
-decreases the inequality of drafted vs.~undrafted players by dismissing
-players with a chance of being drafted close to zero or have errors in
-the data. By sampling the data we can make the distribution close to
-fifty/fifty, but if this will really improve our predictions needs to be
-cross-validated with the models. Since the filter shall dismiss the
-errors, we only continue with the filtered data (one set unsampled and
-four sampled).
 
 
 \end{document}

@@ -12,7 +12,7 @@ abstract: This Chapter describes the evaluation of the best sampling and model c
 urlcolor: blue
 ---
 ## The goal of our performance measurement
-After training a model it is important to check how well it performes. Since we not only trained one model but 120 in total (6 algos * 5 samplings * 4 positions), it is even more important to compare all the different models to see which one is the best. For our business case, this means that we want to see which combination of method and sampling we should take to predict which position, or if we even have a model, which does it better when we leave them together.
+After training a model it is important to check how well it performes. Since we not only trained one model but 120 in total (6 algorithms * 5 samplings * 4 positions), it is even more important to compare all the different models to see which one is the best. For our business case, this means that we want to see which combination of method and sampling we should take to predict which position, or if we even have a model, which does it better when we leave them together.
 
 ## How to compare the method/sampling combinations for all positions
 After training the models with 10-fold cross-validation, we applied them on all the (unsampled) data from 2007 to 2013 to obtain the true positives, true negatives, false positives and false negatives on the training set. At the end of every model-script, we save this information separately, to bring it all together in the script 'PerformanceMeasurement.R'. At the same time (and in the same scripts) we also compute the testing fit on the 2014 testing data.
@@ -51,9 +51,12 @@ We can see these two tendencies in the models:
 
 The four following plots combine the information of both tibbles, showing the accuracy and the F1 score on every sampling method for every position on its own. The horizontal lines show the no information rates for the accuracy, which displays, how a model's performance would be when predicting only 0's.
 
-\newsection
+```{r, echo = FALSE, out.width="95%"}
+library(knitr)
+include_graphics("Plots_8.jpg")
+```
 
-![Plotted Accuracy and F1-Score by position and sampling method](Plots_8.jpg){#id .class width=80% heigth=50%}
+\newpage
 
 ## Our best models
 Now let's have a look at the best model/sampling combination for every position:

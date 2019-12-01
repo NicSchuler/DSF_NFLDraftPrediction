@@ -88,9 +88,7 @@ After all the described processes the five dataframes (one unsampled and four sa
 
 * Player.Code: A unique Number for matching the data
 * Name: Name of the Player
-* Class: A factor showing the college year the player was in when being in draft class with levels:
-  + JR=Junior (3.year)
-  + SR=Senior (4.year)
+* Class: A factor showing the college year the player was in when being in draft class with levels: JR=Junior (3.year) and SR=Senior (4.year)
 * Position: A factor with Position of the Player (filtered for only QB=Quarterback, RB=Runningback, WR=Wide Receiver)
 * Year: Shows the year the player was in the draft class
 * Drafted: The targe which is 1 when a player was drafted and 0 when a player was not drafted
@@ -118,34 +116,3 @@ After all the described processes the five dataframes (one unsampled and four sa
 * Fumble: Dropped balls summed over both seasons
 * Fumble.Lost: Dropped balls recovered by opponent summed over both seasons
 * Games.Played: Number of games played over both seasons (filter applied: >= 10)
-
-
-
-# For the Documentation:
-
-For further information about this part, please see 'RM_DataHandling.pdf'.
-
-## Data Source
-
-Most of our data was uploaded some years ago to Kaggle (<https://www.kaggle.com/mhixon/college-football-statistics>), but has no relevant scprips that were made of it and try to predict the NFL Draft. These Datasets contain much more information about college football, than we would need. 
-
-The best data sets (in order of lenght) about the NFL Combine and the Pro Day we found, is also one from Kaggle (<https://www.kaggle.com/kbanta11/nfl-combine>). Unfortunately it turned out that, compared to the College data, not even 10% of the players have accessible Combine/Pro Day data, which is why we took them out again. Otherwise too many cells would contain NA and could not be analized with all the algorithms we want to use.
-
-The third data set we integrate, is from Pro Football reference (<https://www.pro-football-reference.com/play-index/draft-finder.cgi?>). It contains the information about the NFL Drafts from the last couple of years.
-
-## The data cleaning process
-In order to clean the data fast and easy and with only a few manual steps, we build a function, that will provide us the clean data sets in the formate we want them to be. This function is called getCleanClass2 and is coded in the file 'functionGetCleanClass2.R'. Given all the input dataframes it returns the clean data for one draft year. After putting them together and removing duplicates, we apply a filter on the games a player played, in order to remove observations containing errors (details explained in 'RM_DataHandling.pdf').
-
-## Sampling the data
-Because our target value is distributed very inequally (see table below), we applied 4 different sampling methods, to approach this issue. The methods are called 'oversampling', 'undersampling', 'rose both' and 'smote'. We then cross-validate the different data in all the models, to find the best data to use for training the optimal model.
-```{r, include=FALSE}
-DataComp = data.frame(Observations=c(6372,3008,4022,654,2338,4221), Drafted_Ratio = c("06.24%","12.43%","50.00%","50.00%","50.81%","52.35%"), row.names = c("Before filter","No Sampling", "Oversampling", "Undersampling", "Rose Both", "Smote"))
-
-```
-```{r echo = FALSE}
-knitr::kable(DataComp, caption = "Number of observations and Ratio of Drafted Players in the Dataframes")
-```
-
-As we see, applying the filter Games.played >= 10 already decreases the inequality of drafted vs. undrafted players by dismissing players with a chance of being drafted close to zero or have errors in the data. By sampling the data we can make the distribution close to fifty/fifty, but if this will really improve our predictions needs to be cross-validated with the models. Since the filter shall dismiss the errors, we only continue with the filtered data (one set unsampled and four sampled).
-
-
