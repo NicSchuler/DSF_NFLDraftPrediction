@@ -3,8 +3,8 @@ title: "README for K-Nearest Neighbor (KNN)"
 author: "Group 2"
 date: "02 12 2019"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
   word_document: default
 ---
 

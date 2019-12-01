@@ -313,57 +313,65 @@ performance can be viewed below (also see the
 \href{https://github.com/NicSchuler/DSF_NFLDraftPrediction/blob/master/Data/READMEs/RM_PerformanceMeasurement.pdf}{between
 model comparison}):
 
-\begin{longtable}[]{@{}llrrrrrrrrrrrrrrrr@{}}
+\begin{longtable}[]{@{}lrrrrr@{}}
 \caption{training data performance}\tabularnewline
 \toprule
-Method & Sampling & QB\_TP & QB\_TN & QB\_FP & QB\_FN & WR\_TP & WR\_TN
-& WR\_FP & WR\_FN & RB\_TP & RB\_TN & RB\_FP & RB\_FN & Together\_TP &
-Together\_TN & Together\_FP & Together\_FN\tabularnewline
+& No Sampling & Oversampling & Undersampling & Rose Both &
+Smote\tabularnewline
 \midrule
 \endfirsthead
 \toprule
-Method & Sampling & QB\_TP & QB\_TN & QB\_FP & QB\_FN & WR\_TP & WR\_TN
-& WR\_FP & WR\_FN & RB\_TP & RB\_TN & RB\_FP & RB\_FN & Together\_TP &
-Together\_TN & Together\_FP & Together\_FN\tabularnewline
+& No Sampling & Oversampling & Undersampling & Rose Both &
+Smote\tabularnewline
 \midrule
 \endhead
-ANN & no\_sampling & 32 & 316 & 41 & 21 & 81 & 1096 & 83 & 40 & 38 & 517
-& 52 & 21 & 140 & 1924 & 187 & 87\tabularnewline
-ANN & oversampling & 73 & 180 & 0 & 157 & 159 & 768 & 5 & 368 & 84 & 344
-& 6 & 194 & 313 & 1269 & 14 & 742\tabularnewline
-ANN & undersampling & 73 & 176 & 0 & 161 & 158 & 761 & 6 & 375 & 83 &
-347 & 7 & 191 & 311 & 1301 & 16 & 710\tabularnewline
-ANN & Rose\_both & 73 & 172 & 0 & 165 & 159 & 746 & 5 & 390 & 84 & 351 &
-6 & 187 & 314 & 1263 & 13 & 748\tabularnewline
-ANN & Smote & 72 & 199 & 1 & 138 & 162 & 708 & 2 & 428 & 84 & 334 & 6 &
-204 & 314 & 1229 & 13 & 782\tabularnewline
+QB\_TP & 32 & 73 & 73 & 73 & 72\tabularnewline
+QB\_TN & 316 & 180 & 176 & 172 & 199\tabularnewline
+QB\_FP & 41 & 0 & 0 & 0 & 1\tabularnewline
+QB\_FN & 21 & 157 & 161 & 165 & 138\tabularnewline
+WR\_TP & 81 & 159 & 158 & 159 & 162\tabularnewline
+WR\_TN & 1096 & 768 & 761 & 746 & 708\tabularnewline
+WR\_FP & 83 & 5 & 6 & 5 & 2\tabularnewline
+WR\_FN & 40 & 368 & 375 & 390 & 428\tabularnewline
+RB\_TP & 38 & 84 & 83 & 84 & 84\tabularnewline
+RB\_TN & 517 & 344 & 347 & 351 & 334\tabularnewline
+RB\_FP & 52 & 6 & 7 & 6 & 6\tabularnewline
+RB\_FN & 21 & 194 & 191 & 187 & 204\tabularnewline
+Together\_TP & 140 & 313 & 311 & 314 & 314\tabularnewline
+Together\_TN & 1924 & 1269 & 1301 & 1263 & 1229\tabularnewline
+Together\_FP & 187 & 14 & 16 & 13 & 13\tabularnewline
+Together\_FN & 87 & 742 & 710 & 748 & 782\tabularnewline
 \bottomrule
 \end{longtable}
 
-\begin{longtable}[]{@{}llrrrrrrrrrrrrrrrr@{}}
+\begin{longtable}[]{@{}lrrrrr@{}}
 \caption{testing data performance}\tabularnewline
 \toprule
-Method & Sampling & QB\_TP & QB\_TN & QB\_FP & QB\_FN & WR\_TP & WR\_TN
-& WR\_FP & WR\_FN & RB\_TP & RB\_TN & RB\_FP & RB\_FN & Together\_TP &
-Together\_TN & Together\_FP & Together\_FN\tabularnewline
+& No Sampling & Oversampling & Undersampling & Rose Both &
+Smote\tabularnewline
 \midrule
 \endfirsthead
 \toprule
-Method & Sampling & QB\_TP & QB\_TN & QB\_FP & QB\_FN & WR\_TP & WR\_TN
-& WR\_FP & WR\_FN & RB\_TP & RB\_TN & RB\_FP & RB\_FN & Together\_TP &
-Together\_TN & Together\_FP & Together\_FN\tabularnewline
+& No Sampling & Oversampling & Undersampling & Rose Both &
+Smote\tabularnewline
 \midrule
 \endhead
-ANN & no\_sampling & 8 & 98 & 3 & 7 & 11 & 312 & 11 & 24 & 9 & 171 & 5 &
-11 & 27 & 584 & 20 & 39\tabularnewline
-ANN & oversampling & 10 & 56 & 1 & 49 & 22 & 216 & 0 & 120 & 12 & 107 &
-2 & 75 & 44 & 372 & 3 & 251\tabularnewline
-ANN & undersampling & 11 & 52 & 0 & 53 & 22 & 213 & 0 & 123 & 12 & 107 &
-2 & 75 & 44 & 386 & 3 & 237\tabularnewline
-ANN & Rose\_both & 11 & 55 & 0 & 50 & 21 & 211 & 1 & 125 & 12 & 105 & 2
-& 77 & 44 & 377 & 3 & 246\tabularnewline
-ANN & Smote & 10 & 58 & 1 & 47 & 22 & 190 & 0 & 146 & 12 & 103 & 2 & 79
-& 44 & 358 & 3 & 265\tabularnewline
+QB\_TP & 8 & 10 & 11 & 11 & 10\tabularnewline
+QB\_TN & 98 & 56 & 52 & 55 & 58\tabularnewline
+QB\_FP & 3 & 1 & 0 & 0 & 1\tabularnewline
+QB\_FN & 7 & 49 & 53 & 50 & 47\tabularnewline
+WR\_TP & 11 & 22 & 22 & 21 & 22\tabularnewline
+WR\_TN & 312 & 216 & 213 & 211 & 190\tabularnewline
+WR\_FP & 11 & 0 & 0 & 1 & 0\tabularnewline
+WR\_FN & 24 & 120 & 123 & 125 & 146\tabularnewline
+RB\_TP & 9 & 12 & 12 & 12 & 12\tabularnewline
+RB\_TN & 171 & 107 & 107 & 105 & 103\tabularnewline
+RB\_FP & 5 & 2 & 2 & 2 & 2\tabularnewline
+RB\_FN & 11 & 75 & 75 & 77 & 79\tabularnewline
+Together\_TP & 27 & 44 & 44 & 44 & 44\tabularnewline
+Together\_TN & 584 & 372 & 386 & 377 & 358\tabularnewline
+Together\_FP & 20 & 3 & 3 & 3 & 3\tabularnewline
+Together\_FN & 39 & 251 & 237 & 246 & 265\tabularnewline
 \bottomrule
 \end{longtable}
 

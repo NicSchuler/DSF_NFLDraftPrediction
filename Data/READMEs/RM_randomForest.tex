@@ -298,57 +298,65 @@ below (also see the
 \href{https://github.com/NicSchuler/DSF_NFLDraftPrediction/blob/master/Data/READMEs/RM_PerformanceMeasurement.pdf}{between
 model comparison}):
 
-\begin{longtable}[]{@{}llrrrrrrrrrrrrrrrr@{}}
+\begin{longtable}[]{@{}lrrrrr@{}}
 \caption{training data performance}\tabularnewline
 \toprule
-Method & Sampling & QB\_TP & QB\_TN & QB\_FP & QB\_FN & WR\_TP & WR\_TN
-& WR\_FP & WR\_FN & RB\_TP & RB\_TN & RB\_FP & RB\_FN & Together\_TP &
-Together\_TN & Together\_FP & Together\_FN\tabularnewline
+& No Sampling & Oversampling & Undersampling & Rose Both &
+Smote\tabularnewline
 \midrule
 \endfirsthead
 \toprule
-Method & Sampling & QB\_TP & QB\_TN & QB\_FP & QB\_FN & WR\_TP & WR\_TN
-& WR\_FP & WR\_FN & RB\_TP & RB\_TN & RB\_FP & RB\_FN & Together\_TP &
-Together\_TN & Together\_FP & Together\_FN\tabularnewline
+& No Sampling & Oversampling & Undersampling & Rose Both &
+Smote\tabularnewline
 \midrule
 \endhead
-randomForest & no\_sampling & 73 & 337 & 0 & 0 & 161 & 1136 & 3 & 0 & 90
-& 538 & 0 & 0 & 322 & 2011 & 5 & 0\tabularnewline
-randomForest & oversampling & 73 & 337 & 0 & 0 & 164 & 1134 & 0 & 2 & 90
-& 538 & 0 & 0 & 327 & 2010 & 0 & 1\tabularnewline
-randomForest & undersampling & 73 & 231 & 0 & 106 & 163 & 986 & 1 & 150
-& 90 & 434 & 0 & 104 & 326 & 1661 & 1 & 350\tabularnewline
-randomForest & Rose\_both & 72 & 300 & 1 & 37 & 164 & 1066 & 0 & 70 & 89
-& 501 & 1 & 37 & 325 & 1866 & 2 & 145\tabularnewline
-randomForest & Smote & 73 & 337 & 0 & 0 & 159 & 1136 & 5 & 0 & 90 & 538
-& 0 & 0 & 323 & 2011 & 4 & 0\tabularnewline
+QB\_TP & 73 & 73 & 73 & 72 & 73\tabularnewline
+QB\_TN & 337 & 337 & 231 & 300 & 337\tabularnewline
+QB\_FP & 0 & 0 & 0 & 1 & 0\tabularnewline
+QB\_FN & 0 & 0 & 106 & 37 & 0\tabularnewline
+WR\_TP & 161 & 164 & 163 & 164 & 159\tabularnewline
+WR\_TN & 1136 & 1134 & 986 & 1066 & 1136\tabularnewline
+WR\_FP & 3 & 0 & 1 & 0 & 5\tabularnewline
+WR\_FN & 0 & 2 & 150 & 70 & 0\tabularnewline
+RB\_TP & 90 & 90 & 90 & 89 & 90\tabularnewline
+RB\_TN & 538 & 538 & 434 & 501 & 538\tabularnewline
+RB\_FP & 0 & 0 & 0 & 1 & 0\tabularnewline
+RB\_FN & 0 & 0 & 104 & 37 & 0\tabularnewline
+Together\_TP & 322 & 327 & 326 & 325 & 323\tabularnewline
+Together\_TN & 2011 & 2010 & 1661 & 1866 & 2011\tabularnewline
+Together\_FP & 5 & 0 & 1 & 2 & 4\tabularnewline
+Together\_FN & 0 & 1 & 350 & 145 & 0\tabularnewline
 \bottomrule
 \end{longtable}
 
-\begin{longtable}[]{@{}llrrrrrrrrrrrrrrrr@{}}
+\begin{longtable}[]{@{}lrrrrr@{}}
 \caption{testing data performance}\tabularnewline
 \toprule
-Method & Sampling & QB\_TP & QB\_TN & QB\_FP & QB\_FN & WR\_TP & WR\_TN
-& WR\_FP & WR\_FN & RB\_TP & RB\_TN & RB\_FP & RB\_FN & Together\_TP &
-Together\_TN & Together\_FP & Together\_FN\tabularnewline
+& No Sampling & Oversampling & Undersampling & Rose Both &
+Smote\tabularnewline
 \midrule
 \endfirsthead
 \toprule
-Method & Sampling & QB\_TP & QB\_TN & QB\_FP & QB\_FN & WR\_TP & WR\_TN
-& WR\_FP & WR\_FN & RB\_TP & RB\_TN & RB\_FP & RB\_FN & Together\_TP &
-Together\_TN & Together\_FP & Together\_FN\tabularnewline
+& No Sampling & Oversampling & Undersampling & Rose Both &
+Smote\tabularnewline
 \midrule
 \endhead
-randomForest & no\_sampling & 5 & 94 & 11 & 6 & 7 & 318 & 18 & 15 & 7 &
-172 & 10 & 7 & 19 & 584 & 39 & 28\tabularnewline
-randomForest & oversampling & 6 & 90 & 15 & 5 & 13 & 304 & 32 & 9 & 8 &
-163 & 19 & 6 & 27 & 566 & 57 & 20\tabularnewline
-randomForest & undersampling & 10 & 65 & 40 & 1 & 19 & 265 & 71 & 3 & 12
-& 137 & 45 & 2 & 42 & 468 & 155 & 5\tabularnewline
-randomForest & Rose\_both & 10 & 79 & 26 & 1 & 19 & 283 & 53 & 3 & 9 &
-155 & 27 & 5 & 37 & 511 & 112 & 10\tabularnewline
-randomForest & Smote & 8 & 86 & 19 & 3 & 16 & 289 & 47 & 6 & 10 & 155 &
-27 & 4 & 33 & 532 & 91 & 14\tabularnewline
+QB\_TP & 5 & 6 & 10 & 10 & 8\tabularnewline
+QB\_TN & 94 & 90 & 65 & 79 & 86\tabularnewline
+QB\_FP & 11 & 15 & 40 & 26 & 19\tabularnewline
+QB\_FN & 6 & 5 & 1 & 1 & 3\tabularnewline
+WR\_TP & 7 & 13 & 19 & 19 & 16\tabularnewline
+WR\_TN & 318 & 304 & 265 & 283 & 289\tabularnewline
+WR\_FP & 18 & 32 & 71 & 53 & 47\tabularnewline
+WR\_FN & 15 & 9 & 3 & 3 & 6\tabularnewline
+RB\_TP & 7 & 8 & 12 & 9 & 10\tabularnewline
+RB\_TN & 172 & 163 & 137 & 155 & 155\tabularnewline
+RB\_FP & 10 & 19 & 45 & 27 & 27\tabularnewline
+RB\_FN & 7 & 6 & 2 & 5 & 4\tabularnewline
+Together\_TP & 19 & 27 & 42 & 37 & 33\tabularnewline
+Together\_TN & 584 & 566 & 468 & 511 & 532\tabularnewline
+Together\_FP & 39 & 57 & 155 & 112 & 91\tabularnewline
+Together\_FN & 28 & 20 & 5 & 10 & 14\tabularnewline
 \bottomrule
 \end{longtable}
 
