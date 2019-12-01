@@ -68,16 +68,16 @@ The following plots records the cross validated results for the respecitve train
 
 ![](RM_KNN_files/plots_k_values.jpg)
 
-The performance of the models is sensitive to the choice of $k$. With low values for $k$ a model typically overfits and for large values the model often underfits. At the extremes, when $k=1$, we would base the prediction on a single observation that has the closest distance measure. On the other hand, when $k=n$, we would simply be using the most common class, in our context not drafted CFP, across all training samples as our predicted value. There is no general rule existent about the optimal $k$; it depends on the nature of the data. For high signal data with few noisy, respectively irrelevant features, smaller values of $k$ tend to work best. As more irrelevant features are present, larger values of $k$ are required to smooth out the noise. The k values and accuracy values received in our case are listed in a tables below:
+The performance of the models is sensitive to the choice of $k$. With low values for $k$ a model typically overfits and for large values the model often underfits. At the extremes, when $k=1$, we would base the prediction on a single observation that has the closest distance measure. On the other hand, when $k=n$, we would simply be using the most common class, in our context not drafted CFP, across all training samples as our predicted value. There is no general rule existent about the optimal $k$; it depends on the nature of the data. For high signal data with few noisy, respectively irrelevant features, smaller values of $k$ tend to work best. As more irrelevant features are present, larger values of $k$ are required to smooth out the noise. The k values values received in our case are listed in a tables below:
+
+\newpage
 
 ```{r, include=FALSE}
 library(tidyverse)
 load("RM_KNN_files/KNN_K.Rdata")
-load("RM_KNN_files/KNN_Acc.Rdata")
 ```
 ```{r echo = FALSE}
 knitr::kable(KNN_K, caption = "k Values for KNN Models")
-knitr::kable(KNN_Acc, caption = "Accuracy for KNN Models")
 ```
 
 In our case the following may be possible. In our context are a lot of different features considered in the models. All these features are also considered regarding the individual player positions `_QB`, `_RB` and `_WR`, whereas from an objective point of view all these features do not always seem suitable to measure their position specific performance. Therefore a larger value could be used to smooth out the noise. On the other hand, there are strong correlations between many variables, as can be seen in the [ReadMe](https://github.com/NicSchuler/DSF_NFLDraftPrediction/tree/master/Data/READMEs) and [Script](https://github.com/NicSchuler/DSF_NFLDraftPrediction/tree/master/Project_Scripts) for the Naive Bayes classifier. If these variables are good indicators, they can reinforce each other and would determine the classification relatively more strongly; this would indicate a rather lower $k$ value.
