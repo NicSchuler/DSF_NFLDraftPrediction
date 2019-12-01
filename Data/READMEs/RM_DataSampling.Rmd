@@ -3,8 +3,8 @@ title: "README for Data Sampling"
 author: "Group 2"
 date: "02 12 2019"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
   word_document: default
 ---
 
@@ -73,11 +73,12 @@ Applying a combination of over- and undersampling both the minority class, here 
 
 For the application of a combination of over- and undersampling with the function `ovun.sample` from ROSE-package we make use of the argument `both`. In this case, both the arguments `N` and `p` have to be set to establish the amount of oversampling and undersampling. We set the new sample size `N` to 2338 according to the initial total size of our unsampled data. Argument `p` is set to 0.5, which is the default value. Again, the function `ovun.sample` generates a list from which we extract the new augmented data; the result is a new balanced data set:
 
-```
-CleanClass2007to2013_3_both <- ovun.sample(Drafted~., data=CleanClass2007to2013_3, method="both", 
-                                                p=0.5,     # probability of class 1 in new sample; default 0.5.
-                                                seed=6969, # specify random seed
-                                                N=2338)    # specified sample according to initial sample size 
+```{r eval=FALSE}
+CleanClass2007to2013_3_both <- ovun.sample(Drafted~., data=CleanClass2007to2013_3,
+                    method="both", 
+                    p=0.5,     # probability of class 1 in new sample; default 0.5.
+                    seed=6969, # specify random seed
+                    N=2338)    # specified sample according to initial sample size 
 
 CleanClass2007to2013_3_both <- as.data.frame(CleanClass2007to2013_3_both$data) 
 

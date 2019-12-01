@@ -3,7 +3,11 @@ title: "README for random forest (RF)"
 author: "Group 2"
 date: "02 12 2019"
 output:
-html_document: default
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+  html_document:
+    df_print: paged
 ---
 
 **Corresponding R Script:** [RF](https://github.com/NicSchuler/DSF_NFLDraftPrediction/blob/master/Project_Scripts/RandomForest.R)
