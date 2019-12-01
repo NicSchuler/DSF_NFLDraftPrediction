@@ -1,6 +1,5 @@
 
 
-
 rm(list=ls())
 graphics.off()
 
@@ -13,8 +12,20 @@ library(caret)
 
 ## Data for 2007 to 2014
 
-load("../Data/CleanData/CleanClass2007to2014_2.Rdata")
-no_samplingData = as_tibble(CleanClass2007to2014_2)
+load("../Data/CleanData/CleanClass2007to2014_3.Rdata")
+no_samplingData = as_tibble(CleanClass2007to2014_3)
+
+predict2007to2013_tog = no_samplingData %>% 
+  filter(Year != 2014)
+predict2007to2013_QB = predict2007to2013_tog %>% filter(Position == "QB")
+predict2007to2013_WR = predict2007to2013_tog %>% filter(Position == "WR")
+predict2007to2013_RB = predict2007to2013_tog %>% filter(Position == "RB")
+
+predict2014_tog = no_samplingData %>%
+  filter(Year == 2014)
+predict2014_QB = predict2014_tog %>% filter(Position == "QB")
+predict2014_WR = predict2014_tog %>% filter(Position == "WR")
+predict2014_RB = predict2014_tog %>% filter(Position == "RB")
 
 # oversampling
 
@@ -37,7 +48,7 @@ load("../Data/CleanData/CleanClass2007to2013_3_smote.Rdata")
 SmoteData = cleanData_smote
 
 
-## matrix for performance measurement
+## matrices for performance measurement
 
 LogisticRegressionPerfMeas = data.frame(Method = character(), Sampling = character(), QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
                                         
@@ -53,19 +64,28 @@ LogisticRegressionPerfMeas[1:5,1] = "LogisticRegression"
 LogisticRegressionPerfMeas[1:5,2] = c("no_sampling", "oversampling", "undersampling", "Rose_both", "Smote")
 
 
+LogisticRegressionPerfMeas2014 = data.frame(Method = character(), Sampling = character(), QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
+                                        
+                                        WR_TP = integer(), WR_TN = integer(), WR_FP = integer(), WR_FN = integer(),
+                                        
+                                        RB_TP = integer(), RB_TN = integer(), RB_FP = integer(), RB_FN = integer(),
+                                        
+                                        Together_TP = integer(), Together_TN = integer(), Together_FP = integer(), Together_FN = integer(), stringsAsFactors = FALSE)
+
+LogisticRegressionPerfMeas2014[1:5,1] = "LogisticRegression"
+LogisticRegressionPerfMeas2014[1:5,2] = c("no_sampling", "oversampling", "undersampling", "Rose_both", "Smote")
+
+# The following steps are repeated 5 times, once for each of the data samples loaded above.
 # 1. No Sampling ---------
 
 ### Logistic Regression for all players together --------
 
 ## training and testing data
-# We use years 2007 to 2013 for training and the year 2014 for testing.
+# We use years 2007 to 2013 for training and the year 2014 for testing. We chose this approach in order to simulate our business case. We want to predict the outcome
+# of the upcoming Draft (in our case the one of 2014) based on all the data we have from the previous years.
 
 Data_tog_train = no_samplingData %>%
   filter(Year != 2014) %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
-Data_tog_test = no_samplingData %>%
-  filter(Year == 2014) %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
 ## training the model on the training data, including a 10-fold cross-validation
@@ -78,30 +98,39 @@ model_logit_tog = train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-Together_Pred = ifelse(predict(model_logit_tog)>0.5, 1, 0)
+Together_Pred = ifelse(predict(model_logit_tog, predict2007to2013_tog)>0.5, 1, 0)
 
 CheckList_train_tog_1 = tibble("Together_Pred" = Together_Pred,
-                               "Together_TP" = ifelse(Together_Pred == 1 & Data_tog_train == 1, 1, 0),
-                               "Together_FP" = ifelse(Together_Pred == 1 & Data_tog_train == 0, 1, 0),
-                               "Together_TN" = ifelse(Together_Pred == 0 & Data_tog_train == 0, 1, 0),
-                               "Together_FN" = ifelse(Together_Pred == 0 & Data_tog_train == 1, 1, 0))
-
-# testing error 
-
-Together_Pred = ifelse(predict(model_logit_tog, newdata = Data_tog_test)>0.5, 1, 0)
-
-CheckList_test_tog_1 = tibble("Together_Pred" = Together_Pred,
-                              "Together_TP" = ifelse(Together_Pred == 1 & Data_tog_test == 1, 1, 0),
-                              "Together_FP" = ifelse(Together_Pred == 1 & Data_tog_test == 0, 1, 0),
-                              "Together_TN" = ifelse(Together_Pred == 0 & Data_tog_test == 0, 1, 0),
-                              "Together_FN" = ifelse(Together_Pred == 0 & Data_tog_test == 1, 1, 0))
+                               "Together_TP" = ifelse(Together_Pred == 1 & predict2007to2013_tog$Drafted == 1, 1, 0),
+                               "Together_FP" = ifelse(Together_Pred == 1 & predict2007to2013_tog$Drafted == 0, 1, 0),
+                               "Together_TN" = ifelse(Together_Pred == 0 & predict2007to2013_tog$Drafted == 0, 1, 0),
+                               "Together_FN" = ifelse(Together_Pred == 0 & predict2007to2013_tog$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[1,"Together_TP"] = sum(CheckList_test_tog_1$Together_TP)
-LogisticRegressionPerfMeas[1,"Together_TN"] = sum(CheckList_test_tog_1$Together_TN)
-LogisticRegressionPerfMeas[1,"Together_FP"] = sum(CheckList_test_tog_1$Together_FP)
-LogisticRegressionPerfMeas[1,"Together_FN"] = sum(CheckList_test_tog_1$Together_FN)
+LogisticRegressionPerfMeas[1,"Together_TP"] = sum(CheckList_train_tog_1$Together_TP)
+LogisticRegressionPerfMeas[1,"Together_TN"] = sum(CheckList_train_tog_1$Together_TN)
+LogisticRegressionPerfMeas[1,"Together_FP"] = sum(CheckList_train_tog_1$Together_FP)
+LogisticRegressionPerfMeas[1,"Together_FN"] = sum(CheckList_train_tog_1$Together_FN)
+
+# testing error 
+
+Together_Pred = ifelse(predict(model_logit_tog, newdata = predict2014_tog)>0.5, 1, 0)
+
+CheckList_test_tog_1 = tibble("Together_Pred" = Together_Pred,
+                              "Together_TP" = ifelse(Together_Pred == 1 & predict2014_tog$Drafted == 1, 1, 0),
+                              "Together_FP" = ifelse(Together_Pred == 1 & predict2014_tog$Drafted == 0, 1, 0),
+                              "Together_TN" = ifelse(Together_Pred == 0 & predict2014_tog$Drafted == 0, 1, 0),
+                              "Together_FN" = ifelse(Together_Pred == 0 & predict2014_tog$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[1,"Together_TP"] = sum(CheckList_test_tog_1$Together_TP)
+LogisticRegressionPerfMeas2014[1,"Together_TN"] = sum(CheckList_test_tog_1$Together_TN)
+LogisticRegressionPerfMeas2014[1,"Together_FP"] = sum(CheckList_test_tog_1$Together_FP)
+LogisticRegressionPerfMeas2014[1,"Together_FN"] = sum(CheckList_test_tog_1$Together_FN)
+
+
 
 
 ### Logistic Regression for QBs --------
@@ -114,45 +143,46 @@ Data_QB_train = no_samplingData %>%
   filter(Position == "QB") %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
-Data_QB_test = no_samplingData %>%
-  filter(Year == 2014) %>%
-  filter(Position == "QB") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
 ## training the model on the training set, including a 10-fold cross-validation
 model_logit_QB <- train(Drafted ~ .,
                         data = Data_QB_train,
                         trControl = trainControl(method = "cv", number = 10),
                         method = "glm",
                         family=binomial())
-
 ## Performance Measurement
 # training error
 
-QB_Pred = ifelse(predict(model_logit_QB)>0.5, 1, 0)
+QB_Pred = ifelse(predict(model_logit_QB, predict2007to2013_QB)>0.5, 1, 0)
 
 CheckList_train_QB_1 = tibble("QB_Pred" = QB_Pred,
-                              "QB_TP" = ifelse(QB_Pred == 1 &Data_QB_train == 1, 1, 0),
-                              "QB_FP" = ifelse(QB_Pred == 1 &Data_QB_train == 0, 1, 0),
-                              "QB_TN" = ifelse(QB_Pred == 0 &Data_QB_train == 0, 1, 0),
-                              "QB_FN" = ifelse(QB_Pred == 0 &Data_QB_train == 1, 1, 0))
-
-# testing error 
-
-QB_Pred = ifelse(predict(model_logit_QB, newdata = Data_QB_test)>0.5, 1, 0)
-
-CheckList_test_QB_1 = tibble("QB_Pred" = QB_Pred,
-                             "QB_TP" = ifelse(QB_Pred == 1 & Data_QB_test == 1, 1, 0),
-                             "QB_FP" = ifelse(QB_Pred == 1 & Data_QB_test == 0, 1, 0),
-                             "QB_TN" = ifelse(QB_Pred == 0 & Data_QB_test == 0, 1, 0),
-                             "QB_FN" = ifelse(QB_Pred == 0 & Data_QB_test == 1, 1, 0))
+                              "QB_TP" = ifelse(QB_Pred == 1 &predict2007to2013_QB$Drafted == 1, 1, 0),
+                              "QB_FP" = ifelse(QB_Pred == 1 &predict2007to2013_QB$Drafted == 0, 1, 0),
+                              "QB_TN" = ifelse(QB_Pred == 0 &predict2007to2013_QB$Drafted == 0, 1, 0),
+                              "QB_FN" = ifelse(QB_Pred == 0 &predict2007to2013_QB$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[1,"QB_TP"] = sum(CheckList_test_QB_1$QB_TP)
-LogisticRegressionPerfMeas[1,"QB_TN"] = sum(CheckList_test_QB_1$QB_TN)
-LogisticRegressionPerfMeas[1,"QB_FP"] = sum(CheckList_test_QB_1$QB_FP)
-LogisticRegressionPerfMeas[1,"QB_FN"] = sum(CheckList_test_QB_1$QB_FN)
+LogisticRegressionPerfMeas[1,"QB_TP"] = sum(CheckList_train_QB_1$QB_TP)
+LogisticRegressionPerfMeas[1,"QB_TN"] = sum(CheckList_train_QB_1$QB_TN)
+LogisticRegressionPerfMeas[1,"QB_FP"] = sum(CheckList_train_QB_1$QB_FP)
+LogisticRegressionPerfMeas[1,"QB_FN"] = sum(CheckList_train_QB_1$QB_FN)
+
+# testing error
+
+QB_Pred = ifelse(predict(model_logit_QB, newdata = predict2014_QB)>0.5, 1, 0)
+
+CheckList_test_QB_1 = tibble("QB_Pred" = QB_Pred,
+                             "QB_TP" = ifelse(QB_Pred == 1 & predict2014_QB$Drafted == 1, 1, 0),
+                             "QB_FP" = ifelse(QB_Pred == 1 & predict2014_QB$Drafted == 0, 1, 0),
+                             "QB_TN" = ifelse(QB_Pred == 0 & predict2014_QB$Drafted == 0, 1, 0),
+                             "QB_FN" = ifelse(QB_Pred == 0 & predict2014_QB$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[1,"QB_TP"] = sum(CheckList_test_QB_1$QB_TP)
+LogisticRegressionPerfMeas2014[1,"QB_TN"] = sum(CheckList_test_QB_1$QB_TN)
+LogisticRegressionPerfMeas2014[1,"QB_FP"] = sum(CheckList_test_QB_1$QB_FP)
+LogisticRegressionPerfMeas2014[1,"QB_FN"] = sum(CheckList_test_QB_1$QB_FN)
 
 
 ### Logistic Regression for WRs --------
@@ -162,11 +192,6 @@ LogisticRegressionPerfMeas[1,"QB_FN"] = sum(CheckList_test_QB_1$QB_FN)
 
 Data_WR_train = no_samplingData %>%
   filter(Year != 2014) %>%
-  filter(Position == "WR") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
-Data_WR_test = no_samplingData %>%
-  filter(Year == 2014) %>%
   filter(Position == "WR") %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
@@ -180,30 +205,37 @@ model_logit_WR <- train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-WR_Pred = ifelse(predict(model_logit_WR)>0.5, 1, 0)
+WR_Pred = ifelse(predict(model_logit_WR, predict2007to2013_WR)>0.5, 1, 0)
 
 CheckList_train_WR_1 = tibble("WR_Pred" = WR_Pred,
-                              "WR_TP" = ifelse(WR_Pred == 1 &Data_WR_train == 1, 1, 0),
-                              "WR_FP" = ifelse(WR_Pred == 1 &Data_WR_train == 0, 1, 0),
-                              "WR_TN" = ifelse(WR_Pred == 0 &Data_WR_train == 0, 1, 0),
-                              "WR_FN" = ifelse(WR_Pred == 0 &Data_WR_train == 1, 1, 0))
-
-# testing error 
-
-WR_Pred = ifelse(predict(model_logit_WR, newdata = Data_WR_test)>0.5, 1, 0)
-
-CheckList_test_WR_1 = tibble("WR_Pred" = WR_Pred,
-                             "WR_TP" = ifelse(WR_Pred == 1 & Data_WR_test == 1, 1, 0),
-                             "WR_FP" = ifelse(WR_Pred == 1 & Data_WR_test == 0, 1, 0),
-                             "WR_TN" = ifelse(WR_Pred == 0 & Data_WR_test == 0, 1, 0),
-                             "WR_FN" = ifelse(WR_Pred == 0 & Data_WR_test == 1, 1, 0))
+                              "WR_TP" = ifelse(WR_Pred == 1 &predict2007to2013_WR$Drafted == 1, 1, 0),
+                              "WR_FP" = ifelse(WR_Pred == 1 &predict2007to2013_WR$Drafted == 0, 1, 0),
+                              "WR_TN" = ifelse(WR_Pred == 0 &predict2007to2013_WR$Drafted == 0, 1, 0),
+                              "WR_FN" = ifelse(WR_Pred == 0 &predict2007to2013_WR$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[1,"WR_TP"] = sum(CheckList_test_WR_1$WR_TP)
-LogisticRegressionPerfMeas[1,"WR_TN"] = sum(CheckList_test_WR_1$WR_TN)
-LogisticRegressionPerfMeas[1,"WR_FP"] = sum(CheckList_test_WR_1$WR_FP)
-LogisticRegressionPerfMeas[1,"WR_FN"] = sum(CheckList_test_WR_1$WR_FN)
+LogisticRegressionPerfMeas[1,"WR_TP"] = sum(CheckList_train_WR_1$WR_TP)
+LogisticRegressionPerfMeas[1,"WR_TN"] = sum(CheckList_train_WR_1$WR_TN)
+LogisticRegressionPerfMeas[1,"WR_FP"] = sum(CheckList_train_WR_1$WR_FP)
+LogisticRegressionPerfMeas[1,"WR_FN"] = sum(CheckList_train_WR_1$WR_FN)
+
+# testing error 
+
+WR_Pred = ifelse(predict(model_logit_WR, newdata = predict2014_WR)>0.5, 1, 0)
+
+CheckList_test_WR_1 = tibble("WR_Pred" = WR_Pred,
+                             "WR_TP" = ifelse(WR_Pred == 1 & predict2014_WR$Drafted == 1, 1, 0),
+                             "WR_FP" = ifelse(WR_Pred == 1 & predict2014_WR$Drafted == 0, 1, 0),
+                             "WR_TN" = ifelse(WR_Pred == 0 & predict2014_WR$Drafted == 0, 1, 0),
+                             "WR_FN" = ifelse(WR_Pred == 0 & predict2014_WR$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[1,"WR_TP"] = sum(CheckList_test_WR_1$WR_TP)
+LogisticRegressionPerfMeas2014[1,"WR_TN"] = sum(CheckList_test_WR_1$WR_TN)
+LogisticRegressionPerfMeas2014[1,"WR_FP"] = sum(CheckList_test_WR_1$WR_FP)
+LogisticRegressionPerfMeas2014[1,"WR_FN"] = sum(CheckList_test_WR_1$WR_FN)
 
 
 ### Logistic Regression for RBs --------
@@ -213,11 +245,6 @@ LogisticRegressionPerfMeas[1,"WR_FN"] = sum(CheckList_test_WR_1$WR_FN)
 
 Data_RB_train = no_samplingData %>%
   filter(Year != 2014) %>%
-  filter(Position == "RB") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
-Data_RB_test = no_samplingData %>%
-  filter(Year == 2014) %>%
   filter(Position == "RB") %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
@@ -231,30 +258,37 @@ model_logit_RB <- train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-RB_Pred = ifelse(predict(model_logit_RB)>0.5, 1, 0)
+RB_Pred = ifelse(predict(model_logit_RB, predict2007to2013_RB)>0.5, 1, 0)
 
 CheckList_train_RB_1 = tibble("RB_Pred" = RB_Pred,
-                              "RB_TP" = ifelse(RB_Pred == 1 &Data_RB_train == 1, 1, 0),
-                              "RB_FP" = ifelse(RB_Pred == 1 &Data_RB_train == 0, 1, 0),
-                              "RB_TN" = ifelse(RB_Pred == 0 &Data_RB_train == 0, 1, 0),
-                              "RB_FN" = ifelse(RB_Pred == 0 &Data_RB_train == 1, 1, 0))
-
-# testing error 
-
-RB_Pred = ifelse(predict(model_logit_RB, newdata = Data_RB_test)>0.5, 1, 0)
-
-CheckList_test_RB_1 = tibble("RB_Pred" = RB_Pred,
-                             "RB_TP" = ifelse(RB_Pred == 1 & Data_RB_test == 1, 1, 0),
-                             "RB_FP" = ifelse(RB_Pred == 1 & Data_RB_test == 0, 1, 0),
-                             "RB_TN" = ifelse(RB_Pred == 0 & Data_RB_test == 0, 1, 0),
-                             "RB_FN" = ifelse(RB_Pred == 0 & Data_RB_test == 1, 1, 0))
+                              "RB_TP" = ifelse(RB_Pred == 1 &predict2007to2013_RB$Drafted == 1, 1, 0),
+                              "RB_FP" = ifelse(RB_Pred == 1 &predict2007to2013_RB$Drafted == 0, 1, 0),
+                              "RB_TN" = ifelse(RB_Pred == 0 &predict2007to2013_RB$Drafted == 0, 1, 0),
+                              "RB_FN" = ifelse(RB_Pred == 0 &predict2007to2013_RB$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[1,"RB_TP"] = sum(CheckList_test_RB_1$RB_TP)
-LogisticRegressionPerfMeas[1,"RB_TN"] = sum(CheckList_test_RB_1$RB_TN)
-LogisticRegressionPerfMeas[1,"RB_FP"] = sum(CheckList_test_RB_1$RB_FP)
-LogisticRegressionPerfMeas[1,"RB_FN"] = sum(CheckList_test_RB_1$RB_FN)
+LogisticRegressionPerfMeas[1,"RB_TP"] = sum(CheckList_train_RB_1$RB_TP)
+LogisticRegressionPerfMeas[1,"RB_TN"] = sum(CheckList_train_RB_1$RB_TN)
+LogisticRegressionPerfMeas[1,"RB_FP"] = sum(CheckList_train_RB_1$RB_FP)
+LogisticRegressionPerfMeas[1,"RB_FN"] = sum(CheckList_train_RB_1$RB_FN)
+
+# testing error 
+
+RB_Pred = ifelse(predict(model_logit_RB, newdata = predict2014_RB)>0.5, 1, 0)
+
+CheckList_test_RB_1 = tibble("RB_Pred" = RB_Pred,
+                             "RB_TP" = ifelse(RB_Pred == 1 & predict2014_RB$Drafted == 1, 1, 0),
+                             "RB_FP" = ifelse(RB_Pred == 1 & predict2014_RB$Drafted == 0, 1, 0),
+                             "RB_TN" = ifelse(RB_Pred == 0 & predict2014_RB$Drafted == 0, 1, 0),
+                             "RB_FN" = ifelse(RB_Pred == 0 & predict2014_RB$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[1,"RB_TP"] = sum(CheckList_test_RB_1$RB_TP)
+LogisticRegressionPerfMeas2014[1,"RB_TN"] = sum(CheckList_test_RB_1$RB_TN)
+LogisticRegressionPerfMeas2014[1,"RB_FP"] = sum(CheckList_test_RB_1$RB_FP)
+LogisticRegressionPerfMeas2014[1,"RB_FN"] = sum(CheckList_test_RB_1$RB_FN)
 
 
 # 2. Oversampling ---------
@@ -268,10 +302,6 @@ Data_tog_train = oversamplingData %>%
   filter(Year != 2014) %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
-Data_tog_test = no_samplingData %>%
-  filter(Year == 2014) %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
 ## training the model on the training data, including a 10-fold cross-validation
 model_logit_tog = train(Drafted ~ .,
                         data = Data_tog_train,
@@ -282,30 +312,37 @@ model_logit_tog = train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-Together_Pred = ifelse(predict(model_logit_tog)>0.5, 1, 0)
+Together_Pred = ifelse(predict(model_logit_tog, predict2007to2013_tog)>0.5, 1, 0)
 
 CheckList_train_tog_2 = tibble("Together_Pred" = Together_Pred,
-                               "Together_TP" = ifelse(Together_Pred == 1 & Data_tog_train == 1, 1, 0),
-                               "Together_FP" = ifelse(Together_Pred == 1 & Data_tog_train == 0, 1, 0),
-                               "Together_TN" = ifelse(Together_Pred == 0 & Data_tog_train == 0, 1, 0),
-                               "Together_FN" = ifelse(Together_Pred == 0 & Data_tog_train == 1, 1, 0))
-
-# testing error 
-
-Together_Pred = ifelse(predict(model_logit_tog, newdata = Data_tog_test)>0.5, 1, 0)
-
-CheckList_test_tog_2 = tibble("Together_Pred" = Together_Pred,
-                              "Together_TP" = ifelse(Together_Pred == 1 & Data_tog_test == 1, 1, 0),
-                              "Together_FP" = ifelse(Together_Pred == 1 & Data_tog_test == 0, 1, 0),
-                              "Together_TN" = ifelse(Together_Pred == 0 & Data_tog_test == 0, 1, 0),
-                              "Together_FN" = ifelse(Together_Pred == 0 & Data_tog_test == 1, 1, 0))
+                               "Together_TP" = ifelse(Together_Pred == 1 & predict2007to2013_tog$Drafted == 1, 1, 0),
+                               "Together_FP" = ifelse(Together_Pred == 1 & predict2007to2013_tog$Drafted == 0, 1, 0),
+                               "Together_TN" = ifelse(Together_Pred == 0 & predict2007to2013_tog$Drafted == 0, 1, 0),
+                               "Together_FN" = ifelse(Together_Pred == 0 & predict2007to2013_tog$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[2,"Together_TP"] = sum(CheckList_test_tog_2$Together_TP)
-LogisticRegressionPerfMeas[2,"Together_TN"] = sum(CheckList_test_tog_2$Together_TN)
-LogisticRegressionPerfMeas[2,"Together_FP"] = sum(CheckList_test_tog_2$Together_FP)
-LogisticRegressionPerfMeas[2,"Together_FN"] = sum(CheckList_test_tog_2$Together_FN)
+LogisticRegressionPerfMeas[2,"Together_TP"] = sum(CheckList_train_tog_2$Together_TP)
+LogisticRegressionPerfMeas[2,"Together_TN"] = sum(CheckList_train_tog_2$Together_TN)
+LogisticRegressionPerfMeas[2,"Together_FP"] = sum(CheckList_train_tog_2$Together_FP)
+LogisticRegressionPerfMeas[2,"Together_FN"] = sum(CheckList_train_tog_2$Together_FN)
+
+# testing error 
+
+Together_Pred = ifelse(predict(model_logit_tog, newdata = predict2014_tog)>0.5, 1, 0)
+
+CheckList_test_tog_2 = tibble("Together_Pred" = Together_Pred,
+                              "Together_TP" = ifelse(Together_Pred == 1 & predict2014_tog$Drafted == 1, 1, 0),
+                              "Together_FP" = ifelse(Together_Pred == 1 & predict2014_tog$Drafted == 0, 1, 0),
+                              "Together_TN" = ifelse(Together_Pred == 0 & predict2014_tog$Drafted == 0, 1, 0),
+                              "Together_FN" = ifelse(Together_Pred == 0 & predict2014_tog$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[2,"Together_TP"] = sum(CheckList_test_tog_2$Together_TP)
+LogisticRegressionPerfMeas2014[2,"Together_TN"] = sum(CheckList_test_tog_2$Together_TN)
+LogisticRegressionPerfMeas2014[2,"Together_FP"] = sum(CheckList_test_tog_2$Together_FP)
+LogisticRegressionPerfMeas2014[2,"Together_FN"] = sum(CheckList_test_tog_2$Together_FN)
 
 
 ### Logistic Regression for QBs --------
@@ -315,11 +352,6 @@ LogisticRegressionPerfMeas[2,"Together_FN"] = sum(CheckList_test_tog_2$Together_
 
 Data_QB_train = oversamplingData %>%
   filter(Year != 2014) %>%
-  filter(Position == "QB") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
-Data_QB_test = no_samplingData %>%
-  filter(Year == 2014) %>%
   filter(Position == "QB") %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
@@ -333,30 +365,37 @@ model_logit_QB <- train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-QB_Pred = ifelse(predict(model_logit_QB)>0.5, 1, 0)
+QB_Pred = ifelse(predict(model_logit_QB, predict2007to2013_QB)>0.5, 1, 0)
 
 CheckList_train_QB_2 = tibble("QB_Pred" = QB_Pred,
-                              "QB_TP" = ifelse(QB_Pred == 1 &Data_QB_train == 1, 1, 0),
-                              "QB_FP" = ifelse(QB_Pred == 1 &Data_QB_train == 0, 1, 0),
-                              "QB_TN" = ifelse(QB_Pred == 0 &Data_QB_train == 0, 1, 0),
-                              "QB_FN" = ifelse(QB_Pred == 0 &Data_QB_train == 1, 1, 0))
-
-# testing error 
-
-QB_Pred = ifelse(predict(model_logit_QB, newdata = Data_QB_test)>0.5, 1, 0)
-
-CheckList_test_QB_2 = tibble("QB_Pred" = QB_Pred,
-                             "QB_TP" = ifelse(QB_Pred == 1 & Data_QB_test == 1, 1, 0),
-                             "QB_FP" = ifelse(QB_Pred == 1 & Data_QB_test == 0, 1, 0),
-                             "QB_TN" = ifelse(QB_Pred == 0 & Data_QB_test == 0, 1, 0),
-                             "QB_FN" = ifelse(QB_Pred == 0 & Data_QB_test == 1, 1, 0))
+                              "QB_TP" = ifelse(QB_Pred == 1 &predict2007to2013_QB$Drafted == 1, 1, 0),
+                              "QB_FP" = ifelse(QB_Pred == 1 &predict2007to2013_QB$Drafted == 0, 1, 0),
+                              "QB_TN" = ifelse(QB_Pred == 0 &predict2007to2013_QB$Drafted == 0, 1, 0),
+                              "QB_FN" = ifelse(QB_Pred == 0 &predict2007to2013_QB$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[2,"QB_TP"] = sum(CheckList_test_QB_2$QB_TP)
-LogisticRegressionPerfMeas[2,"QB_TN"] = sum(CheckList_test_QB_2$QB_TN)
-LogisticRegressionPerfMeas[2,"QB_FP"] = sum(CheckList_test_QB_2$QB_FP)
-LogisticRegressionPerfMeas[2,"QB_FN"] = sum(CheckList_test_QB_2$QB_FN)
+LogisticRegressionPerfMeas[2,"QB_TP"] = sum(CheckList_train_QB_2$QB_TP)
+LogisticRegressionPerfMeas[2,"QB_TN"] = sum(CheckList_train_QB_2$QB_TN)
+LogisticRegressionPerfMeas[2,"QB_FP"] = sum(CheckList_train_QB_2$QB_FP)
+LogisticRegressionPerfMeas[2,"QB_FN"] = sum(CheckList_train_QB_2$QB_FN)
+
+# testing error 
+
+QB_Pred = ifelse(predict(model_logit_QB, newdata = predict2014_QB)>0.5, 1, 0)
+
+CheckList_test_QB_2 = tibble("QB_Pred" = QB_Pred,
+                             "QB_TP" = ifelse(QB_Pred == 1 & predict2014_QB$Drafted == 1, 1, 0),
+                             "QB_FP" = ifelse(QB_Pred == 1 & predict2014_QB$Drafted == 0, 1, 0),
+                             "QB_TN" = ifelse(QB_Pred == 0 & predict2014_QB$Drafted == 0, 1, 0),
+                             "QB_FN" = ifelse(QB_Pred == 0 & predict2014_QB$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[2,"QB_TP"] = sum(CheckList_test_QB_2$QB_TP)
+LogisticRegressionPerfMeas2014[2,"QB_TN"] = sum(CheckList_test_QB_2$QB_TN)
+LogisticRegressionPerfMeas2014[2,"QB_FP"] = sum(CheckList_test_QB_2$QB_FP)
+LogisticRegressionPerfMeas2014[2,"QB_FN"] = sum(CheckList_test_QB_2$QB_FN)
 
 
 ### Logistic Regression for WRs --------
@@ -366,11 +405,6 @@ LogisticRegressionPerfMeas[2,"QB_FN"] = sum(CheckList_test_QB_2$QB_FN)
 
 Data_WR_train = oversamplingData %>%
   filter(Year != 2014) %>%
-  filter(Position == "WR") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
-Data_WR_test = no_samplingData %>%
-  filter(Year == 2014) %>%
   filter(Position == "WR") %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
@@ -384,30 +418,37 @@ model_logit_WR <- train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-WR_Pred = ifelse(predict(model_logit_WR)>0.5, 1, 0)
+WR_Pred = ifelse(predict(model_logit_WR, predict2007to2013_WR)>0.5, 1, 0)
 
 CheckList_train_WR_2 = tibble("WR_Pred" = WR_Pred,
-                              "WR_TP" = ifelse(WR_Pred == 1 &Data_WR_train == 1, 1, 0),
-                              "WR_FP" = ifelse(WR_Pred == 1 &Data_WR_train == 0, 1, 0),
-                              "WR_TN" = ifelse(WR_Pred == 0 &Data_WR_train == 0, 1, 0),
-                              "WR_FN" = ifelse(WR_Pred == 0 &Data_WR_train == 1, 1, 0))
-
-# testing error 
-
-WR_Pred = ifelse(predict(model_logit_WR, newdata = Data_WR_test)>0.5, 1, 0)
-
-CheckList_test_WR_2 = tibble("WR_Pred" = WR_Pred,
-                             "WR_TP" = ifelse(WR_Pred == 1 & Data_WR_test == 1, 1, 0),
-                             "WR_FP" = ifelse(WR_Pred == 1 & Data_WR_test == 0, 1, 0),
-                             "WR_TN" = ifelse(WR_Pred == 0 & Data_WR_test == 0, 1, 0),
-                             "WR_FN" = ifelse(WR_Pred == 0 & Data_WR_test == 1, 1, 0))
+                              "WR_TP" = ifelse(WR_Pred == 1 &predict2007to2013_WR$Drafted == 1, 1, 0),
+                              "WR_FP" = ifelse(WR_Pred == 1 &predict2007to2013_WR$Drafted == 0, 1, 0),
+                              "WR_TN" = ifelse(WR_Pred == 0 &predict2007to2013_WR$Drafted == 0, 1, 0),
+                              "WR_FN" = ifelse(WR_Pred == 0 &predict2007to2013_WR$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[2,"WR_TP"] = sum(CheckList_test_WR_2$WR_TP)
-LogisticRegressionPerfMeas[2,"WR_TN"] = sum(CheckList_test_WR_2$WR_TN)
-LogisticRegressionPerfMeas[2,"WR_FP"] = sum(CheckList_test_WR_2$WR_FP)
-LogisticRegressionPerfMeas[2,"WR_FN"] = sum(CheckList_test_WR_2$WR_FN)
+LogisticRegressionPerfMeas[2,"WR_TP"] = sum(CheckList_train_WR_2$WR_TP)
+LogisticRegressionPerfMeas[2,"WR_TN"] = sum(CheckList_train_WR_2$WR_TN)
+LogisticRegressionPerfMeas[2,"WR_FP"] = sum(CheckList_train_WR_2$WR_FP)
+LogisticRegressionPerfMeas[2,"WR_FN"] = sum(CheckList_train_WR_2$WR_FN)
+
+# testing error 
+
+WR_Pred = ifelse(predict(model_logit_WR, newdata = predict2014_WR)>0.5, 1, 0)
+
+CheckList_test_WR_2 = tibble("WR_Pred" = WR_Pred,
+                             "WR_TP" = ifelse(WR_Pred == 1 & predict2014_WR$Drafted == 1, 1, 0),
+                             "WR_FP" = ifelse(WR_Pred == 1 & predict2014_WR$Drafted == 0, 1, 0),
+                             "WR_TN" = ifelse(WR_Pred == 0 & predict2014_WR$Drafted == 0, 1, 0),
+                             "WR_FN" = ifelse(WR_Pred == 0 & predict2014_WR$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[2,"WR_TP"] = sum(CheckList_test_WR_2$WR_TP)
+LogisticRegressionPerfMeas2014[2,"WR_TN"] = sum(CheckList_test_WR_2$WR_TN)
+LogisticRegressionPerfMeas2014[2,"WR_FP"] = sum(CheckList_test_WR_2$WR_FP)
+LogisticRegressionPerfMeas2014[2,"WR_FN"] = sum(CheckList_test_WR_2$WR_FN)
 
 
 ### Logistic Regression for RBs --------
@@ -417,11 +458,6 @@ LogisticRegressionPerfMeas[2,"WR_FN"] = sum(CheckList_test_WR_2$WR_FN)
 
 Data_RB_train = oversamplingData %>%
   filter(Year != 2014) %>%
-  filter(Position == "RB") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
-Data_RB_test = no_samplingData %>%
-  filter(Year == 2014) %>%
   filter(Position == "RB") %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
@@ -435,30 +471,37 @@ model_logit_RB <- train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-RB_Pred = ifelse(predict(model_logit_RB)>0.5, 1, 0)
+RB_Pred = ifelse(predict(model_logit_RB, predict2007to2013_RB)>0.5, 1, 0)
 
 CheckList_train_RB_2 = tibble("RB_Pred" = RB_Pred,
-                            "RB_TP" = ifelse(RB_Pred == 1 &Data_RB_train == 1, 1, 0),
-                            "RB_FP" = ifelse(RB_Pred == 1 &Data_RB_train == 0, 1, 0),
-                            "RB_TN" = ifelse(RB_Pred == 0 &Data_RB_train == 0, 1, 0),
-                            "RB_FN" = ifelse(RB_Pred == 0 &Data_RB_train == 1, 1, 0))
-
-# testing error 
-
-RB_Pred = ifelse(predict(model_logit_RB, newdata = Data_RB_test)>0.5, 1, 0)
-
-CheckList_test_RB_2 = tibble("RB_Pred" = RB_Pred,
-                           "RB_TP" = ifelse(RB_Pred == 1 & Data_RB_test == 1, 1, 0),
-                           "RB_FP" = ifelse(RB_Pred == 1 & Data_RB_test == 0, 1, 0),
-                           "RB_TN" = ifelse(RB_Pred == 0 & Data_RB_test == 0, 1, 0),
-                           "RB_FN" = ifelse(RB_Pred == 0 & Data_RB_test == 1, 1, 0))
+                            "RB_TP" = ifelse(RB_Pred == 1 &predict2007to2013_RB$Drafted == 1, 1, 0),
+                            "RB_FP" = ifelse(RB_Pred == 1 &predict2007to2013_RB$Drafted == 0, 1, 0),
+                            "RB_TN" = ifelse(RB_Pred == 0 &predict2007to2013_RB$Drafted == 0, 1, 0),
+                            "RB_FN" = ifelse(RB_Pred == 0 &predict2007to2013_RB$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[2,"RB_TP"] = sum(CheckList_test_RB_2$RB_TP)
-LogisticRegressionPerfMeas[2,"RB_TN"] = sum(CheckList_test_RB_2$RB_TN)
-LogisticRegressionPerfMeas[2,"RB_FP"] = sum(CheckList_test_RB_2$RB_FP)
-LogisticRegressionPerfMeas[2,"RB_FN"] = sum(CheckList_test_RB_2$RB_FN)
+LogisticRegressionPerfMeas[2,"RB_TP"] = sum(CheckList_train_RB_2$RB_TP)
+LogisticRegressionPerfMeas[2,"RB_TN"] = sum(CheckList_train_RB_2$RB_TN)
+LogisticRegressionPerfMeas[2,"RB_FP"] = sum(CheckList_train_RB_2$RB_FP)
+LogisticRegressionPerfMeas[2,"RB_FN"] = sum(CheckList_train_RB_2$RB_FN)
+
+# testing error 
+
+RB_Pred = ifelse(predict(model_logit_RB, newdata = predict2014_RB)>0.5, 1, 0)
+
+CheckList_test_RB_2 = tibble("RB_Pred" = RB_Pred,
+                           "RB_TP" = ifelse(RB_Pred == 1 & predict2014_RB$Drafted == 1, 1, 0),
+                           "RB_FP" = ifelse(RB_Pred == 1 & predict2014_RB$Drafted == 0, 1, 0),
+                           "RB_TN" = ifelse(RB_Pred == 0 & predict2014_RB$Drafted == 0, 1, 0),
+                           "RB_FN" = ifelse(RB_Pred == 0 & predict2014_RB$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[2,"RB_TP"] = sum(CheckList_test_RB_2$RB_TP)
+LogisticRegressionPerfMeas2014[2,"RB_TN"] = sum(CheckList_test_RB_2$RB_TN)
+LogisticRegressionPerfMeas2014[2,"RB_FP"] = sum(CheckList_test_RB_2$RB_FP)
+LogisticRegressionPerfMeas2014[2,"RB_FN"] = sum(CheckList_test_RB_2$RB_FN)
 
 
 # 3. Undersampling ---------
@@ -472,10 +515,6 @@ Data_tog_train = undersamplingData %>%
   filter(Year != 2014) %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
-Data_tog_test = no_samplingData %>%
-  filter(Year == 2014) %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
 ## training the model on the training data, including a 10-fold cross-validation
 model_logit_tog = train(Drafted ~ .,
                data = Data_tog_train,
@@ -486,30 +525,37 @@ model_logit_tog = train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-Together_Pred = ifelse(predict(model_logit_tog)>0.5, 1, 0)
+Together_Pred = ifelse(predict(model_logit_tog, predict2007to2013_tog)>0.5, 1, 0)
 
 CheckList_train_tog_3 = tibble("Together_Pred" = Together_Pred,
-                 "Together_TP" = ifelse(Together_Pred == 1 & Data_tog_train == 1, 1, 0),
-                 "Together_FP" = ifelse(Together_Pred == 1 & Data_tog_train == 0, 1, 0),
-                 "Together_TN" = ifelse(Together_Pred == 0 & Data_tog_train == 0, 1, 0),
-                 "Together_FN" = ifelse(Together_Pred == 0 & Data_tog_train == 1, 1, 0))
-
-# testing error 
-
-Together_Pred = ifelse(predict(model_logit_tog, newdata = Data_tog_test)>0.5, 1, 0)
-
-CheckList_test_tog_3 = tibble("Together_Pred" = Together_Pred,
-                 "Together_TP" = ifelse(Together_Pred == 1 & Data_tog_test == 1, 1, 0),
-                 "Together_FP" = ifelse(Together_Pred == 1 & Data_tog_test == 0, 1, 0),
-                 "Together_TN" = ifelse(Together_Pred == 0 & Data_tog_test == 0, 1, 0),
-                 "Together_FN" = ifelse(Together_Pred == 0 & Data_tog_test == 1, 1, 0))
+                 "Together_TP" = ifelse(Together_Pred == 1 & predict2007to2013_tog$Drafted == 1, 1, 0),
+                 "Together_FP" = ifelse(Together_Pred == 1 & predict2007to2013_tog$Drafted == 0, 1, 0),
+                 "Together_TN" = ifelse(Together_Pred == 0 & predict2007to2013_tog$Drafted == 0, 1, 0),
+                 "Together_FN" = ifelse(Together_Pred == 0 & predict2007to2013_tog$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[3,"Together_TP"] = sum(CheckList_test_tog_3$Together_TP)
-LogisticRegressionPerfMeas[3,"Together_TN"] = sum(CheckList_test_tog_3$Together_TN)
-LogisticRegressionPerfMeas[3,"Together_FP"] = sum(CheckList_test_tog_3$Together_FP)
-LogisticRegressionPerfMeas[3,"Together_FN"] = sum(CheckList_test_tog_3$Together_FN)
+LogisticRegressionPerfMeas[3,"Together_TP"] = sum(CheckList_train_tog_3$Together_TP)
+LogisticRegressionPerfMeas[3,"Together_TN"] = sum(CheckList_train_tog_3$Together_TN)
+LogisticRegressionPerfMeas[3,"Together_FP"] = sum(CheckList_train_tog_3$Together_FP)
+LogisticRegressionPerfMeas[3,"Together_FN"] = sum(CheckList_train_tog_3$Together_FN)
+
+# testing error 
+
+Together_Pred = ifelse(predict(model_logit_tog, newdata = predict2014_tog)>0.5, 1, 0)
+
+CheckList_test_tog_3 = tibble("Together_Pred" = Together_Pred,
+                 "Together_TP" = ifelse(Together_Pred == 1 & predict2014_tog$Drafted == 1, 1, 0),
+                 "Together_FP" = ifelse(Together_Pred == 1 & predict2014_tog$Drafted == 0, 1, 0),
+                 "Together_TN" = ifelse(Together_Pred == 0 & predict2014_tog$Drafted == 0, 1, 0),
+                 "Together_FN" = ifelse(Together_Pred == 0 & predict2014_tog$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[3,"Together_TP"] = sum(CheckList_test_tog_3$Together_TP)
+LogisticRegressionPerfMeas2014[3,"Together_TN"] = sum(CheckList_test_tog_3$Together_TN)
+LogisticRegressionPerfMeas2014[3,"Together_FP"] = sum(CheckList_test_tog_3$Together_FP)
+LogisticRegressionPerfMeas2014[3,"Together_FN"] = sum(CheckList_test_tog_3$Together_FN)
 
 
 ### Logistic Regression for QBs --------
@@ -522,11 +568,6 @@ Data_QB_train = undersamplingData %>%
   filter(Position == "QB") %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
-Data_QB_test = no_samplingData %>%
-  filter(Year == 2014) %>%
-  filter(Position == "QB") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
 ## training the model on the training set, including a 10-fold cross-validation
 model_logit_QB <- train(Drafted ~ .,
                          data = Data_QB_train,
@@ -537,30 +578,37 @@ model_logit_QB <- train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-QB_Pred = ifelse(predict(model_logit_QB)>0.5, 1, 0)
+QB_Pred = ifelse(predict(model_logit_QB, predict2007to2013_QB)>0.5, 1, 0)
 
 CheckList_train_QB_3 = tibble("QB_Pred" = QB_Pred,
-                             "QB_TP" = ifelse(QB_Pred == 1 &Data_QB_train == 1, 1, 0),
-                             "QB_FP" = ifelse(QB_Pred == 1 &Data_QB_train == 0, 1, 0),
-                             "QB_TN" = ifelse(QB_Pred == 0 &Data_QB_train == 0, 1, 0),
-                             "QB_FN" = ifelse(QB_Pred == 0 &Data_QB_train == 1, 1, 0))
-
-# testing error 
-
-QB_Pred = ifelse(predict(model_logit_QB, newdata = Data_QB_test)>0.5, 1, 0)
-
-CheckList_test_QB_3 = tibble("QB_Pred" = QB_Pred,
-                            "QB_TP" = ifelse(QB_Pred == 1 & Data_QB_test == 1, 1, 0),
-                            "QB_FP" = ifelse(QB_Pred == 1 & Data_QB_test == 0, 1, 0),
-                            "QB_TN" = ifelse(QB_Pred == 0 & Data_QB_test == 0, 1, 0),
-                            "QB_FN" = ifelse(QB_Pred == 0 & Data_QB_test == 1, 1, 0))
+                             "QB_TP" = ifelse(QB_Pred == 1 &predict2007to2013_QB$Drafted == 1, 1, 0),
+                             "QB_FP" = ifelse(QB_Pred == 1 &predict2007to2013_QB$Drafted == 0, 1, 0),
+                             "QB_TN" = ifelse(QB_Pred == 0 &predict2007to2013_QB$Drafted == 0, 1, 0),
+                             "QB_FN" = ifelse(QB_Pred == 0 &predict2007to2013_QB$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[3,"QB_TP"] = sum(CheckList_test_QB_3$QB_TP)
-LogisticRegressionPerfMeas[3,"QB_TN"] = sum(CheckList_test_QB_3$QB_TN)
-LogisticRegressionPerfMeas[3,"QB_FP"] = sum(CheckList_test_QB_3$QB_FP)
-LogisticRegressionPerfMeas[3,"QB_FN"] = sum(CheckList_test_QB_3$QB_FN)
+LogisticRegressionPerfMeas[3,"QB_TP"] = sum(CheckList_train_QB_3$QB_TP)
+LogisticRegressionPerfMeas[3,"QB_TN"] = sum(CheckList_train_QB_3$QB_TN)
+LogisticRegressionPerfMeas[3,"QB_FP"] = sum(CheckList_train_QB_3$QB_FP)
+LogisticRegressionPerfMeas[3,"QB_FN"] = sum(CheckList_train_QB_3$QB_FN)
+
+# testing error 
+
+QB_Pred = ifelse(predict(model_logit_QB, newdata = predict2014_QB)>0.5, 1, 0)
+
+CheckList_test_QB_3 = tibble("QB_Pred" = QB_Pred,
+                            "QB_TP" = ifelse(QB_Pred == 1 & predict2014_QB$Drafted == 1, 1, 0),
+                            "QB_FP" = ifelse(QB_Pred == 1 & predict2014_QB$Drafted == 0, 1, 0),
+                            "QB_TN" = ifelse(QB_Pred == 0 & predict2014_QB$Drafted == 0, 1, 0),
+                            "QB_FN" = ifelse(QB_Pred == 0 & predict2014_QB$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[3,"QB_TP"] = sum(CheckList_test_QB_3$QB_TP)
+LogisticRegressionPerfMeas2014[3,"QB_TN"] = sum(CheckList_test_QB_3$QB_TN)
+LogisticRegressionPerfMeas2014[3,"QB_FP"] = sum(CheckList_test_QB_3$QB_FP)
+LogisticRegressionPerfMeas2014[3,"QB_FN"] = sum(CheckList_test_QB_3$QB_FN)
 
 
 ### Logistic Regression for WRs --------
@@ -573,11 +621,6 @@ Data_WR_train = undersamplingData %>%
   filter(Position == "WR") %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
-Data_WR_test = no_samplingData %>%
-  filter(Year == 2014) %>%
-  filter(Position == "WR") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
 ## train the model on the training data, including a 10-fold cross-validation
 model_logit_WR <- train(Drafted ~ .,
                         data = Data_WR_train,
@@ -588,30 +631,37 @@ model_logit_WR <- train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-WR_Pred = ifelse(predict(model_logit_WR)>0.5, 1, 0)
+WR_Pred = ifelse(predict(model_logit_WR, predict2007to2013_WR)>0.5, 1, 0)
 
 CheckList_train_WR_3 = tibble("WR_Pred" = WR_Pred,
-                            "WR_TP" = ifelse(WR_Pred == 1 &Data_WR_train == 1, 1, 0),
-                            "WR_FP" = ifelse(WR_Pred == 1 &Data_WR_train == 0, 1, 0),
-                            "WR_TN" = ifelse(WR_Pred == 0 &Data_WR_train == 0, 1, 0),
-                            "WR_FN" = ifelse(WR_Pred == 0 &Data_WR_train == 1, 1, 0))
-
-# testing error 
-
-WR_Pred = ifelse(predict(model_logit_WR, newdata = Data_WR_test)>0.5, 1, 0)
-
-CheckList_test_WR_3 = tibble("WR_Pred" = WR_Pred,
-                           "WR_TP" = ifelse(WR_Pred == 1 & Data_WR_test == 1, 1, 0),
-                           "WR_FP" = ifelse(WR_Pred == 1 & Data_WR_test == 0, 1, 0),
-                           "WR_TN" = ifelse(WR_Pred == 0 & Data_WR_test == 0, 1, 0),
-                           "WR_FN" = ifelse(WR_Pred == 0 & Data_WR_test == 1, 1, 0))
+                            "WR_TP" = ifelse(WR_Pred == 1 &predict2007to2013_WR$Drafted == 1, 1, 0),
+                            "WR_FP" = ifelse(WR_Pred == 1 &predict2007to2013_WR$Drafted == 0, 1, 0),
+                            "WR_TN" = ifelse(WR_Pred == 0 &predict2007to2013_WR$Drafted == 0, 1, 0),
+                            "WR_FN" = ifelse(WR_Pred == 0 &predict2007to2013_WR$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[3,"WR_TP"] = sum(CheckList_test_WR_3$WR_TP)
-LogisticRegressionPerfMeas[3,"WR_TN"] = sum(CheckList_test_WR_3$WR_TN)
-LogisticRegressionPerfMeas[3,"WR_FP"] = sum(CheckList_test_WR_3$WR_FP)
-LogisticRegressionPerfMeas[3,"WR_FN"] = sum(CheckList_test_WR_3$WR_FN)
+LogisticRegressionPerfMeas[3,"WR_TP"] = sum(CheckList_train_WR_3$WR_TP)
+LogisticRegressionPerfMeas[3,"WR_TN"] = sum(CheckList_train_WR_3$WR_TN)
+LogisticRegressionPerfMeas[3,"WR_FP"] = sum(CheckList_train_WR_3$WR_FP)
+LogisticRegressionPerfMeas[3,"WR_FN"] = sum(CheckList_train_WR_3$WR_FN)
+
+# testing error 
+
+WR_Pred = ifelse(predict(model_logit_WR, newdata = predict2014_WR)>0.5, 1, 0)
+
+CheckList_test_WR_3 = tibble("WR_Pred" = WR_Pred,
+                           "WR_TP" = ifelse(WR_Pred == 1 & predict2014_WR$Drafted == 1, 1, 0),
+                           "WR_FP" = ifelse(WR_Pred == 1 & predict2014_WR$Drafted  == 0, 1, 0),
+                           "WR_TN" = ifelse(WR_Pred == 0 & predict2014_WR$Drafted  == 0, 1, 0),
+                           "WR_FN" = ifelse(WR_Pred == 0 & predict2014_WR$Drafted  == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[3,"WR_TP"] = sum(CheckList_test_WR_3$WR_TP)
+LogisticRegressionPerfMeas2014[3,"WR_TN"] = sum(CheckList_test_WR_3$WR_TN)
+LogisticRegressionPerfMeas2014[3,"WR_FP"] = sum(CheckList_test_WR_3$WR_FP)
+LogisticRegressionPerfMeas2014[3,"WR_FN"] = sum(CheckList_test_WR_3$WR_FN)
 
 
 ### Logistic Regression for RBs --------
@@ -621,11 +671,6 @@ LogisticRegressionPerfMeas[3,"WR_FN"] = sum(CheckList_test_WR_3$WR_FN)
 
 Data_RB_train = undersamplingData %>%
   filter(Year != 2014) %>%
-  filter(Position == "RB") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
-Data_RB_test = no_samplingData %>%
-  filter(Year == 2014) %>%
   filter(Position == "RB") %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
@@ -639,34 +684,41 @@ model_logit_RB <- train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-RB_Pred = ifelse(predict(model_logit_RB)>0.5, 1, 0)
+RB_Pred = ifelse(predict(model_logit_RB, predict2007to2013_RB)>0.5, 1, 0)
 
 CheckList_train_RB_3 = tibble("RB_Pred" = RB_Pred,
-                            "RB_TP" = ifelse(RB_Pred == 1 &Data_RB_train == 1, 1, 0),
-                            "RB_FP" = ifelse(RB_Pred == 1 &Data_RB_train == 0, 1, 0),
-                            "RB_TN" = ifelse(RB_Pred == 0 &Data_RB_train == 0, 1, 0),
-                            "RB_FN" = ifelse(RB_Pred == 0 &Data_RB_train == 1, 1, 0))
-
-# testing error 
-
-RB_Pred = ifelse(predict(model_logit_RB, newdata = Data_RB_test)>0.5, 1, 0)
-
-CheckList_test_RB_3 = tibble("RB_Pred" = RB_Pred,
-                           "RB_TP" = ifelse(RB_Pred == 1 & Data_RB_test == 1, 1, 0),
-                           "RB_FP" = ifelse(RB_Pred == 1 & Data_RB_test == 0, 1, 0),
-                           "RB_TN" = ifelse(RB_Pred == 0 & Data_RB_test == 0, 1, 0),
-                           "RB_FN" = ifelse(RB_Pred == 0 & Data_RB_test == 1, 1, 0))
+                            "RB_TP" = ifelse(RB_Pred == 1 &predict2007to2013_RB$Drafted == 1, 1, 0),
+                            "RB_FP" = ifelse(RB_Pred == 1 &predict2007to2013_RB$Drafted == 0, 1, 0),
+                            "RB_TN" = ifelse(RB_Pred == 0 &predict2007to2013_RB$Drafted == 0, 1, 0),
+                            "RB_FN" = ifelse(RB_Pred == 0 &predict2007to2013_RB$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[3,"RB_TP"] = sum(CheckList_test_RB_3$RB_TP)
-LogisticRegressionPerfMeas[3,"RB_TN"] = sum(CheckList_test_RB_3$RB_TN)
-LogisticRegressionPerfMeas[3,"RB_FP"] = sum(CheckList_test_RB_3$RB_FP)
-LogisticRegressionPerfMeas[3,"RB_FN"] = sum(CheckList_test_RB_3$RB_FN)
+LogisticRegressionPerfMeas[3,"RB_TP"] = sum(CheckList_train_RB_3$RB_TP)
+LogisticRegressionPerfMeas[3,"RB_TN"] = sum(CheckList_train_RB_3$RB_TN)
+LogisticRegressionPerfMeas[3,"RB_FP"] = sum(CheckList_train_RB_3$RB_FP)
+LogisticRegressionPerfMeas[3,"RB_FN"] = sum(CheckList_train_RB_3$RB_FN)
+
+# testing error 
+
+RB_Pred = ifelse(predict(model_logit_RB, newdata = predict2014_RB)>0.5, 1, 0)
+
+CheckList_test_RB_3 = tibble("RB_Pred" = RB_Pred,
+                           "RB_TP" = ifelse(RB_Pred == 1 & predict2014_RB$Drafted == 1, 1, 0),
+                           "RB_FP" = ifelse(RB_Pred == 1 & predict2014_RB$Drafted  == 0, 1, 0),
+                           "RB_TN" = ifelse(RB_Pred == 0 & predict2014_RB$Drafted  == 0, 1, 0),
+                           "RB_FN" = ifelse(RB_Pred == 0 & predict2014_RB$Drafted  == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[3,"RB_TP"] = sum(CheckList_test_RB_3$RB_TP)
+LogisticRegressionPerfMeas2014[3,"RB_TN"] = sum(CheckList_test_RB_3$RB_TN)
+LogisticRegressionPerfMeas2014[3,"RB_FP"] = sum(CheckList_test_RB_3$RB_FP)
+LogisticRegressionPerfMeas2014[3,"RB_FN"] = sum(CheckList_test_RB_3$RB_FN)
 
 
 
-# 5. Smote ---------
+# 4. Rose_both ---------
 
 ### Logistic Regression for all players together --------
 
@@ -675,10 +727,6 @@ LogisticRegressionPerfMeas[3,"RB_FN"] = sum(CheckList_test_RB_3$RB_FN)
 
 Data_tog_train = Rose_bothData %>%
   filter(Year != 2014) %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
-Data_tog_test = no_samplingData %>%
-  filter(Year == 2014) %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
 ## training the model on the training data, including a 10-fold cross-validation
@@ -691,30 +739,37 @@ model_logit_tog = train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-Together_Pred = ifelse(predict(model_logit_tog)>0.5, 1, 0)
+Together_Pred = ifelse(predict(model_logit_tog, predict2007to2013_tog)>0.5, 1, 0)
 
 CheckList_train_tog_4 = tibble("Together_Pred" = Together_Pred,
-                 "Together_TP" = ifelse(Together_Pred == 1 & Data_tog_train == 1, 1, 0),
-                 "Together_FP" = ifelse(Together_Pred == 1 & Data_tog_train == 0, 1, 0),
-                 "Together_TN" = ifelse(Together_Pred == 0 & Data_tog_train == 0, 1, 0),
-                 "Together_FN" = ifelse(Together_Pred == 0 & Data_tog_train == 1, 1, 0))
-
-# testing error 
-
-Together_Pred = ifelse(predict(model_logit_tog, newdata = Data_tog_test)>0.5, 1, 0)
-
-CheckList_test_tog_4 = tibble("Together_Pred" = Together_Pred,
-                 "Together_TP" = ifelse(Together_Pred == 1 & Data_tog_test == 1, 1, 0),
-                 "Together_FP" = ifelse(Together_Pred == 1 & Data_tog_test == 0, 1, 0),
-                 "Together_TN" = ifelse(Together_Pred == 0 & Data_tog_test == 0, 1, 0),
-                 "Together_FN" = ifelse(Together_Pred == 0 & Data_tog_test == 1, 1, 0))
+                 "Together_TP" = ifelse(Together_Pred == 1 & predict2007to2013_tog$Drafted == 1, 1, 0),
+                 "Together_FP" = ifelse(Together_Pred == 1 & predict2007to2013_tog$Drafted == 0, 1, 0),
+                 "Together_TN" = ifelse(Together_Pred == 0 & predict2007to2013_tog$Drafted == 0, 1, 0),
+                 "Together_FN" = ifelse(Together_Pred == 0 & predict2007to2013_tog$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[4,"Together_TP"] = sum(CheckList_test_tog_4$Together_TP)
-LogisticRegressionPerfMeas[4,"Together_TN"] = sum(CheckList_test_tog_4$Together_TN)
-LogisticRegressionPerfMeas[4,"Together_FP"] = sum(CheckList_test_tog_4$Together_FP)
-LogisticRegressionPerfMeas[4,"Together_FN"] = sum(CheckList_test_tog_4$Together_FN)
+LogisticRegressionPerfMeas[4,"Together_TP"] = sum(CheckList_train_tog_4$Together_TP)
+LogisticRegressionPerfMeas[4,"Together_TN"] = sum(CheckList_train_tog_4$Together_TN)
+LogisticRegressionPerfMeas[4,"Together_FP"] = sum(CheckList_train_tog_4$Together_FP)
+LogisticRegressionPerfMeas[4,"Together_FN"] = sum(CheckList_train_tog_4$Together_FN)
+
+# testing error 
+
+Together_Pred = ifelse(predict(model_logit_tog, newdata = predict2014_tog)>0.5, 1, 0)
+
+CheckList_test_tog_4 = tibble("Together_Pred" = Together_Pred,
+                 "Together_TP" = ifelse(Together_Pred == 1 & predict2014_tog$Drafted == 1, 1, 0),
+                 "Together_FP" = ifelse(Together_Pred == 1 & predict2014_tog$Drafted == 0, 1, 0),
+                 "Together_TN" = ifelse(Together_Pred == 0 & predict2014_tog$Drafted == 0, 1, 0),
+                 "Together_FN" = ifelse(Together_Pred == 0 & predict2014_tog$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[4,"Together_TP"] = sum(CheckList_test_tog_4$Together_TP)
+LogisticRegressionPerfMeas2014[4,"Together_TN"] = sum(CheckList_test_tog_4$Together_TN)
+LogisticRegressionPerfMeas2014[4,"Together_FP"] = sum(CheckList_test_tog_4$Together_FP)
+LogisticRegressionPerfMeas2014[4,"Together_FN"] = sum(CheckList_test_tog_4$Together_FN)
 
 
 ### Logistic Regression for QBs --------
@@ -724,11 +779,6 @@ LogisticRegressionPerfMeas[4,"Together_FN"] = sum(CheckList_test_tog_4$Together_
 
 Data_QB_train = Rose_bothData %>%
   filter(Year != 2014) %>%
-  filter(Position == "QB") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
-Data_QB_test = no_samplingData %>%
-  filter(Year == 2014) %>%
   filter(Position == "QB") %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
@@ -742,30 +792,37 @@ model_logit_QB <- train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-QB_Pred = ifelse(predict(model_logit_QB)>0.5, 1, 0)
+QB_Pred = ifelse(predict(model_logit_QB, predict2007to2013_QB)>0.5, 1, 0)
 
 CheckList_train_QB_4 = tibble("QB_Pred" = QB_Pred,
-                             "QB_TP" = ifelse(QB_Pred == 1 &Data_QB_train == 1, 1, 0),
-                             "QB_FP" = ifelse(QB_Pred == 1 &Data_QB_train == 0, 1, 0),
-                             "QB_TN" = ifelse(QB_Pred == 0 &Data_QB_train == 0, 1, 0),
-                             "QB_FN" = ifelse(QB_Pred == 0 &Data_QB_train == 1, 1, 0))
-
-# testing error 
-
-QB_Pred = ifelse(predict(model_logit_QB, newdata = Data_QB_test)>0.5, 1, 0)
-
-CheckList_test_QB_4 = tibble("QB_Pred" = QB_Pred,
-                            "QB_TP" = ifelse(QB_Pred == 1 & Data_QB_test == 1, 1, 0),
-                            "QB_FP" = ifelse(QB_Pred == 1 & Data_QB_test == 0, 1, 0),
-                            "QB_TN" = ifelse(QB_Pred == 0 & Data_QB_test == 0, 1, 0),
-                            "QB_FN" = ifelse(QB_Pred == 0 & Data_QB_test == 1, 1, 0))
+                             "QB_TP" = ifelse(QB_Pred == 1 &predict2007to2013_QB$Drafted == 1, 1, 0),
+                             "QB_FP" = ifelse(QB_Pred == 1 &predict2007to2013_QB$Drafted == 0, 1, 0),
+                             "QB_TN" = ifelse(QB_Pred == 0 &predict2007to2013_QB$Drafted == 0, 1, 0),
+                             "QB_FN" = ifelse(QB_Pred == 0 &predict2007to2013_QB$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[4,"QB_TP"] = sum(CheckList_test_QB_4$QB_TP)
-LogisticRegressionPerfMeas[4,"QB_TN"] = sum(CheckList_test_QB_4$QB_TN)
-LogisticRegressionPerfMeas[4,"QB_FP"] = sum(CheckList_test_QB_4$QB_FP)
-LogisticRegressionPerfMeas[4,"QB_FN"] = sum(CheckList_test_QB_4$QB_FN)
+LogisticRegressionPerfMeas[4,"QB_TP"] = sum(CheckList_train_QB_4$QB_TP)
+LogisticRegressionPerfMeas[4,"QB_TN"] = sum(CheckList_train_QB_4$QB_TN)
+LogisticRegressionPerfMeas[4,"QB_FP"] = sum(CheckList_train_QB_4$QB_FP)
+LogisticRegressionPerfMeas[4,"QB_FN"] = sum(CheckList_train_QB_4$QB_FN)
+
+# testing error 
+
+QB_Pred = ifelse(predict(model_logit_QB, newdata = predict2014_QB)>0.5, 1, 0)
+
+CheckList_test_QB_4 = tibble("QB_Pred" = QB_Pred,
+                            "QB_TP" = ifelse(QB_Pred == 1 & predict2014_QB$Drafted == 1, 1, 0),
+                            "QB_FP" = ifelse(QB_Pred == 1 & predict2014_QB$Drafted == 0, 1, 0),
+                            "QB_TN" = ifelse(QB_Pred == 0 & predict2014_QB$Drafted == 0, 1, 0),
+                            "QB_FN" = ifelse(QB_Pred == 0 & predict2014_QB$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[4,"QB_TP"] = sum(CheckList_test_QB_4$QB_TP)
+LogisticRegressionPerfMeas2014[4,"QB_TN"] = sum(CheckList_test_QB_4$QB_TN)
+LogisticRegressionPerfMeas2014[4,"QB_FP"] = sum(CheckList_test_QB_4$QB_FP)
+LogisticRegressionPerfMeas2014[4,"QB_FN"] = sum(CheckList_test_QB_4$QB_FN)
 
 
 ### Logistic Regression for WRs --------
@@ -775,11 +832,6 @@ LogisticRegressionPerfMeas[4,"QB_FN"] = sum(CheckList_test_QB_4$QB_FN)
 
 Data_WR_train = Rose_bothData %>%
   filter(Year != 2014) %>%
-  filter(Position == "WR") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
-Data_WR_test = no_samplingData %>%
-  filter(Year == 2014) %>%
   filter(Position == "WR") %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
@@ -793,30 +845,37 @@ model_logit_WR <- train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-WR_Pred = ifelse(predict(model_logit_WR)>0.5, 1, 0)
+WR_Pred = ifelse(predict(model_logit_WR, predict2007to2013_WR)>0.5, 1, 0)
 
 CheckList_train_WR_4 = tibble("WR_Pred" = WR_Pred,
-                            "WR_TP" = ifelse(WR_Pred == 1 &Data_WR_train == 1, 1, 0),
-                            "WR_FP" = ifelse(WR_Pred == 1 &Data_WR_train == 0, 1, 0),
-                            "WR_TN" = ifelse(WR_Pred == 0 &Data_WR_train == 0, 1, 0),
-                            "WR_FN" = ifelse(WR_Pred == 0 &Data_WR_train == 1, 1, 0))
-
-# testing error 
-
-WR_Pred = ifelse(predict(model_logit_WR, newdata = Data_WR_test)>0.5, 1, 0)
-
-CheckList_test_WR_4 = tibble("WR_Pred" = WR_Pred,
-                           "WR_TP" = ifelse(WR_Pred == 1 & Data_WR_test == 1, 1, 0),
-                           "WR_FP" = ifelse(WR_Pred == 1 & Data_WR_test == 0, 1, 0),
-                           "WR_TN" = ifelse(WR_Pred == 0 & Data_WR_test == 0, 1, 0),
-                           "WR_FN" = ifelse(WR_Pred == 0 & Data_WR_test == 1, 1, 0))
+                            "WR_TP" = ifelse(WR_Pred == 1 &predict2007to2013_WR$Drafted == 1, 1, 0),
+                            "WR_FP" = ifelse(WR_Pred == 1 &predict2007to2013_WR$Drafted == 0, 1, 0),
+                            "WR_TN" = ifelse(WR_Pred == 0 &predict2007to2013_WR$Drafted == 0, 1, 0),
+                            "WR_FN" = ifelse(WR_Pred == 0 &predict2007to2013_WR$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[4,"WR_TP"] = sum(CheckList_test_WR_4$WR_TP)
-LogisticRegressionPerfMeas[4,"WR_TN"] = sum(CheckList_test_WR_4$WR_TN)
-LogisticRegressionPerfMeas[4,"WR_FP"] = sum(CheckList_test_WR_4$WR_FP)
-LogisticRegressionPerfMeas[4,"WR_FN"] = sum(CheckList_test_WR_4$WR_FN)
+LogisticRegressionPerfMeas[4,"WR_TP"] = sum(CheckList_train_WR_4$WR_TP)
+LogisticRegressionPerfMeas[4,"WR_TN"] = sum(CheckList_train_WR_4$WR_TN)
+LogisticRegressionPerfMeas[4,"WR_FP"] = sum(CheckList_train_WR_4$WR_FP)
+LogisticRegressionPerfMeas[4,"WR_FN"] = sum(CheckList_train_WR_4$WR_FN)
+
+# testing error 
+
+WR_Pred = ifelse(predict(model_logit_WR, newdata = predict2014_WR)>0.5, 1, 0)
+
+CheckList_test_WR_4 = tibble("WR_Pred" = WR_Pred,
+                           "WR_TP" = ifelse(WR_Pred == 1 & predict2014_WR$Drafted == 1, 1, 0),
+                           "WR_FP" = ifelse(WR_Pred == 1 & predict2014_WR$Drafted == 0, 1, 0),
+                           "WR_TN" = ifelse(WR_Pred == 0 & predict2014_WR$Drafted == 0, 1, 0),
+                           "WR_FN" = ifelse(WR_Pred == 0 & predict2014_WR$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[4,"WR_TP"] = sum(CheckList_test_WR_4$WR_TP)
+LogisticRegressionPerfMeas2014[4,"WR_TN"] = sum(CheckList_test_WR_4$WR_TN)
+LogisticRegressionPerfMeas2014[4,"WR_FP"] = sum(CheckList_test_WR_4$WR_FP)
+LogisticRegressionPerfMeas2014[4,"WR_FN"] = sum(CheckList_test_WR_4$WR_FN)
 
 
 ### Logistic Regression for RBs --------
@@ -826,11 +885,6 @@ LogisticRegressionPerfMeas[4,"WR_FN"] = sum(CheckList_test_WR_4$WR_FN)
 
 Data_RB_train = Rose_bothData %>%
   filter(Year != 2014) %>%
-  filter(Position == "RB") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
-Data_RB_test = no_samplingData %>%
-  filter(Year == 2014) %>%
   filter(Position == "RB") %>%
   select(-Class, -Position, -Name, -Player.Code, -Year)
 
@@ -844,30 +898,37 @@ model_logit_RB <- train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-RB_Pred = ifelse(predict(model_logit_RB)>0.5, 1, 0)
+RB_Pred = ifelse(predict(model_logit_RB, predict2007to2013_RB)>0.5, 1, 0)
 
 CheckList_train_RB_4 = tibble("RB_Pred" = RB_Pred,
-                            "RB_TP" = ifelse(RB_Pred == 1 &Data_RB_train == 1, 1, 0),
-                            "RB_FP" = ifelse(RB_Pred == 1 &Data_RB_train == 0, 1, 0),
-                            "RB_TN" = ifelse(RB_Pred == 0 &Data_RB_train == 0, 1, 0),
-                            "RB_FN" = ifelse(RB_Pred == 0 &Data_RB_train == 1, 1, 0))
-
-# testing error 
-
-RB_Pred = ifelse(predict(model_logit_RB, newdata = Data_RB_test)>0.5, 1, 0)
-
-CheckList_test_RB_4 = tibble("RB_Pred" = RB_Pred,
-                           "RB_TP" = ifelse(RB_Pred == 1 & Data_RB_test == 1, 1, 0),
-                           "RB_FP" = ifelse(RB_Pred == 1 & Data_RB_test == 0, 1, 0),
-                           "RB_TN" = ifelse(RB_Pred == 0 & Data_RB_test == 0, 1, 0),
-                           "RB_FN" = ifelse(RB_Pred == 0 & Data_RB_test == 1, 1, 0))
+                            "RB_TP" = ifelse(RB_Pred == 1 &predict2007to2013_RB$Drafted == 1, 1, 0),
+                            "RB_FP" = ifelse(RB_Pred == 1 &predict2007to2013_RB$Drafted == 0, 1, 0),
+                            "RB_TN" = ifelse(RB_Pred == 0 &predict2007to2013_RB$Drafted == 0, 1, 0),
+                            "RB_FN" = ifelse(RB_Pred == 0 &predict2007to2013_RB$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[4,"RB_TP"] = sum(CheckList_test_RB_4$RB_TP)
-LogisticRegressionPerfMeas[4,"RB_TN"] = sum(CheckList_test_RB_4$RB_TN)
-LogisticRegressionPerfMeas[4,"RB_FP"] = sum(CheckList_test_RB_4$RB_FP)
-LogisticRegressionPerfMeas[4,"RB_FN"] = sum(CheckList_test_RB_4$RB_FN)
+LogisticRegressionPerfMeas[4,"RB_TP"] = sum(CheckList_train_RB_4$RB_TP)
+LogisticRegressionPerfMeas[4,"RB_TN"] = sum(CheckList_train_RB_4$RB_TN)
+LogisticRegressionPerfMeas[4,"RB_FP"] = sum(CheckList_train_RB_4$RB_FP)
+LogisticRegressionPerfMeas[4,"RB_FN"] = sum(CheckList_train_RB_4$RB_FN)
+
+# testing error 
+
+RB_Pred = ifelse(predict(model_logit_RB, newdata = predict2014_RB)>0.5, 1, 0)
+
+CheckList_test_RB_4 = tibble("RB_Pred" = RB_Pred,
+                           "RB_TP" = ifelse(RB_Pred == 1 & predict2014_RB$Drafted == 1, 1, 0),
+                           "RB_FP" = ifelse(RB_Pred == 1 & predict2014_RB$Drafted == 0, 1, 0),
+                           "RB_TN" = ifelse(RB_Pred == 0 & predict2014_RB$Drafted == 0, 1, 0),
+                           "RB_FN" = ifelse(RB_Pred == 0 & predict2014_RB$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[4,"RB_TP"] = sum(CheckList_test_RB_4$RB_TP)
+LogisticRegressionPerfMeas2014[4,"RB_TN"] = sum(CheckList_test_RB_4$RB_TN)
+LogisticRegressionPerfMeas2014[4,"RB_FP"] = sum(CheckList_test_RB_4$RB_FP)
+LogisticRegressionPerfMeas2014[4,"RB_FN"] = sum(CheckList_test_RB_4$RB_FN)
 
 
 
@@ -882,10 +943,6 @@ Data_tog_train = SmoteData %>%
   filter(Year != 2014) %>%
   select(-Position, -Name, -Player.Code, -Year)
 
-Data_tog_test = no_samplingData %>%
-  filter(Year == 2014) %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
 ## training the model on the training data, including a 10-fold cross-validation
 model_logit_tog = train(Drafted ~ .,
                data = Data_tog_train,
@@ -896,30 +953,38 @@ model_logit_tog = train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-Together_Pred = ifelse(predict(model_logit_tog)>0.5, 1, 0)
+pred = predict(model_logit_tog, predict2007to2013_tog)
 
-CheckList_train_tog_5 = tibble("Together_Pred" = Together_Pred,
-                 "Together_TP" = ifelse(Together_Pred == 1 & Data_tog_train == 1, 1, 0),
-                 "Together_FP" = ifelse(Together_Pred == 1 & Data_tog_train == 0, 1, 0),
-                 "Together_TN" = ifelse(Together_Pred == 0 & Data_tog_train == 0, 1, 0),
-                 "Together_FN" = ifelse(Together_Pred == 0 & Data_tog_train == 1, 1, 0))
+CheckList_train_tog_5 = tibble("Together_Pred" = pred,
+                               "Together_TP" = ifelse(pred == 1 & predict2007to2013_tog$Drafted == 1, 1, 0),
+                               "Together_FP" = ifelse(pred == 1 & predict2007to2013_tog$Drafted == 0, 1, 0),
+                               "Together_TN" = ifelse(pred == 0 & predict2007to2013_tog$Drafted == 0, 1, 0),
+                               "Together_FN" = ifelse(pred == 0 & predict2007to2013_tog$Drafted == 1, 1, 0))
 
-# testing error 
-
-Together_Pred = ifelse(predict(model_logit_tog, newdata = Data_tog_test)>0.5, 1, 0)
-
-CheckList_test_tog_5 = tibble("Together_Pred" = Together_Pred,
-                 "Together_TP" = ifelse(Together_Pred == 1 & Data_tog_test == 1, 1, 0),
-                 "Together_FP" = ifelse(Together_Pred == 1 & Data_tog_test == 0, 1, 0),
-                 "Together_TN" = ifelse(Together_Pred == 0 & Data_tog_test == 0, 1, 0),
-                 "Together_FN" = ifelse(Together_Pred == 0 & Data_tog_test == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[5,"Together_TP"] = sum(CheckList_test_tog_5$Together_TP)
-LogisticRegressionPerfMeas[5,"Together_TN"] = sum(CheckList_test_tog_5$Together_TN)
-LogisticRegressionPerfMeas[5,"Together_FP"] = sum(CheckList_test_tog_5$Together_FP)
-LogisticRegressionPerfMeas[5,"Together_FN"] = sum(CheckList_test_tog_5$Together_FN)
+LogisticRegressionPerfMeas[5,"Together_TP"] = sum(CheckList_train_tog_5$Together_TP)
+LogisticRegressionPerfMeas[5,"Together_TN"] = sum(CheckList_train_tog_5$Together_TN)
+LogisticRegressionPerfMeas[5,"Together_FP"] = sum(CheckList_train_tog_5$Together_FP)
+LogisticRegressionPerfMeas[5,"Together_FN"] = sum(CheckList_train_tog_5$Together_FN)
+
+# testing error 
+
+pred = predict(model_logit_tog, newdata = predict2014_tog)
+
+CheckList_test_tog_5 = tibble("Together_Pred" = pred,
+                 "Together_TP" = ifelse(pred == 1 & predict2014_tog$Drafted == 1, 1, 0),
+                 "Together_FP" = ifelse(pred == 1 & predict2014_tog$Drafted == 0, 1, 0),
+                 "Together_TN" = ifelse(pred == 0 & predict2014_tog$Drafted == 0, 1, 0),
+                 "Together_FN" = ifelse(pred == 0 & predict2014_tog$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[5,"Together_TP"] = sum(CheckList_test_tog_5$Together_TP)
+LogisticRegressionPerfMeas2014[5,"Together_TN"] = sum(CheckList_test_tog_5$Together_TN)
+LogisticRegressionPerfMeas2014[5,"Together_FP"] = sum(CheckList_test_tog_5$Together_FP)
+LogisticRegressionPerfMeas2014[5,"Together_FN"] = sum(CheckList_test_tog_5$Together_FN)
 
 
 ### Logistic Regression for QBs --------
@@ -932,11 +997,6 @@ Data_QB_train = SmoteData %>%
   filter(Position == "QB") %>%
   select(-Position, -Name, -Player.Code, -Year)
 
-Data_QB_test = no_samplingData %>%
-  filter(Year == 2014) %>%
-  filter(Position == "QB") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
 ## training the model on the training set, including a 10-fold cross-validation
 model_logit_QB <- train(Drafted ~ .,
                          data = Data_QB_train,
@@ -947,30 +1007,37 @@ model_logit_QB <- train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-QB_Pred = ifelse(predict(model_logit_QB)>0.5, 1, 0)
+pred = predict(model_logit_tog, newdata = predict2007to2013_QB)
 
-CheckList_train_QB_5 = tibble("QB_Pred" = QB_Pred,
-                             "QB_TP" = ifelse(QB_Pred == 1 &Data_QB_train == 1, 1, 0),
-                             "QB_FP" = ifelse(QB_Pred == 1 &Data_QB_train == 0, 1, 0),
-                             "QB_TN" = ifelse(QB_Pred == 0 &Data_QB_train == 0, 1, 0),
-                             "QB_FN" = ifelse(QB_Pred == 0 &Data_QB_train == 1, 1, 0))
-
-# testing error 
-
-QB_Pred = ifelse(predict(model_logit_QB, newdata = Data_QB_test)>0.5, 1, 0)
-
-CheckList_test_QB_5 = tibble("QB_Pred" = QB_Pred,
-                            "QB_TP" = ifelse(QB_Pred == 1 & Data_QB_test == 1, 1, 0),
-                            "QB_FP" = ifelse(QB_Pred == 1 & Data_QB_test == 0, 1, 0),
-                            "QB_TN" = ifelse(QB_Pred == 0 & Data_QB_test == 0, 1, 0),
-                            "QB_FN" = ifelse(QB_Pred == 0 & Data_QB_test == 1, 1, 0))
+CheckList_train_QB_5 = tibble("QB_Pred" = pred,
+                             "QB_TP" = ifelse(pred == 1 &predict2007to2013_QB$Drafted == 1, 1, 0),
+                             "QB_FP" = ifelse(pred == 1 &predict2007to2013_QB$Drafted == 0, 1, 0),
+                             "QB_TN" = ifelse(pred == 0 &predict2007to2013_QB$Drafted == 0, 1, 0),
+                             "QB_FN" = ifelse(pred == 0 &predict2007to2013_QB$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[5,"QB_TP"] = sum(CheckList_test_QB_5$QB_TP)
-LogisticRegressionPerfMeas[5,"QB_TN"] = sum(CheckList_test_QB_5$QB_TN)
-LogisticRegressionPerfMeas[5,"QB_FP"] = sum(CheckList_test_QB_5$QB_FP)
-LogisticRegressionPerfMeas[5,"QB_FN"] = sum(CheckList_test_QB_5$QB_FN)
+LogisticRegressionPerfMeas[5,"QB_TP"] = sum(CheckList_train_QB_5$QB_TP)
+LogisticRegressionPerfMeas[5,"QB_TN"] = sum(CheckList_train_QB_5$QB_TN)
+LogisticRegressionPerfMeas[5,"QB_FP"] = sum(CheckList_train_QB_5$QB_FP)
+LogisticRegressionPerfMeas[5,"QB_FN"] = sum(CheckList_train_QB_5$QB_FN)
+
+# testing error 
+
+pred = predict(model_logit_tog, newdata = predict2014_QB)
+
+CheckList_test_QB_5 = tibble("QB_Pred" = pred,
+                            "QB_TP" = ifelse(pred == 1 & predict2014_QB$Drafted == 1, 1, 0),
+                            "QB_FP" = ifelse(pred == 1 & predict2014_QB$Drafted == 0, 1, 0),
+                            "QB_TN" = ifelse(pred == 0 & predict2014_QB$Drafted == 0, 1, 0),
+                            "QB_FN" = ifelse(pred == 0 & predict2014_QB$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[5,"QB_TP"] = sum(CheckList_test_QB_5$QB_TP)
+LogisticRegressionPerfMeas2014[5,"QB_TN"] = sum(CheckList_test_QB_5$QB_TN)
+LogisticRegressionPerfMeas2014[5,"QB_FP"] = sum(CheckList_test_QB_5$QB_FP)
+LogisticRegressionPerfMeas2014[5,"QB_FN"] = sum(CheckList_test_QB_5$QB_FN)
 
 
 ### Logistic Regression for WRs --------
@@ -983,11 +1050,6 @@ Data_WR_train = SmoteData %>%
   filter(Position == "WR") %>%
   select(-Position, -Name, -Player.Code, -Year)
 
-Data_WR_test = no_samplingData %>%
-  filter(Year == 2014) %>%
-  filter(Position == "WR") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
 ## train the model on the training data, including a 10-fold cross-validation
 model_logit_WR <- train(Drafted ~ .,
                         data = Data_WR_train,
@@ -998,30 +1060,37 @@ model_logit_WR <- train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-WR_Pred = ifelse(predict(model_logit_WR)>0.5, 1, 0)
+pred = predict(model_logit_tog, newdata = predict2007to2013_WR)
 
-CheckList_train_WR_5 = tibble("WR_Pred" = WR_Pred,
-                            "WR_TP" = ifelse(WR_Pred == 1 &Data_WR_train == 1, 1, 0),
-                            "WR_FP" = ifelse(WR_Pred == 1 &Data_WR_train == 0, 1, 0),
-                            "WR_TN" = ifelse(WR_Pred == 0 &Data_WR_train == 0, 1, 0),
-                            "WR_FN" = ifelse(WR_Pred == 0 &Data_WR_train == 1, 1, 0))
-
-# testing error 
-
-WR_Pred = ifelse(predict(model_logit_WR, newdata = Data_WR_test)>0.5, 1, 0)
-
-CheckList_test_WR_5 = tibble("WR_Pred" = WR_Pred,
-                           "WR_TP" = ifelse(WR_Pred == 1 & Data_WR_test == 1, 1, 0),
-                           "WR_FP" = ifelse(WR_Pred == 1 & Data_WR_test == 0, 1, 0),
-                           "WR_TN" = ifelse(WR_Pred == 0 & Data_WR_test == 0, 1, 0),
-                           "WR_FN" = ifelse(WR_Pred == 0 & Data_WR_test == 1, 1, 0))
+CheckList_train_WR_5 = tibble("WR_Pred" = pred,
+                            "WR_TP" = ifelse(pred == 1 &predict2007to2013_WR$Drafted == 1, 1, 0),
+                            "WR_FP" = ifelse(pred == 1 &predict2007to2013_WR$Drafted == 0, 1, 0),
+                            "WR_TN" = ifelse(pred == 0 &predict2007to2013_WR$Drafted == 0, 1, 0),
+                            "WR_FN" = ifelse(pred == 0 &predict2007to2013_WR$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[5,"WR_TP"] = sum(CheckList_test_WR_5$WR_TP)
-LogisticRegressionPerfMeas[5,"WR_TN"] = sum(CheckList_test_WR_5$WR_TN)
-LogisticRegressionPerfMeas[5,"WR_FP"] = sum(CheckList_test_WR_5$WR_FP)
-LogisticRegressionPerfMeas[5,"WR_FN"] = sum(CheckList_test_WR_5$WR_FN)
+LogisticRegressionPerfMeas[5,"WR_TP"] = sum(CheckList_train_WR_5$WR_TP)
+LogisticRegressionPerfMeas[5,"WR_TN"] = sum(CheckList_train_WR_5$WR_TN)
+LogisticRegressionPerfMeas[5,"WR_FP"] = sum(CheckList_train_WR_5$WR_FP)
+LogisticRegressionPerfMeas[5,"WR_FN"] = sum(CheckList_train_WR_5$WR_FN)
+
+# testing error 
+
+pred = predict(model_logit_tog, newdata = predict2014_WR)
+
+CheckList_test_WR_5 = tibble("WR_Pred" = pred,
+                           "WR_TP" = ifelse(pred == 1 & predict2014_WR$Drafted == 1, 1, 0),
+                           "WR_FP" = ifelse(pred == 1 & predict2014_WR$Drafted == 0, 1, 0),
+                           "WR_TN" = ifelse(pred == 0 & predict2014_WR$Drafted == 0, 1, 0),
+                           "WR_FN" = ifelse(pred == 0 & predict2014_WR$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[5,"WR_TP"] = sum(CheckList_test_WR_5$WR_TP)
+LogisticRegressionPerfMeas2014[5,"WR_TN"] = sum(CheckList_test_WR_5$WR_TN)
+LogisticRegressionPerfMeas2014[5,"WR_FP"] = sum(CheckList_test_WR_5$WR_FP)
+LogisticRegressionPerfMeas2014[5,"WR_FN"] = sum(CheckList_test_WR_5$WR_FN)
 
 
 ### Logistic Regression for RBs --------
@@ -1034,11 +1103,6 @@ Data_RB_train = SmoteData %>%
   filter(Position == "RB") %>%
   select(-Position, -Name, -Player.Code, -Year)
 
-Data_RB_test = no_samplingData %>%
-  filter(Year == 2014) %>%
-  filter(Position == "RB") %>%
-  select(-Class, -Position, -Name, -Player.Code, -Year)
-
 ## train the model on training data, inclding a 10-fold cross-validation
 model_logit_RB <- train(Drafted ~ .,
                         data = Data_RB_train,
@@ -1049,33 +1113,42 @@ model_logit_RB <- train(Drafted ~ .,
 ## Performance Measurement
 # training error
 
-RB_Pred = ifelse(predict(model_logit_RB)>0.5, 1, 0)
+pred = predict(model_logit_tog, newdata = predict2007to2013_RB)
 
-CheckList_train_RB_5 = tibble("RB_Pred" = RB_Pred,
-                            "RB_TP" = ifelse(RB_Pred == 1 &Data_RB_train == 1, 1, 0),
-                            "RB_FP" = ifelse(RB_Pred == 1 &Data_RB_train == 0, 1, 0),
-                            "RB_TN" = ifelse(RB_Pred == 0 &Data_RB_train == 0, 1, 0),
-                            "RB_FN" = ifelse(RB_Pred == 0 &Data_RB_train == 1, 1, 0))
-
-# testing error 
-
-RB_Pred = ifelse(predict(model_logit_RB, newdata = Data_RB_test)>0.5, 1, 0)
-
-CheckList_test_RB_5 = tibble("RB_Pred" = RB_Pred,
-                           "RB_TP" = ifelse(RB_Pred == 1 & Data_RB_test == 1, 1, 0),
-                           "RB_FP" = ifelse(RB_Pred == 1 & Data_RB_test == 0, 1, 0),
-                           "RB_TN" = ifelse(RB_Pred == 0 & Data_RB_test == 0, 1, 0),
-                           "RB_FN" = ifelse(RB_Pred == 0 & Data_RB_test == 1, 1, 0))
+CheckList_train_RB_5 = tibble("RB_Pred" = pred,
+                            "RB_TP" = ifelse(pred == 1 &predict2007to2013_RB$Drafted == 1, 1, 0),
+                            "RB_FP" = ifelse(pred == 1 &predict2007to2013_RB$Drafted == 0, 1, 0),
+                            "RB_TN" = ifelse(pred == 0 &predict2007to2013_RB$Drafted == 0, 1, 0),
+                            "RB_FN" = ifelse(pred == 0 &predict2007to2013_RB$Drafted == 1, 1, 0))
 
 # Fill the Performance Measurement Matrix
 
-LogisticRegressionPerfMeas[5,"RB_TP"] = sum(CheckList_test_RB_5$RB_TP)
-LogisticRegressionPerfMeas[5,"RB_TN"] = sum(CheckList_test_RB_5$RB_TN)
-LogisticRegressionPerfMeas[5,"RB_FP"] = sum(CheckList_test_RB_5$RB_FP)
-LogisticRegressionPerfMeas[5,"RB_FN"] = sum(CheckList_test_RB_5$RB_FN)
+LogisticRegressionPerfMeas[5,"RB_TP"] = sum(CheckList_train_RB_5$RB_TP)
+LogisticRegressionPerfMeas[5,"RB_TN"] = sum(CheckList_train_RB_5$RB_TN)
+LogisticRegressionPerfMeas[5,"RB_FP"] = sum(CheckList_train_RB_5$RB_FP)
+LogisticRegressionPerfMeas[5,"RB_FN"] = sum(CheckList_train_RB_5$RB_FN)
+
+# testing error 
+
+pred = predict(model_logit_tog, newdata = predict2014_RB)
+
+CheckList_test_RB_5 = tibble("RB_Pred" = pred,
+                           "RB_TP" = ifelse(pred == 1 & predict2014_RB$Drafted == 1, 1, 0),
+                           "RB_FP" = ifelse(pred == 1 & predict2014_RB$Drafted == 0, 1, 0),
+                           "RB_TN" = ifelse(pred == 0 & predict2014_RB$Drafted == 0, 1, 0),
+                           "RB_FN" = ifelse(pred == 0 & predict2014_RB$Drafted == 1, 1, 0))
+
+# Fill the Performance Measurement Matrix
+
+LogisticRegressionPerfMeas2014[5,"RB_TP"] = sum(CheckList_test_RB_5$RB_TP)
+LogisticRegressionPerfMeas2014[5,"RB_TN"] = sum(CheckList_test_RB_5$RB_TN)
+LogisticRegressionPerfMeas2014[5,"RB_FP"] = sum(CheckList_test_RB_5$RB_FP)
+LogisticRegressionPerfMeas2014[5,"RB_FN"] = sum(CheckList_test_RB_5$RB_FN)
+
 
 ### Performance Measurement ----------
 
 # Save Performance Measurement data frame
 
 save(LogisticRegressionPerfMeas, file = "../Data/PerformanceMeasurement/LogisticRegressionPerfMeas.Rdata")
+save(LogisticRegressionPerfMeas2014, file = "../Data/PerformanceMeasurement/LogisticRegressionPerfMeas2014.Rdata")
