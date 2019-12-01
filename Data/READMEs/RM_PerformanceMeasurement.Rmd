@@ -49,13 +49,11 @@ We can see these two tendencies in the models:
 * Mostly better performance with unsampled data, than with sampled data
 * Mostly better performance when we split the positions manually
 
-ThThe four following plots combine the information of both tibbles, showing the accuracy and the F1 score on every sampling method for every position on its own. The horizontal lines show the no information rates for the accuracy, which displays, how a model's performance would be when predicting only 0's.
+The four following plots combine the information of both tibbles, showing the accuracy and the F1 score on every sampling method for every position on its own. The horizontal lines show the no information rates for the accuracy, which displays, how a model's performance would be when predicting only 0's.
 
+\newsection
 
-
-RUBEN PLOTS
-
-
+![Plotted Accuracy and F1-Score by position and sampling method](Plots_8.jpg){#id .class width=80% heigth=50%}
 
 ## Our best models
 Now let's have a look at the best model/sampling combination for every position:

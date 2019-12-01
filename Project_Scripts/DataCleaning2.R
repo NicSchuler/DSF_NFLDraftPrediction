@@ -3,7 +3,7 @@ library(dbplyr)
 library(dplyr)
 
 # Load the function to clean the data for the different draft years
-# the function is coded in "functionGetCleanClass.R"
+# the function is coded in "functionGetCleanClass2.R"
 load("getCleanClass2.R")
 
 # 2014 Draft---------------------------------
@@ -189,21 +189,6 @@ sum(CleanClass2007to2014_2$Drafted[CleanClass2007to2014_2$Games.Played>=10])/len
 
 # By filtering out all players with less than 10 games, we can increase the percentage of drafted
 # Players from 6.2% up to 12.4%, which is better for machine learning (according to various sources)
-
-# Prepare a Plot to see the Percentage depending on the cutoff point
-Cutoff = seq(1:28)
-PlotTibble = as.tibble(Cutoff) %>%
-  mutate(Cutoff=value) %>%
-  select(-value) %>%
-  mutate(DataLength=NA) %>%
-  mutate(DraftLength=NA) %>%
-  mutate(DraftPerc=NA)
-
-for(i in PlotTibble$Cutoff){
-  PlotTibble$DataLength[i]=length(CleanClass2007to2014_2$Drafted[CleanClass2007to2014_2$Games.Played >= i])
-  PlotTibble$DraftLength[i]=sum(CleanClass2007to2014_2$Drafted[CleanClass2007to2014_2$Games.Played >= i])
-  PlotTibble$DraftPerc[i]=(PlotTibble$DraftLength[i])/(PlotTibble$DataLength[i])
-}
 
 # Optimizing the data
 CleanClass2007to2014_3 = CleanClass2007to2014_2 %>%

@@ -28,12 +28,11 @@ ClassificationTreePerfMeas$Method = "ClassificationTree"
 # We will do the next steps 5 times (e.g. "1. No Splitting" does the same thing as "2. Oversampling"), but using different data for training the model
 # In other words, this is the cross-validation of the sampling methods. The reason for doing it a couple of times instead of looping or functioning it
 # is the easier availability of the steps in between in case of further processing them.
+# Part 6 will be the testing of the models on the 2014 data.
 
 ## 1. No Sampling ------------------------
 # Splitting the data
 # We use all the available information just before the 2014 NFL-Draft, in order to train the model and then apply it on the data for 2014.
-# In other words we act as if it was the end of April 2014 (which is one week before the draft). Therefore we will do the performance measurement
-# on the training data and apply the best model to the 2014 data to see if we were right.
 DtrainNS = CleanClass2007to2014_3 %>%
   filter(Year != 2014)
 
@@ -189,9 +188,6 @@ fancyRpartPlot(ClassTreeTogetherNS, main="Classification Tree for QB/WR/RB toget
 
 ## 2. Oversampling ------------------------
 # Splitting the data
-# We use all the available information just before the 2014 NFL-Draft, in order to train the model and then apply it on the data for 2014.
-# In other words we act as if it was the end of April 2014 (which is one week before the draft). Therefore we will do the performance measurement
-# on the training data and apply the best model to the 2014 data to see if we were right.
 DtrainOS = CleanClass2007to2014_3_oversampling %>%
   filter(Year != 2014)
 
@@ -350,8 +346,6 @@ fancyRpartPlot(ClassTreeTogetherOS, main="Classification Tree for QB/WR/RB toget
 ## 3. Undersampling ------------------------
 # Splitting the data
 # We use all the available information just before the 2014 NFL-Draft, in order to train the model and then apply it on the data for 2014.
-# In other words we act as if it was the end of April 2014 (which is one week before the draft). Therefore we will do the performance measurement
-# on the training data and apply the best model to the 2014 data to see if we were right.
 DtrainUS = CleanClass2007to2014_3_undersampling %>%
   filter(Year != 2014)
 
@@ -509,8 +503,6 @@ fancyRpartPlot(ClassTreeTogetherUS, main="Classification Tree for QB/WR/RB toget
 ## 4. Rose_Both------------------------
 # Splitting the data
 # We use all the available information just before the 2014 NFL-Draft, in order to train the model and then apply it on the data for 2014.
-# In other words we act as if it was the end of April 2014 (which is one week before the draft). Therefore we will do the performance measurement
-# on the training data and apply the best model to the 2014 data to see if we were right.
 DtrainRO = CleanClass2007to2014_3_Rose.both %>%
   filter(Year != 2014)
 
@@ -669,8 +661,6 @@ fancyRpartPlot(ClassTreeTogetherRO, main="Classification Tree for QB/WR/RB toget
 ## 5. Smote------------------------
 # Splitting the data
 # We use all the available information just before the 2014 NFL-Draft, in order to train the model and then apply it on the data for 2014.
-# In other words we act as if it was the end of April 2014 (which is one week before the draft). Therefore we will do the performance measurement
-# on the training data and apply the best model to the 2014 data to see if we were right.
 DtrainSM = cleanData_smote %>%
   filter(Year != 2014)
 
@@ -828,12 +818,12 @@ fancyRpartPlot(ClassTreeTogetherSM, main="Classification Tree for QB/WR/RB toget
 # Save the tibble for the Performance Measurement separately
 save(ClassificationTreePerfMeas, file = "../Data/PerformanceMeasurement/ClassificationTreePerfMeas.Rdata")
 
-
+# Uncomment to save a Plot of a tree (and update the name!)
 # savePlotToFile(file.name = "QBtreeNS.jpg")
 
 
-# Predicting the 2014 NFL Draft---------------
-
+# 6. Predicting the 2014 NFL Draft---------------
+# This is the Testing!
 # Create an empty tibble
 ClassificationTreePerfMeas14 = data.frame(Method = character(), Sampling = character(), QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
                                         WR_TP = integer(), WR_TN = integer(), WR_FP = integer(), WR_FN = integer(),

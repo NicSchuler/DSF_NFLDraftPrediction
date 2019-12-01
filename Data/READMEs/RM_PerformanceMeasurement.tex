@@ -93,7 +93,7 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-This Chapter is describes the evaluation of the best sampling and model
+This Chapter describes the evaluation of the best sampling and model
 combination, which is computed in the script `PerformanceMeasurement.R'.
 \end{abstract}
 
@@ -197,16 +197,16 @@ NaiveBayes & undersampling & 0.3279 & 0.2667 & 0.3265 &
 NaiveBayes & Rose\_both & 0.3571 & 0.2432 & 0.1379 &
 0.2900\tabularnewline
 NaiveBayes & Smote & 0.3571 & 0.2906 & 0.2667 & 0.3457\tabularnewline
-LogisticRegression & no\_sampling & 0.2875 & 0.3852 & 0.4675 &
-0.4873\tabularnewline
-LogisticRegression & oversampling & 0.3266 & 0.1649 & 0.4525 &
-0.5862\tabularnewline
-LogisticRegression & undersampling & 0.2734 & 0.4777 & 0.4320 &
-0.5870\tabularnewline
-LogisticRegression & Rose\_both & 0.3393 & 0.5081 & 0.4083 &
-0.6002\tabularnewline
-LogisticRegression & Smote & 0.3393 & 0.5081 & 0.4083 &
-0.6002\tabularnewline
+LogisticRegression & no\_sampling & 0.5625 & 0.3019 & 0.5000 &
+0.4522\tabularnewline
+LogisticRegression & oversampling & 0.3509 & 0.3774 & 0.3200 &
+0.3621\tabularnewline
+LogisticRegression & undersampling & 0.3125 & 0.3495 & 0.3077 &
+0.3448\tabularnewline
+LogisticRegression & Rose\_both & 0.3509 & 0.3774 & 0.3288 &
+0.3668\tabularnewline
+LogisticRegression & Smote & 0.3333 & 0.3894 & 0.3750 &
+0.3713\tabularnewline
 \bottomrule
 \end{longtable}
 
@@ -261,16 +261,16 @@ NaiveBayes & undersampling & 0.6466 & 0.7542 & 0.8316 &
 NaiveBayes & Rose\_both & 0.6897 & 0.6872 & 0.8724 &
 0.7881\tabularnewline
 NaiveBayes & Smote & 0.6897 & 0.7682 & 0.6633 & 0.8418\tabularnewline
-LogisticRegression & no\_sampling & 0.8007 & 0.8761 & 0.8704 &
-0.8875\tabularnewline
-LogisticRegression & oversampling & 0.7866 & 0.7834 & 0.7660 &
-0.8358\tabularnewline
-LogisticRegression & undersampling & 0.8272 & 0.7344 & 0.7391 &
-0.8345\tabularnewline
-LogisticRegression & Rose\_both & 0.7802 & 0.8319 & 0.6330 &
-0.8405\tabularnewline
-LogisticRegression & Smote & 0.7802 & 0.8319 & 0.6330 &
-0.8405\tabularnewline
+LogisticRegression & no\_sampling & 0.8793 & 0.8966 & 0.9082 &
+0.9060\tabularnewline
+LogisticRegression & oversampling & 0.6810 & 0.8156 & 0.7398 &
+0.7791\tabularnewline
+LogisticRegression & undersampling & 0.6207 & 0.8128 & 0.7245 &
+0.7731\tabularnewline
+LogisticRegression & Rose\_both & 0.6810 & 0.8156 & 0.7500 &
+0.7836\tabularnewline
+LogisticRegression & Smote & 0.6552 & 0.8073 & 0.7959 &
+0.7776\tabularnewline
 \bottomrule
 \end{longtable}
 
@@ -284,13 +284,22 @@ We can see these two tendencies in the models:
   Mostly better performance when we split the positions manually
 \end{itemize}
 
-ThThe four following plots combine the information of both tibbles,
+The four following plots combine the information of both tibbles,
 showing the accuracy and the F1 score on every sampling method for every
 position on its own. The horizontal lines show the no information rates
 for the accuracy, which displays, how a model's performance would be
 when predicting only 0's.
 
-RUBEN PLOTS
+\newsection
+
+\begin{figure}
+\hypertarget{id}{%
+\centering
+\includegraphics[width=0.8\textwidth,height=\textheight]{Plots_8.jpg}
+\caption{Plotted Accuracy and F1-Score by position and sampling
+method}\label{id}
+}
+\end{figure}
 
 \hypertarget{our-best-models}{%
 \subsection{Our best models}\label{our-best-models}}
@@ -310,10 +319,9 @@ Position & Method & Sampling & F1 & Accuracy\tabularnewline
 \midrule
 \endhead
 QB & ANN & no\_sampling & 0.6154 & 0.9138\tabularnewline
-WR & LogisticRegression & Rose\_both & 0.5081 & 0.8319\tabularnewline
+WR & randomForest & Rose\_both & 0.4043 & 0.8436\tabularnewline
 RB & ANN & no\_sampling & 0.5294 & 0.9184\tabularnewline
-Together & LogisticRegression & Rose\_both & 0.6002 &
-0.8405\tabularnewline
+Together & ANN & no\_sampling & 0.4779 & 0.9119\tabularnewline
 \bottomrule
 \end{longtable}
 
