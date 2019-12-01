@@ -6,7 +6,6 @@ library(caret)      # Classification and Regression Training
 library(ggplot2)    # Data Visualization                                               
 library(corrplot)   # Visualization of Correlation                                     
 library(reshape2)   # Flexibily Reshape Data                                 
-library(klaR)
 
 # Performance Measurement for training data (2005 to 2013)
 NaiveBayesPerfMeas = data.frame(Method = character(), Sampling = character(), QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
