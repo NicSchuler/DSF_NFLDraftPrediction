@@ -8,7 +8,7 @@ output:
     keep_tex: yes
   html_document:
     df_print: paged
-abstract: This Chapter is describes the evaluation of the best sampling and model combination, which is computed in the script 'PerformanceMeasurement.R'.
+abstract: This Chapter describes the evaluation of the best sampling and model combination, which is computed in the script 'PerformanceMeasurement.R'.
 urlcolor: blue
 ---
 ## The goal of our performance measurement
