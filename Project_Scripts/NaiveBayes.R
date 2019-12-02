@@ -1,11 +1,17 @@
 rm(list=ls())
 graphics.off()
 
+# IMPORTANT NOTE: packages MUST be detached if installed and loaded in this order because klaR loads MASS
+# which clashes with dplyr::select() else
+# detach("package:klaR", unload = TRUE)
+# detach("package:tidyverse", unload = TRUE)
+
+library(klaR)
 library(tidyverse)                                              
 library(caret)      # Classification and Regression Training
 library(ggplot2)    # Data Visualization                                               
 library(corrplot)   # Visualization of Correlation                                     
-library(reshape2)   # Flexibily Reshape Data                                 
+library(reshape2)   # Flexibily Reshape Data
 
 # Performance Measurement for training data (2005 to 2013)
 NaiveBayesPerfMeas = data.frame(Method = character(), Sampling = character(), QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
