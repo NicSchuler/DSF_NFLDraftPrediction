@@ -28,14 +28,50 @@ perfFun <- function(TP, FP, TN, FN){
   return(out)
 }
 
+# Prepare for between-model comparison of the training fit
+# !!! ONLY RUN THIS ONCE !!!
+randomForestPerfMeas = data.frame(Method = character(), Sampling = character(),
+                                  QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
+                                  WR_TP = integer(), WR_TN = integer(), WR_FP = integer(), WR_FN = integer(),
+                                  RB_TP = integer(), RB_TN = integer(), RB_FP = integer(), RB_FN = integer(),
+                                  Together_TP = integer(), Together_TN = integer(), Together_FP = integer(), Together_FN = integer(),
+                                  stringsAsFactors = FALSE)
+
+randomForestPerfMeas[1, 2] = "no_sampling"
+randomForestPerfMeas[2, 2] = "oversampling"
+randomForestPerfMeas[3, 2] = "undersampling"
+randomForestPerfMeas[4, 2] = "Rose_both"
+randomForestPerfMeas[5, 2] = "Smote"
+randomForestPerfMeas$Method = "randomForest"
+
+# Prepare for between-model comparison with 2014 as testing data
+# !!! ONLY RUN THIS ONCE !!!
+randomForestPerfMeas2014 = data.frame(Method = character(), Sampling = character(),
+                                      QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
+                                      WR_TP = integer(), WR_TN = integer(), WR_FP = integer(), WR_FN = integer(),
+                                      RB_TP = integer(), RB_TN = integer(), RB_FP = integer(), RB_FN = integer(),
+                                      Together_TP = integer(), Together_TN = integer(), Together_FP = integer(), Together_FN = integer(),
+                                      stringsAsFactors = FALSE)
+
+randomForestPerfMeas2014[1, 2] = "no_sampling"
+randomForestPerfMeas2014[2, 2] = "oversampling"
+randomForestPerfMeas2014[3, 2] = "undersampling"
+randomForestPerfMeas2014[4, 2] = "Rose_both"
+randomForestPerfMeas2014[5, 2] = "Smote"
+randomForestPerfMeas2014$Method = "randomForest"
+
 
 # Random Forest for QBs ----
 # Select years 2007 through 2013 as training data
 cleanData_QB <- cleanData %>% filter(., Year < 2014, Position == "QB") %>% drop_na(.)
-# cleanData_QB <- cleanData_s %>% filter(., Year < 2014, Position == "QB") %>% drop_na(.) # use this line when working with sampled data
+
+# !!! Use the following line when working with ANY sampled data !!!
+# cleanData_QB <- cleanData_s %>% filter(., Year < 2014, Position == "QB") %>% drop_na(.)
 
 x <- cleanData_QB %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
-# x <- cleanData_QB %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted) # use this line with SMOTE sampling
+
+# !!! Use the following line ONLY when working with SMOTE sampled data and LEAVE COMMENTED otherwise !!!
+# x <- cleanData_QB %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted)
 
 # Randomly shuffle the data for cross validation
 set.seed(6969)
@@ -130,10 +166,14 @@ plot(perf, colorize = TRUE, main = "ROC Curve QB")
 # Random Forest for RBs ----
 # Select years 2007 through 2013 as training data
 cleanData_RB <- cleanData %>% filter(., Year < 2014, Position == "RB") %>% drop_na(.)
-# cleanData_RB <- cleanData_s %>% filter(., Year < 2014, Position == "RB") %>% drop_na(.) # use this line when working with sampled data
+
+# !!! Use the following line when working with ANY sampled data !!!
+# cleanData_RB <- cleanData_s %>% filter(., Year < 2014, Position == "RB") %>% drop_na(.)
 
 x <- cleanData_RB %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
-# x <- cleanData_RB %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted) # use this line with SMOTE sampling
+
+# !!! Use the following line ONLY when working with SMOTE sampled data and LEAVE COMMENTED otherwise !!!
+# x <- cleanData_RB %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted)
 
 # Randomly shuffle the data for cross validation
 set.seed(6969)
@@ -228,10 +268,14 @@ plot(perf, colorize = TRUE, main = "ROC Curve RB")
 # Random Forest for WRs ----
 # Select years 2007 through 2013 as training data
 cleanData_WR <- cleanData %>% filter(., Year < 2014, Position == "WR") %>% drop_na(.)
-# cleanData_WR <- cleanData_s %>% filter(., Year < 2014, Position == "WR") %>% drop_na(.) # use this line when working with sampled data
+
+# !!! Use the following line when working with ANY sampled data !!!
+# cleanData_WR <- cleanData_s %>% filter(., Year < 2014, Position == "WR") %>% drop_na(.)
 
 x <- cleanData_WR %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
-# x <- cleanData_WR %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted) # use this line with SMOTE sampling
+
+# !!! Use the following line ONLY when working with SMOTE sampled data and LEAVE COMMENTED otherwise !!!
+# x <- cleanData_WR %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted)
 
 # Randomly shuffle the data for cross validation
 set.seed(6969)
@@ -326,10 +370,14 @@ plot(perf, colorize = TRUE, main = "ROC Curve WR")
 # Random Forest for all positions ----
 # Select years 2007 through 2013 as training data
 cleanData_all <- cleanData %>% filter(., Year < 2014) %>% drop_na(.)
-# cleanData_all <- cleanData_s %>% filter(., Year < 2014) %>% drop_na(.) # use this line when working with sampled data
+
+# !!! Use the following line when working with ANY sampled data !!!
+# cleanData_all <- cleanData_s %>% filter(., Year < 2014) %>% drop_na(.)
 
 x <- cleanData_all %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Class, -Position, -Year, -Drafted)
-# x <- cleanData_all %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted) # use this line with SMOTE sampling
+
+# !!! Use the following line ONLY when working with SMOTE sampled data and LEAVE COMMENTED otherwise !!!
+# x <- cleanData_all %>% mutate(., "y" = as.factor(Drafted)) %>% select(., -Player.Code, -Name, -Position, -Year, -Drafted)
 
 # Randomly shuffle the data for cross validation
 set.seed(6969)
@@ -442,81 +490,58 @@ resultsComb_all <- resultsComb_all %>% mutate(., "error" = ifelse(Pred != Drafte
                                               "TN" = ifelse(Pred == Drafted & Drafted == 0, 1, 0),
                                               "FN" = ifelse(Pred != Drafted & Drafted == 1, 1, 0))
 
-# Prepare for between-model comparison of the training fit
-randomForestPerfMeas = data.frame(Method = character(), Sampling = character(),
-                                  QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
-                                  WR_TP = integer(), WR_TN = integer(), WR_FP = integer(), WR_FN = integer(),
-                                  RB_TP = integer(), RB_TN = integer(), RB_FP = integer(), RB_FN = integer(),
-                                  Together_TP = integer(), Together_TN = integer(), Together_FP = integer(), Together_FN = integer(),
-                                  stringsAsFactors = FALSE)
+# Fill in the training fit data
 
-randomForestPerfMeas[1, 2] = "no_sampling"
-randomForestPerfMeas[2, 2] = "oversampling"
-randomForestPerfMeas[3, 2] = "undersampling"
-randomForestPerfMeas[4, 2] = "Rose_both"
-randomForestPerfMeas[5, 2] = "Smote"
-randomForestPerfMeas$Method = "randomForest"
+# !!! Note: row index has to be changed depending on the sampling used !!!
+rowInd <- 1 # no sampling
+# rowInd <- 2 # oversampling
+# rowInd <- 3 # undersampling
+# rowInd <- 4 # Rose_both
+# rowInd <- 5 # SMOTE
 
-# Note: row index has to be changed depending on the dataset used
-randomForestPerfMeas[1, "QB_TP"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) == train_QB$Drafted & train_QB$Drafted == 1, 1, 0))
-randomForestPerfMeas[1, "QB_TN"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) == train_QB$Drafted & train_QB$Drafted == 0, 1, 0))
-randomForestPerfMeas[1, "QB_FP"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) != train_QB$Drafted & train_QB$Drafted == 1, 1, 0))
-randomForestPerfMeas[1, "QB_FN"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) != train_QB$Drafted & train_QB$Drafted == 0, 1, 0))
+randomForestPerfMeas[rowInd, "QB_TP"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) == train_QB$Drafted & train_QB$Drafted == 1, 1, 0))
+randomForestPerfMeas[rowInd, "QB_TN"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) == train_QB$Drafted & train_QB$Drafted == 0, 1, 0))
+randomForestPerfMeas[rowInd, "QB_FP"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) != train_QB$Drafted & train_QB$Drafted == 1, 1, 0))
+randomForestPerfMeas[rowInd, "QB_FN"] = sum(ifelse(ifelse(train_QB$pred >= 0.5, 1, 0) != train_QB$Drafted & train_QB$Drafted == 0, 1, 0))
 
-randomForestPerfMeas[1, "RB_TP"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) == train_RB$Drafted & train_RB$Drafted == 1, 1, 0))
-randomForestPerfMeas[1, "RB_TN"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) == train_RB$Drafted & train_RB$Drafted == 0, 1, 0))
-randomForestPerfMeas[1, "RB_FP"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) != train_RB$Drafted & train_RB$Drafted == 1, 1, 0))
-randomForestPerfMeas[1, "RB_FN"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) != train_RB$Drafted & train_RB$Drafted == 0, 1, 0))
+randomForestPerfMeas[rowInd, "RB_TP"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) == train_RB$Drafted & train_RB$Drafted == 1, 1, 0))
+randomForestPerfMeas[rowInd, "RB_TN"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) == train_RB$Drafted & train_RB$Drafted == 0, 1, 0))
+randomForestPerfMeas[rowInd, "RB_FP"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) != train_RB$Drafted & train_RB$Drafted == 1, 1, 0))
+randomForestPerfMeas[rowInd, "RB_FN"] = sum(ifelse(ifelse(train_RB$pred >= 0.5, 1, 0) != train_RB$Drafted & train_RB$Drafted == 0, 1, 0))
 
-randomForestPerfMeas[1, "WR_TP"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) == train_WR$Drafted & train_WR$Drafted == 1, 1, 0))
-randomForestPerfMeas[1, "WR_TN"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) == train_WR$Drafted & train_WR$Drafted == 0, 1, 0))
-randomForestPerfMeas[1, "WR_FP"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) != train_WR$Drafted & train_WR$Drafted == 1, 1, 0))
-randomForestPerfMeas[1, "WR_FN"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) != train_WR$Drafted & train_WR$Drafted == 0, 1, 0))
+randomForestPerfMeas[rowInd, "WR_TP"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) == train_WR$Drafted & train_WR$Drafted == 1, 1, 0))
+randomForestPerfMeas[rowInd, "WR_TN"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) == train_WR$Drafted & train_WR$Drafted == 0, 1, 0))
+randomForestPerfMeas[rowInd, "WR_FP"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) != train_WR$Drafted & train_WR$Drafted == 1, 1, 0))
+randomForestPerfMeas[rowInd, "WR_FN"] = sum(ifelse(ifelse(train_WR$pred >= 0.5, 1, 0) != train_WR$Drafted & train_WR$Drafted == 0, 1, 0))
 
-randomForestPerfMeas[1, "Together_TP"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) == train_all$Drafted & train_all$Drafted == 1, 1, 0))
-randomForestPerfMeas[1, "Together_TN"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) == train_all$Drafted & train_all$Drafted == 0, 1, 0))
-randomForestPerfMeas[1, "Together_FP"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) != train_all$Drafted & train_all$Drafted == 1, 1, 0))
-randomForestPerfMeas[1, "Together_FN"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) != train_all$Drafted & train_all$Drafted == 0, 1, 0))
+randomForestPerfMeas[rowInd, "Together_TP"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) == train_all$Drafted & train_all$Drafted == 1, 1, 0))
+randomForestPerfMeas[rowInd, "Together_TN"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) == train_all$Drafted & train_all$Drafted == 0, 1, 0))
+randomForestPerfMeas[rowInd, "Together_FP"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) != train_all$Drafted & train_all$Drafted == 1, 1, 0))
+randomForestPerfMeas[rowInd, "Together_FN"] = sum(ifelse(ifelse(train_all$pred >= 0.5, 1, 0) != train_all$Drafted & train_all$Drafted == 0, 1, 0))
 
-# Save the results for model comparison
-save(randomForestPerfMeas, file = "../Data/PerformanceMeasurement/randomForestPerfMeas.Rdata")
+# Fill in the testing fit data
 
-# Prepare for between-model comparison with 2014 as testing data
-randomForestPerfMeas2014 = data.frame(Method = character(), Sampling = character(),
-                                      QB_TP = integer(), QB_TN = integer(), QB_FP = integer(), QB_FN = integer(),
-                                      WR_TP = integer(), WR_TN = integer(), WR_FP = integer(), WR_FN = integer(),
-                                      RB_TP = integer(), RB_TN = integer(), RB_FP = integer(), RB_FN = integer(),
-                                      Together_TP = integer(), Together_TN = integer(), Together_FP = integer(), Together_FN = integer(),
-                                      stringsAsFactors = FALSE)
+randomForestPerfMeas2014[rowInd, "QB_TP"] = sum(ifelse(pred_QB$pred == pred_QB$Drafted & pred_QB$pred == 1, 1, 0))
+randomForestPerfMeas2014[rowInd, "QB_TN"] = sum(ifelse(pred_QB$pred == pred_QB$Drafted & pred_QB$pred == 0, 1, 0))
+randomForestPerfMeas2014[rowInd, "QB_FP"] = sum(ifelse(pred_QB$pred != pred_QB$Drafted & pred_QB$pred == 1, 1, 0))
+randomForestPerfMeas2014[rowInd, "QB_FN"] = sum(ifelse(pred_QB$pred != pred_QB$Drafted & pred_QB$pred == 0, 1, 0))
 
-randomForestPerfMeas2014[1, 2] = "no_sampling"
-randomForestPerfMeas2014[2, 2] = "oversampling"
-randomForestPerfMeas2014[3, 2] = "undersampling"
-randomForestPerfMeas2014[4, 2] = "Rose_both"
-randomForestPerfMeas2014[5, 2] = "Smote"
-randomForestPerfMeas2014$Method = "randomForest"
+randomForestPerfMeas2014[rowInd, "RB_TP"] = sum(ifelse(pred_RB$pred == pred_RB$Drafted & pred_RB$pred == 1, 1, 0))
+randomForestPerfMeas2014[rowInd, "RB_TN"] = sum(ifelse(pred_RB$pred == pred_RB$Drafted & pred_RB$pred == 0, 1, 0))
+randomForestPerfMeas2014[rowInd, "RB_FP"] = sum(ifelse(pred_RB$pred != pred_RB$Drafted & pred_RB$pred == 1, 1, 0))
+randomForestPerfMeas2014[rowInd, "RB_FN"] = sum(ifelse(pred_RB$pred != pred_RB$Drafted & pred_RB$pred == 0, 1, 0))
 
-# Note: row index has to be changed depending on the dataset used
-randomForestPerfMeas2014[1, "QB_TP"] = sum(ifelse(pred_QB$pred == pred_QB$Drafted & pred_QB$pred == 1, 1, 0))
-randomForestPerfMeas2014[1, "QB_TN"] = sum(ifelse(pred_QB$pred == pred_QB$Drafted & pred_QB$pred == 0, 1, 0))
-randomForestPerfMeas2014[1, "QB_FP"] = sum(ifelse(pred_QB$pred != pred_QB$Drafted & pred_QB$pred == 1, 1, 0))
-randomForestPerfMeas2014[1, "QB_FN"] = sum(ifelse(pred_QB$pred != pred_QB$Drafted & pred_QB$pred == 0, 1, 0))
+randomForestPerfMeas2014[rowInd, "WR_TP"] = sum(ifelse(pred_WR$pred == pred_WR$Drafted & pred_WR$pred == 1, 1, 0))
+randomForestPerfMeas2014[rowInd, "WR_TN"] = sum(ifelse(pred_WR$pred == pred_WR$Drafted & pred_WR$pred == 0, 1, 0))
+randomForestPerfMeas2014[rowInd, "WR_FP"] = sum(ifelse(pred_WR$pred != pred_WR$Drafted & pred_WR$pred == 1, 1, 0))
+randomForestPerfMeas2014[rowInd, "WR_FN"] = sum(ifelse(pred_WR$pred != pred_WR$Drafted & pred_WR$pred == 0, 1, 0))
 
-randomForestPerfMeas2014[1, "RB_TP"] = sum(ifelse(pred_RB$pred == pred_RB$Drafted & pred_RB$pred == 1, 1, 0))
-randomForestPerfMeas2014[1, "RB_TN"] = sum(ifelse(pred_RB$pred == pred_RB$Drafted & pred_RB$pred == 0, 1, 0))
-randomForestPerfMeas2014[1, "RB_FP"] = sum(ifelse(pred_RB$pred != pred_RB$Drafted & pred_RB$pred == 1, 1, 0))
-randomForestPerfMeas2014[1, "RB_FN"] = sum(ifelse(pred_RB$pred != pred_RB$Drafted & pred_RB$pred == 0, 1, 0))
-
-randomForestPerfMeas2014[1, "WR_TP"] = sum(ifelse(pred_WR$pred == pred_WR$Drafted & pred_WR$pred == 1, 1, 0))
-randomForestPerfMeas2014[1, "WR_TN"] = sum(ifelse(pred_WR$pred == pred_WR$Drafted & pred_WR$pred == 0, 1, 0))
-randomForestPerfMeas2014[1, "WR_FP"] = sum(ifelse(pred_WR$pred != pred_WR$Drafted & pred_WR$pred == 1, 1, 0))
-randomForestPerfMeas2014[1, "WR_FN"] = sum(ifelse(pred_WR$pred != pred_WR$Drafted & pred_WR$pred == 0, 1, 0))
-
-randomForestPerfMeas2014[1, "Together_TP"] = sum(ifelse(pred_all$pred == pred_all$Drafted & pred_all$pred == 1, 1, 0))
-randomForestPerfMeas2014[1, "Together_TN"] = sum(ifelse(pred_all$pred == pred_all$Drafted & pred_all$pred == 0, 1, 0))
-randomForestPerfMeas2014[1, "Together_FP"] = sum(ifelse(pred_all$pred != pred_all$Drafted & pred_all$pred == 1, 1, 0))
-randomForestPerfMeas2014[1, "Together_FN"] = sum(ifelse(pred_all$pred != pred_all$Drafted & pred_all$pred == 0, 1, 0))
+randomForestPerfMeas2014[rowInd, "Together_TP"] = sum(ifelse(pred_all$pred == pred_all$Drafted & pred_all$pred == 1, 1, 0))
+randomForestPerfMeas2014[rowInd, "Together_TN"] = sum(ifelse(pred_all$pred == pred_all$Drafted & pred_all$pred == 0, 1, 0))
+randomForestPerfMeas2014[rowInd, "Together_FP"] = sum(ifelse(pred_all$pred != pred_all$Drafted & pred_all$pred == 1, 1, 0))
+randomForestPerfMeas2014[rowInd, "Together_FN"] = sum(ifelse(pred_all$pred != pred_all$Drafted & pred_all$pred == 0, 1, 0))
 
 # Save the results for model comparison
 save(randomForestPerfMeas2014, file = "../Data/PerformanceMeasurement/randomForestPerfMeas2014.Rdata")
+save(randomForestPerfMeas, file = "../Data/PerformanceMeasurement/randomForestPerfMeas.Rdata")
 
